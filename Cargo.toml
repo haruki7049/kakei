@@ -1,0 +1,16 @@
+[package]
+name = "kakei"
+version = "0.1.0"
+authors = ["haruki7049 <tontonkirikiri@gmail.com>"]
+description = "A kakeibo cli application"
+edition = "2021"
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/haruki7049/kakei"
+repository = "https://github.com/haruki7049/kakei"
+keywords = ["editor", "kakeibo"]
+categories = ["command-line-utilities"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
