@@ -19,7 +19,6 @@ fn main() {
             eprintln!("Unknown command: {}", &args.sub_command);
         }
     }
-
 }
 
 #[derive(Debug, Parser)]
