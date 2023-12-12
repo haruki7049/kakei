@@ -1,4 +1,5 @@
 use clap::Parser;
+use serde::{Deserialize, Serialize};
 
 fn main() {
     let args: Args = Args::parse();
@@ -55,4 +56,31 @@ impl std::str::FromStr for SubCommands {
             _ => Err(format!("Unknown sub command: {}", s)),
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Balance {
+    expenses: Vec<Price>,
+    incomes: Vec<Price>,
+}
+
+impl Balance {
+    #[allow(dead_code)]
+    fn new() -> Self {
+        Self {
+            expenses: Vec::new(),
+            incomes: Vec::new(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Price {
+    price: f64,
+    unit: Unit,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+enum Unit {
+    Yen,
 }
