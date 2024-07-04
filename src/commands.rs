@@ -2,17 +2,23 @@ use clap::Parser;
 
 /// set_income subcommand
 pub fn set_income() {
-    println!("set-income command typed");
+    todo!();
 }
 
 /// set_expense subcommand
 pub fn set_expense() {
-    println!("set-expense command typed");
+    todo!();
 }
 
 /// get_balance subcommand
 pub fn get_balance(_is_listed: &bool) {
-    println!("get-balance command typed");
+    todo!();
+}
+
+/// initialize subcommand
+/// This function creates a new file named "kakeibo.toml" in the current directory.
+pub fn initialize() {
+    todo!();
 }
 
 /// SET_INCOME constant
@@ -23,6 +29,9 @@ const SET_EXPENSE: &str = "set-expense";
 
 /// GET_BALANCE constant
 const GET_BALANCE: &str = "get-balance";
+
+/// INITIALIZE constant
+const INITIALIZE: &str = "init";
 
 /// Parser for kakei command by clap crate
 #[derive(Debug, Parser)]
@@ -41,6 +50,7 @@ pub enum SubCommands {
     SetIncome,
     SetExpense,
     GetBalance,
+    Initialize,
 }
 
 /// FromStr implement for SubCommands
@@ -52,6 +62,7 @@ impl std::str::FromStr for SubCommands {
             SET_INCOME => Ok(Self::SetIncome),
             GET_BALANCE => Ok(Self::GetBalance),
             SET_EXPENSE => Ok(Self::SetExpense),
+            INITIALIZE => Ok(Self::Initialize),
             _ => Err(format!("Unknown sub command: {}", s)),
         }
     }

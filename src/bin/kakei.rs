@@ -1,5 +1,5 @@
 use clap::Parser;
-use kakei::commands::{get_balance, set_expense, set_income, Args, SubCommands};
+use kakei::commands::{get_balance, initialize, set_expense, set_income, Args, SubCommands};
 
 fn main() {
     let args: Args = Args::parse();
@@ -9,5 +9,6 @@ fn main() {
         SubCommands::SetIncome => set_income(),
         SubCommands::SetExpense => set_expense(),
         SubCommands::GetBalance => get_balance(&is_listed),
+        SubCommands::Initialize => initialize(),
     }
 }
