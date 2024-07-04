@@ -1,18 +1,49 @@
+use crate::data::DataTable;
 use clap::Parser;
 
 /// set_income subcommand
 pub fn set_income() {
-    println!("set-income command typed");
+    todo!();
 }
 
 /// set_expense subcommand
 pub fn set_expense() {
-    println!("set-expense command typed");
+    todo!();
 }
 
 /// get_balance subcommand
 pub fn get_balance(_is_listed: &bool) {
-    println!("get-balance command typed");
+    todo!();
+}
+
+/// initialize subcommand
+/// This function creates a new file named "kakeibo.toml" in the current directory.
+pub fn initialize() {
+    let data: DataTable = DataTable::default();
+    write_data(data, "kakeibo.toml".to_string());
+    println!("Initialized kakeibo.toml");
+}
+
+fn write_data(data: DataTable, path: String) {
+    let string: String = toml::to_string(&data).unwrap();
+    if let Err(err) = std::fs::write(path, string) {
+        eprintln!("Failed to write data to file: {}", err);
+    }
+}
+
+fn read_data(path: String) -> DataTable {
+    let string = match std::fs::read_to_string(path) {
+        Ok(s) => s,
+        Err(err) => {
+            panic!("Failed to read data from file: {}", err);
+        }
+    };
+    match toml::from_str(&string) {
+        Ok(data) => data,
+        Err(err) => {
+            panic!("Failed to parse data from file: {}", err);
+        }
+    }
 }
 
 /// SET_INCOME constant
@@ -23,6 +54,9 @@ const SET_EXPENSE: &str = "set-expense";
 
 /// GET_BALANCE constant
 const GET_BALANCE: &str = "get-balance";
+
+/// INITIALIZE constant
+const INITIALIZE: &str = "init";
 
 /// Parser for kakei command by clap crate
 #[derive(Debug, Parser)]
@@ -41,6 +75,7 @@ pub enum SubCommands {
     SetIncome,
     SetExpense,
     GetBalance,
+    Initialize,
 }
 
 /// FromStr implement for SubCommands
@@ -52,6 +87,7 @@ impl std::str::FromStr for SubCommands {
             SET_INCOME => Ok(Self::SetIncome),
             GET_BALANCE => Ok(Self::GetBalance),
             SET_EXPENSE => Ok(Self::SetExpense),
+            INITIALIZE => Ok(Self::Initialize),
             _ => Err(format!("Unknown sub command: {}", s)),
         }
     }
