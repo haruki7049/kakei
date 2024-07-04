@@ -1,18 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct DataTable {
     expenses: Vec<Price>,
     incomes: Vec<Price>,
-}
-
-impl std::default::Default for DataTable {
-    fn default() -> Self {
-        DataTable {
-            expenses: Vec::new(),
-            incomes: Vec::new(),
-        }
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
