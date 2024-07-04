@@ -1,5 +1,5 @@
-use clap::Parser;
 use crate::data::DataTable;
+use clap::Parser;
 
 /// set_income subcommand
 pub fn set_income() {
@@ -28,6 +28,21 @@ fn write_data(data: DataTable, path: String) {
     let string: String = toml::to_string(&data).unwrap();
     if let Err(err) = std::fs::write(path, string) {
         eprintln!("Failed to write data to file: {}", err);
+    }
+}
+
+fn read_data(path: String) -> DataTable {
+    let string = match std::fs::read_to_string(path) {
+        Ok(s) => s,
+        Err(err) => {
+            panic!("Failed to read data from file: {}", err);
+        }
+    };
+    match toml::from_str(&string) {
+        Ok(data) => data,
+        Err(err) => {
+            panic!("Failed to parse data from file: {}", err);
+        }
     }
 }
 
