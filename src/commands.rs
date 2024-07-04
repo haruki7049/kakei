@@ -1,4 +1,5 @@
 use clap::Parser;
+use crate::data::DataTable;
 
 /// set_income subcommand
 pub fn set_income() {
@@ -18,7 +19,16 @@ pub fn get_balance(_is_listed: &bool) {
 /// initialize subcommand
 /// This function creates a new file named "kakeibo.toml" in the current directory.
 pub fn initialize() {
-    todo!();
+    let data: DataTable = DataTable::default();
+    write_data(data, "kakeibo.toml".to_string());
+    println!("Initialized kakeibo.toml");
+}
+
+fn write_data(data: DataTable, path: String) {
+    let string: String = toml::to_string(&data).unwrap();
+    if let Err(err) = std::fs::write(path, string) {
+        eprintln!("Failed to write data to file: {}", err);
+    }
 }
 
 /// SET_INCOME constant
