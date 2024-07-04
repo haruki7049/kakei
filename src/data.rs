@@ -6,6 +6,15 @@ pub struct DataTable {
     incomes: Vec<Price>,
 }
 
+impl std::default::Default for DataTable {
+    fn default() -> Self {
+        DataTable {
+            expenses: Vec::new(),
+            incomes: Vec::new(),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Price {
     name: String,
@@ -55,5 +64,14 @@ mod tests {
         };
 
         assert_eq!(toml::to_string(&data).unwrap(), "[[expenses]]\nname = \"food\"\nprice = 100\nunit = \"Yen\"\n\n[[expenses]]\nname = \"rent\"\nprice = 200\nunit = \"Dollar\"\n\n[[incomes]]\nname = \"salary\"\nprice = 1000\nunit = \"Yen\"\n\n[[incomes]]\nname = \"bonus\"\nprice = 200\nunit = \"Dollar\"\n");
+    }
+
+    #[test]
+    fn test_data_table_initialize() {
+        let data: DataTable = DataTable::default();
+
+        assert_eq!(data.expenses.len(), 0);
+        assert_eq!(data.incomes.len(), 0);
+        assert_eq!(toml::to_string(&data).unwrap(), "expenses = []\nincomes = []\n");
     }
 }
