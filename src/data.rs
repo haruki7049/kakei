@@ -72,6 +72,9 @@ mod tests {
 
         assert_eq!(data.expenses.len(), 0);
         assert_eq!(data.incomes.len(), 0);
-        assert_eq!(toml::to_string(&data).unwrap(), "expenses = []\nincomes = []\n");
+        assert_eq!(
+            toml::to_string(&data).unwrap(),
+            "expenses = []\nincomes = []\n"
+        );
     }
 }
