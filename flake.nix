@@ -1,61 +1,86 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs";
-    flake-utils.url = "github:numtide/flake-utils";
-    treefmt-nix.url = "github:numtide/treefmt-nix";
-    rust-overlay.url = "github:oxalica/rust-overlay";
+    systems.url = "github:nix-systems/default";
     crane.url = "github:ipetkov/crane";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, treefmt-nix, rust-overlay, crane }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs { inherit system; overlays = [ (import rust-overlay) ]; };
-        rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-        treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
-        craneLib = (crane.mkLib pkgs).overrideToolchain rust;
-        src = ./.;
-        cargoArtifacts = craneLib.buildDepsOnly {
-          inherit src;
-        };
-        kakei = craneLib.buildPackage {
-          inherit src cargoArtifacts;
-          strictDeps = true;
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = import inputs.systems;
 
-          doCheck = true;
-        };
-        cargo-clippy = craneLib.cargoClippy {
-          inherit src cargoArtifacts;
-          cargoClippyExtraArgs = "--verbose -- --deny warnings";
-        };
-        cargo-doc = craneLib.cargoDoc {
-          inherit src cargoArtifacts;
-        };
-      in
-      {
-        formatter = treefmtEval.config.build.wrapper;
+      imports = [
+        inputs.treefmt-nix.flakeModule
+      ];
 
-        packages.default = kakei;
-        packages.doc = cargo-doc;
+      perSystem = { pkgs, system, ... }:
+        let
+          rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+          overlays = [ inputs.rust-overlay.overlays.default ];
+          craneLib = (inputs.crane.mkLib pkgs).overrideToolchain rust;
+          src = craneLib.cleanCargoSource ./.;
+          cargoArtifacts = craneLib.buildDepsOnly {
+            inherit src;
+          };
+          kakei = craneLib.buildPackage {
+            inherit src cargoArtifacts;
+            strictDeps = true;
 
-        apps.default = flake-utils.lib.mkApp {
-          drv = self.packages.${system}.default;
+            doCheck = true;
+          };
+          cargo-clippy = craneLib.cargoClippy {
+            inherit src cargoArtifacts;
+            cargoClippyExtraArgs = "--verbose -- --deny warning";
+          };
+          cargo-doc = craneLib.cargoDoc {
+            inherit src cargoArtifacts;
+          };
+        in
+        {
+          _module.args.pkgs = import inputs.nixpkgs {
+            inherit system overlays;
+          };
+
+          packages = {
+            inherit kakei;
+            default = kakei;
+            doc = cargo-doc;
+          };
+
+          checks = {
+            inherit
+              kakei
+              cargo-clippy
+              cargo-doc
+              ;
+          };
+
+          treefmt = {
+            projectRootFile = "flake.nix";
+            programs.nixpkgs-fmt.enable = true;
+            programs.rustfmt.enable = true;
+            programs.taplo.enable = true;
+            programs.yamlfmt.enable = true;
+          };
+
+          devShells.default = pkgs.mkShell {
+            nativeBuildInputs = [
+              rust
+            ];
+          };
         };
-
-        checks = {
-          inherit kakei cargo-clippy cargo-doc;
-          formatting = treefmtEval.config.build.check self;
-        };
-
-        devShells.default = pkgs.mkShell {
-          packages = [
-            rust
-          ];
-
-          shellHook = ''
-            export PS1="\n[nix-shell:\w]$ "
-          '';
-        };
-      }
-    );
+    };
 }
