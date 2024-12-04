@@ -26,7 +26,8 @@
         inputs.treefmt-nix.flakeModule
       ];
 
-      perSystem = { pkgs, system, ... }:
+      perSystem =
+        { pkgs, system, ... }:
         let
           rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
           overlays = [ inputs.rust-overlay.overlays.default ];
@@ -66,6 +67,15 @@
               cargo-clippy
               cargo-doc
               ;
+          };
+
+          treefmt = {
+            projectRootFile = "flake.nix";
+            programs.nixfmt.enable = true;
+            programs.rustfmt.enable = true;
+            programs.taplo.enable = true;
+            programs.actionlint.enable = true;
+            programs.mdformat.enable = true;
           };
 
           devShells.default = pkgs.mkShell {
