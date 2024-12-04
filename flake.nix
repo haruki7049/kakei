@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     systems.url = "github:nix-systems/default";
     crane.url = "github:ipetkov/crane";
     flake-parts = {
@@ -26,7 +26,8 @@
         inputs.treefmt-nix.flakeModule
       ];
 
-      perSystem = { pkgs, system, ... }:
+      perSystem =
+        { pkgs, system, ... }:
         let
           rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
           overlays = [ inputs.rust-overlay.overlays.default ];
@@ -70,10 +71,10 @@
 
           treefmt = {
             projectRootFile = "flake.nix";
-            programs.nixpkgs-fmt.enable = true;
+            programs.nixfmt.enable = true;
             programs.rustfmt.enable = true;
-            programs.taplo.enable = true;
-            programs.yamlfmt.enable = true;
+            programs.actionlint.enable = true;
+            programs.mdformat.enable = true;
           };
 
           devShells.default = pkgs.mkShell {
