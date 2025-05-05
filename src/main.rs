@@ -51,6 +51,7 @@ struct Args {
     #[arg(long, default_value_t = false)]
     initialize_configuration_file: bool,
 
+    /// Initialize default kakeibo file (In Linux: $XDG_DATA_HOME/kakei)
     #[arg(long, default_value_t = false)]
     initialize_default_kakeibo: bool,
 }
