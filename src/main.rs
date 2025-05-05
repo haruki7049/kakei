@@ -1,7 +1,9 @@
+use std::fs::File;
+use std::io::Write;
 use clap::Parser;
 use serde_derive::{Deserialize, Serialize};
 
-fn main() -> Result<(), confy::ConfyError> {
+fn main() -> anyhow::Result<()> {
     let args: Args = Args::parse();
 
     if args.initialize_configuration_file {
@@ -9,13 +11,24 @@ fn main() -> Result<(), confy::ConfyError> {
     }
 
     if args.initialize_default_kakeibo {
-        dbg!(args);
+        init_default_kakeibo()?;
     }
 
     Ok(())
 }
 
-fn init_config() -> Result<(), confy::ConfyError> {
+fn init_default_kakeibo() -> anyhow::Result<()> {
+    let app_name = env!("CARGO_PKG_NAME");
+
+    // Gets /home/haruki/.local/share/kakei/default.csv
+    let kakeibo_path = xdg::BaseDirectories::with_prefix(app_name).place_data_file("default.csv")?;
+    let mut file = File::create(kakeibo_path)?;
+    file.write_all(b"Name,Price\nSushi,-1000")?;
+
+    Ok(())
+}
+
+fn init_config() -> anyhow::Result<()> {
     let app_name = env!("CARGO_PKG_NAME");
     let config_name = "config";
 
