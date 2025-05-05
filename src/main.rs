@@ -45,6 +45,7 @@ fn init_config() -> anyhow::Result<()> {
 }
 
 #[derive(Debug, Parser)]
+#[command(arg_required_else_help = true)]
 struct Args {
     /// Initialize configuration file (In Linux: $XDG_CONFIG_HOME/kakei)
     #[arg(long, default_value_t = false)]
