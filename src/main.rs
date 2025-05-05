@@ -1,7 +1,7 @@
-use std::fs::File;
-use std::io::Write;
 use clap::Parser;
 use serde_derive::{Deserialize, Serialize};
+use std::fs::File;
+use std::io::Write;
 
 fn main() -> anyhow::Result<()> {
     let args: Args = Args::parse();
@@ -21,7 +21,8 @@ fn init_default_kakeibo() -> anyhow::Result<()> {
     let app_name = env!("CARGO_PKG_NAME");
 
     // Gets /home/haruki/.local/share/kakei/default.csv
-    let kakeibo_path = xdg::BaseDirectories::with_prefix(app_name).place_data_file("default.csv")?;
+    let kakeibo_path =
+        xdg::BaseDirectories::with_prefix(app_name).place_data_file("default.csv")?;
     let mut file = File::create(kakeibo_path)?;
     file.write_all(b"Name,Price\nSushi,-1000")?;
 
