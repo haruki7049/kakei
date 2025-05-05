@@ -17,6 +17,8 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Initialize default kakeibo file.
+/// To: ~/.local/share/kakei/default.csv
 fn init_default_kakeibo() -> anyhow::Result<()> {
     let app_name = env!("CARGO_PKG_NAME");
 
@@ -29,6 +31,8 @@ fn init_default_kakeibo() -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Initialize configuration file.
+/// To: ~/.config/kakei/config.toml
 fn init_config() -> anyhow::Result<()> {
     let app_name = env!("CARGO_PKG_NAME");
     let config_name = "config";
@@ -57,7 +61,12 @@ struct Args {
 }
 
 #[derive(Default, Serialize, Deserialize)]
+/// This struct is used by ~/.config/kakei/config.toml
+/// And contains kakei's configurations
 struct KakeiConfig {
+    /// Kakei's software version
     version: String,
+
+    /// The sheets' names
     sheets: Vec<String>,
 }
