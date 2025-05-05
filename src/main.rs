@@ -8,6 +8,10 @@ fn main() -> Result<(), confy::ConfyError> {
         init_config()?;
     }
 
+    if args.initialize_default_kakeibo {
+        dbg!(args);
+    }
+
     Ok(())
 }
 
@@ -28,8 +32,12 @@ fn init_config() -> Result<(), confy::ConfyError> {
 
 #[derive(Debug, Parser)]
 struct Args {
+    /// Initialize configuration file (In Linux: $XDG_CONFIG_HOME/kakei)
     #[arg(long, default_value_t = false)]
     initialize_configuration_file: bool,
+
+    #[arg(long, default_value_t = false)]
+    initialize_default_kakeibo: bool,
 }
 
 #[derive(Default, Serialize, Deserialize)]
