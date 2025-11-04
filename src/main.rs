@@ -1,11 +1,11 @@
 use clap::Parser;
+use kakei::{cli::CLIArgs, KakeiConfig};
 use directories::ProjectDirs;
-use serde_derive::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
 
 fn main() -> anyhow::Result<()> {
-    let args: Args = Args::parse();
+    let args: CLIArgs = CLIArgs::parse();
 
     if args.initialize_configuration_file {
         init_config()?;
@@ -51,27 +51,4 @@ fn init_config() -> anyhow::Result<()> {
     confy::store(app_name, config_name, cfg)?;
 
     Ok(())
-}
-
-#[derive(Debug, Parser)]
-#[command(arg_required_else_help = true)]
-struct Args {
-    /// Initialize configuration file (In Linux: $XDG_CONFIG_HOME/kakei)
-    #[arg(long, default_value_t = false)]
-    initialize_configuration_file: bool,
-
-    /// Initialize default kakeibo file (In Linux: $XDG_DATA_HOME/kakei)
-    #[arg(long, default_value_t = false)]
-    initialize_default_kakeibo: bool,
-}
-
-#[derive(Default, Serialize, Deserialize)]
-/// This struct is used by ~/.config/kakei/config.toml
-/// And contains kakei's configurations
-struct KakeiConfig {
-    /// Kakei's software version
-    version: String,
-
-    /// The sheets' names
-    sheets: Vec<String>,
 }
