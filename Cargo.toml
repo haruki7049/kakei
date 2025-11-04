@@ -13,7 +13,7 @@ readme.workspace = true
 
 [workspace]
 resolver = "3"
-members = ["crates/database"]
+members = ["crates/database", "crates/processor"]
 
 [workspace.package]
 authors = ["haruki7049 <tontonkirikiri@gmail.com>"]
@@ -25,6 +25,8 @@ publish = false
 readme = "README.md"
 
 [workspace.dependencies]
+sqlx = "0.8.6"
+tokio = { version = "1.48.0", features = ["full"] }
 
 [dependencies]
 anyhow = "1.0.98"
