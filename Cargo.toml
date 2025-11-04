@@ -13,7 +13,7 @@ readme.workspace = true
 
 [workspace]
 resolver = "3"
-members = ["crates/database", "crates/processor"]
+members = ["crates/processor/crates/database", "crates/processor"]
 
 [workspace.package]
 authors = ["haruki7049 <tontonkirikiri@gmail.com>"]
