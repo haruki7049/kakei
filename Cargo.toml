@@ -25,7 +25,6 @@ publish = false
 readme = "README.md"
 
 [workspace.dependencies]
-surrealdb = "2.3.10"
 
 [dependencies]
 anyhow = "1.0.98"

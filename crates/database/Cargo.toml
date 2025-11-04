@@ -9,4 +9,3 @@ publish.workspace = true
 readme.workspace = true
 
 [dependencies]
-surrealdb.workspace = true
