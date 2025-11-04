@@ -1848,7 +1848,6 @@ dependencies = [
  "confy",
  "directories 6.0.0",
  "serde",
- "serde_derive",
  "xdg",
 ]
 
