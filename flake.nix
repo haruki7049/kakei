@@ -32,7 +32,9 @@
           rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
           overlays = [ inputs.rust-overlay.overlays.default ];
           craneLib = (inputs.crane.mkLib pkgs).overrideToolchain rust;
+
           src = craneLib.cleanCargoSource ./.;
+
           cargoArtifacts = craneLib.buildDepsOnly {
             inherit src;
           };
@@ -70,12 +72,29 @@
           };
 
           treefmt = {
-            projectRootFile = "flake.nix";
+            projectRootFile = ".git/config";
+
+            # Nix
             programs.nixfmt.enable = true;
+
+            # Rust
             programs.rustfmt.enable = true;
+            settings.formatter.rustfmt.command = "${rust}/bin/rustfmt";
+
+            # TOML
+            programs.taplo.enable = true;
+
+            # GitHub Actions
             programs.actionlint.enable = true;
+
+            # Markdown
             programs.mdformat.enable = true;
+
+            # ShellScript
+            programs.shellcheck.enable = true;
+            programs.shfmt.enable = true;
           };
+
 
           devShells.default = pkgs.mkShell {
             nativeBuildInputs = [
