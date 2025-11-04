@@ -1,6 +1,6 @@
 use clap::Parser;
-use kakei::{cli::CLIArgs, KakeiConfig};
 use directories::ProjectDirs;
+use kakei::{KakeiConfig, cli::CLIArgs};
 use std::fs::File;
 use std::io::Write;
 

@@ -11,4 +11,3 @@ pub struct CLIArgs {
     #[arg(long, default_value_t = false)]
     pub initialize_default_kakeibo: bool,
 }
-
