@@ -95,7 +95,6 @@
             programs.shfmt.enable = true;
           };
 
-
           devShells.default = pkgs.mkShell {
             nativeBuildInputs = [
               rust
