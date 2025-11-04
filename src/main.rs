@@ -42,12 +42,7 @@ fn init_config() -> anyhow::Result<()> {
     let config_name = "config";
 
     // Initialize config
-    let cfg = KakeiConfig {
-        version: env!("CARGO_PKG_VERSION").to_string(),
-        ..Default::default()
-    };
-
-    // Write kakei binary's version
+    let cfg = KakeiConfig::default();
 
     // Records configuration to filesystem
     confy::store(app_name, config_name, cfg)?;

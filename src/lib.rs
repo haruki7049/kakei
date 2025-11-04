@@ -8,9 +8,6 @@ use serde::{Deserialize, Serialize};
 /// And contains kakei's configurations
 #[derive(Default, Serialize, Deserialize)]
 pub struct KakeiConfig {
-    /// Kakei's software version
-    pub version: String,
-
     /// The sheets' names
     pub sheets: Vec<String>,
 }
