@@ -1,17 +1,31 @@
 [package]
 name = "kakei"
-version = "0.1.0"
-authors = ["haruki7049 <tontonkirikiri@gmail.com>"]
 description = "A kakeibo cli application"
-edition = "2021"
-license = "MIT"
-readme = "README.md"
-homepage = "https://github.com/haruki7049/kakei"
-repository = "https://github.com/haruki7049/kakei"
 keywords = ["editor", "kakeibo"]
 categories = ["command-line-utilities"]
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+readme.workspace = true
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace]
+resolver = "3"
+members = ["crates/database"]
+
+[workspace.package]
+authors = ["haruki7049 <tontonkirikiri@gmail.com>"]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/haruki7049/kakei"
+publish = false
+readme = "README.md"
+
+[workspace.dependencies]
+surrealdb = "2.3.10"
 
 [dependencies]
 anyhow = "1.0.98"
@@ -20,5 +34,6 @@ confy = "0.6.1"
 directories = "6.0.0"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_derive = "1.0.219"
-surrealdb = "2.3.10"
 xdg = "3.0.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

@@ -1849,8 +1849,14 @@ dependencies = [
  "directories 6.0.0",
  "serde",
  "serde_derive",
- "surrealdb",
  "xdg",
+]
+
+[[package]]
+name = "kakei_database"
+version = "0.1.0"
+dependencies = [
+ "surrealdb",
 ]
 
 [[package]]
