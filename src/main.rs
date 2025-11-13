@@ -17,8 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize tracing for internal logging only
     tracing_subscriber::fmt()
         .with_env_filter(
-            EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| EnvFilter::new("warn")),
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("warn")),
         )
         .init();
 
@@ -75,7 +74,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .await
             {
                 Ok(_) => {
-                    println!("✅ Initialization complete. Database ready at: {}", db_path_str);
+                    println!(
+                        "✅ Initialization complete. Database ready at: {}",
+                        db_path_str
+                    );
                 }
                 Err(e) => {
                     eprintln!("❌ Failed to initialize database: {}", e);
@@ -85,7 +87,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Commands::List => {
             println!("📋 Recent Transactions:");
-            println!("--------------------------------------------------------------------------------");
+            println!(
+                "--------------------------------------------------------------------------------"
+            );
 
             match processor.get_recent_transactions().await {
                 Ok(transactions) => {
@@ -104,7 +108,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             );
                         }
                     }
-                    println!("--------------------------------------------------------------------------------");
+                    println!(
+                        "--------------------------------------------------------------------------------"
+                    );
                 }
                 Err(e) => {
                     eprintln!("❌ Failed to retrieve transactions: {}", e);
