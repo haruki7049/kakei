@@ -163,7 +163,7 @@ impl SqliteKakeiRepository {
     #[instrument(skip(self))]
     pub async fn migrate(&self) -> Result<(), DbError> {
         info!("Running database migrations");
-        
+
         // Categories table
         debug!("Creating Categories table if not exists");
         sqlx::query(
@@ -235,7 +235,7 @@ impl KakeiRepository for SqliteKakeiRepository {
             "Adding transaction: date={}, amount={:?}, category_id={:?}, account_id={:?}",
             date, amount, category_id, account_id
         );
-        
+
         // 1. Validate that the transaction currency matches the account currency
         // Fetch the account's currency
         debug!("Validating account currency");
@@ -251,7 +251,11 @@ impl KakeiRepository for SqliteKakeiRepository {
 
         // Check for mismatch
         if amount.currency() != account_currency {
-            debug!("Currency mismatch detected: transaction={:?}, account={:?}", amount.currency(), account_currency);
+            debug!(
+                "Currency mismatch detected: transaction={:?}, account={:?}",
+                amount.currency(),
+                account_currency
+            );
             return Err(DbError::Money(MoneyError::CurrencyMismatch(
                 amount.currency(),
                 account_currency,
