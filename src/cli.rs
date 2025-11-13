@@ -1,14 +1,47 @@
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
-#[derive(Debug, Parser)]
-#[clap(version, author, about)]
-#[command(arg_required_else_help = true)]
+/// A CLI expense tracker for programmers.
+#[derive(Parser, Debug)]
+#[command(version, author, about)]
 pub struct CLIArgs {
-    /// Initialize configuration file (In Linux: $XDG_CONFIG_HOME/kakei)
-    #[arg(long, default_value_t = false)]
-    pub initialize_configuration_file: bool,
+    #[command(subcommand)]
+    pub command: Commands,
+}
 
-    /// Initialize default kakeibo file (In Linux: $XDG_DATA_HOME/kakei)
-    #[arg(long, default_value_t = false)]
-    pub initialize_default_kakeibo: bool,
+#[derive(Subcommand, Debug)]
+pub enum Commands {
+    /// Add a new transaction.
+    /// Example: kakei add --date 2025-01-01 --amount -1000 --category Food --account Cash
+    Add {
+        /// Date of the transaction (YYYY-MM-DD).
+        #[arg(long)]
+        date: String,
+
+        /// Amount of the transaction.
+        /// Use negative for expense (e.g. -1000), positive for income.
+        #[arg(long, allow_hyphen_values = true)]
+        amount: String,
+
+        /// Currency code (e.g., JPY, USD).
+        #[arg(long, default_value = "JPY")]
+        currency: String,
+
+        /// Category name (e.g., Food, Salary).
+        #[arg(long)]
+        category: String,
+
+        /// Account name (e.g., Cash, Bank).
+        #[arg(long)]
+        account: String,
+
+        /// Optional memo.
+        #[arg(long)]
+        memo: Option<String>,
+    },
+
+    /// Initialize configuration and database.
+    Init,
+
+    /// (Future) List recent transactions.
+    List,
 }
