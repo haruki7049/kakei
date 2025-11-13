@@ -1,0 +1,29 @@
+# Example configuration file for kakei
+# Copy this file to ~/.config/kakei/config.toml and customize as needed
+
+# Expense categories - Categories for money going out
+expense_categories = [
+    "Food",           # Groceries, restaurants, etc.
+    "Transport",      # Bus, train, car expenses, etc.
+    "Daily Goods",    # Household items, toiletries, etc.
+    "Hobby",          # Entertainment, hobbies, etc.
+    "Utilities",      # Electricity, water, gas, internet, etc.
+    "Healthcare",     # Medical expenses, insurance, etc.
+    "Education",      # Books, courses, tuition, etc.
+]
+
+# Income categories - Categories for money coming in
+income_categories = [
+    "Salary",         # Regular employment income
+    "Bonus",          # Work bonuses
+    "Freelance",      # Freelance or side job income
+    "Investment",     # Dividends, interest, etc.
+    "Gift",           # Money gifts received
+]
+
+# Default accounts - Where money is stored
+default_accounts = [
+    "Cash",           # Physical cash
+    "Bank",           # Bank account
+    "Credit Card",    # Credit card
+]
