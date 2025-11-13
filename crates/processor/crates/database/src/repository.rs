@@ -377,7 +377,10 @@ impl KakeiRepository for SqliteKakeiRepository {
         name: &str,
         initial_balance: Money,
     ) -> Result<AccountId, DbError> {
-        debug!("Creating account: name={}, initial_balance={:?}", name, initial_balance);
+        debug!(
+            "Creating account: name={}, initial_balance={:?}",
+            name, initial_balance
+        );
         let amount_minor = initial_balance.to_minor()?;
         let currency_code = initial_balance.currency().to_string();
 
