@@ -1,8 +1,5 @@
 use chrono::NaiveDate;
-use kakei_database::{
-    DbError, KakeiRepository, SqliteKakeiRepository,
-    TransactionId,
-};
+use kakei_database::{DbError, KakeiRepository, SqliteKakeiRepository, TransactionId};
 use kakei_money::{Currency, Money, MoneyError};
 use rust_decimal::Decimal;
 use std::str::FromStr;

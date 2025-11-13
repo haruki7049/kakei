@@ -1,7 +1,7 @@
-use crate::error::DbError;
-use crate::models::{Category, Account}; // Account is used in DTO conversion logic internally
-use crate::types::{AccountId, CategoryId, TransactionId};
 use crate::dto::AccountDto;
+use crate::error::DbError;
+use crate::models::{Account, Category}; // Account is used in DTO conversion logic internally
+use crate::types::{AccountId, CategoryId, TransactionId};
 use chrono::NaiveDate;
 use kakei_money::{Currency, Money, MoneyError};
 use sqlx::Pool;
@@ -233,7 +233,7 @@ impl KakeiRepository for SqliteKakeiRepository {
 
     async fn find_category_by_name(&self, name: &str) -> Result<Option<Category>, DbError> {
         let category = sqlx::query_as::<_, Category>(
-            "SELECT category_id, name, type FROM Categories WHERE name = ?"
+            "SELECT category_id, name, type FROM Categories WHERE name = ?",
         )
         .bind(name)
         .fetch_optional(&self.pool)
@@ -245,7 +245,7 @@ impl KakeiRepository for SqliteKakeiRepository {
     async fn find_account_by_name(&self, name: &str) -> Result<Option<Account>, DbError> {
         // Use DTO to handle Money type conversion
         let dto = sqlx::query_as::<_, AccountDto>(
-            "SELECT account_id, name, initial_balance, currency FROM Accounts WHERE name = ?"
+            "SELECT account_id, name, initial_balance, currency FROM Accounts WHERE name = ?",
         )
         .bind(name)
         .fetch_optional(&self.pool)
