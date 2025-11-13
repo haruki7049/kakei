@@ -1,7 +1,7 @@
 use crate::dto::AccountDto;
 use crate::error::DbError;
 use crate::models::{Account, Category}; // Account is used in DTO conversion logic internally
-use crate::types::{AccountId, CategoryId, TransactionId};
+use crate::types::{AccountId, CategoryId, CategoryType, TransactionId};
 use chrono::NaiveDate;
 use kakei_money::{Currency, Money, MoneyError};
 use sqlx::Pool;
@@ -70,6 +70,30 @@ pub trait KakeiRepository {
         &self,
         name: &str,
     ) -> impl std::future::Future<Output = Result<Option<Account>, DbError>> + Send;
+
+    /// Creates a new category if it doesn't exist, or returns the existing one.
+    /// This method is idempotent (safe to call multiple times).
+    ///
+    /// # Arguments
+    /// * `name` - The name of the category.
+    /// * `type_` - The type of the category.
+    fn create_category(
+        &self,
+        name: &str,
+        type_: CategoryType,
+    ) -> impl std::future::Future<Output = Result<CategoryId, DbError>> + Send;
+
+    /// Creates a new account if it doesn't exist, or returns the existing one.
+    /// This method is idempotent (safe to call multiple times).
+    ///
+    /// # Arguments
+    /// * `name` - The name of the account.
+    /// * `initial_balance` - The initial balance.
+    fn create_account(
+        &self,
+        name: &str,
+        initial_balance: Money,
+    ) -> impl std::future::Future<Output = Result<AccountId, DbError>> + Send;
 }
 
 // --- Database Implementation (Concrete) ---
@@ -257,6 +281,58 @@ impl KakeiRepository for SqliteKakeiRepository {
             None => Ok(None),
         }
     }
+
+    async fn create_category(
+        &self,
+        name: &str,
+        type_: CategoryType,
+    ) -> Result<CategoryId, DbError> {
+        // Do not error if it already exists (INSERT OR IGNORE)
+        let result = sqlx::query("INSERT OR IGNORE INTO Categories (name, type) VALUES (?, ?)")
+            .bind(name)
+            .bind(type_)
+            .execute(&self.pool)
+            .await?;
+
+        if result.rows_affected() > 0 {
+            Ok(CategoryId(result.last_insert_rowid()))
+        } else {
+            // If it already exists, fetch and return the ID
+            let id: i64 = sqlx::query_scalar("SELECT category_id FROM Categories WHERE name = ?")
+                .bind(name)
+                .fetch_one(&self.pool)
+                .await?;
+            Ok(CategoryId(id))
+        }
+    }
+
+    async fn create_account(
+        &self,
+        name: &str,
+        initial_balance: Money,
+    ) -> Result<AccountId, DbError> {
+        let amount_minor = initial_balance.to_minor()?;
+        let currency_code = initial_balance.currency().to_string();
+
+        let result = sqlx::query(
+            "INSERT OR IGNORE INTO Accounts (name, initial_balance, currency) VALUES (?, ?, ?)",
+        )
+        .bind(name)
+        .bind(amount_minor)
+        .bind(currency_code)
+        .execute(&self.pool)
+        .await?;
+
+        if result.rows_affected() > 0 {
+            Ok(AccountId(result.last_insert_rowid()))
+        } else {
+            let id: i64 = sqlx::query_scalar("SELECT account_id FROM Accounts WHERE name = ?")
+                .bind(name)
+                .fetch_one(&self.pool)
+                .await?;
+            Ok(AccountId(id))
+        }
+    }
 }
 
 // --- Unit Tests ---
@@ -264,7 +340,6 @@ impl KakeiRepository for SqliteKakeiRepository {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::CategoryType;
 
     /// Group tests for SqliteKakeiRepository
     mod sqlite_kakei_repository {

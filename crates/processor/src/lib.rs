@@ -1,5 +1,7 @@
 use chrono::NaiveDate;
-use kakei_database::{DbError, KakeiRepository, SqliteKakeiRepository, TransactionId};
+use kakei_database::{
+    CategoryType, DbError, KakeiRepository, SqliteKakeiRepository, TransactionId,
+};
 use kakei_money::{Currency, Money, MoneyError};
 use rust_decimal::Decimal;
 use std::str::FromStr;
@@ -37,6 +39,33 @@ impl Processor {
         let repo = SqliteKakeiRepository::new(db_path).await?;
         repo.migrate().await?;
         Ok(Self { repo })
+    }
+
+    /// Initializes the database with default categories and accounts.
+    /// Used by the `init` command.
+    pub async fn init_default_data(&self) -> Result<(), ProcessorError> {
+        // Default Categories
+        self.repo
+            .create_category("Food", CategoryType::Expense)
+            .await?;
+        self.repo
+            .create_category("Transport", CategoryType::Expense)
+            .await?;
+        self.repo
+            .create_category("Daily Goods", CategoryType::Expense)
+            .await?;
+        self.repo
+            .create_category("Hobby", CategoryType::Expense)
+            .await?;
+        self.repo
+            .create_category("Salary", CategoryType::Income)
+            .await?;
+
+        // Default Accounts (Initial balance 0 JPY)
+        self.repo.create_account("Cash", Money::jpy(0)).await?;
+        self.repo.create_account("Bank", Money::jpy(0)).await?;
+
+        Ok(())
     }
 
     /// Adds a transaction based on user input strings.

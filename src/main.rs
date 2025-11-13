@@ -47,7 +47,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Transaction added successfully! (ID: {:?})", tx_id);
         }
         Commands::Init => {
-            todo!("Init command received (Not implemented yet).");
+            println!("🔧 Initializing database with default data...");
+            processor.init_default_data().await?;
+
+            println!(
+                "✅ Initialization complete. Database ready at: {}",
+                db_path_str
+            );
         }
         Commands::List => {
             todo!("List command received (Not implemented yet).");
