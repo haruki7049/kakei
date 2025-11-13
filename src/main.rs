@@ -57,7 +57,11 @@ async fn handle_init_command(
     db_path_str: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match processor
-        .init_master_data(&config.default_categories, &config.default_accounts)
+        .init_master_data(
+            &config.expense_categories,
+            &config.income_categories,
+            &config.default_accounts,
+        )
         .await
     {
         Ok(_) => {

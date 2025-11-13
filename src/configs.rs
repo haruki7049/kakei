@@ -6,8 +6,11 @@ use serde::{Deserialize, Serialize};
 /// Saved in ~/.config/kakei/config.toml (typically).
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Configuration {
-    /// List of default categories to create during initialization.
-    pub default_categories: Vec<String>,
+    /// List of expense categories to create during initialization.
+    pub expense_categories: Vec<String>,
+
+    /// List of income categories to create during initialization.
+    pub income_categories: Vec<String>,
 
     /// List of default accounts to create during initialization.
     pub default_accounts: Vec<String>,
@@ -17,13 +20,13 @@ pub struct Configuration {
 impl Default for Configuration {
     fn default() -> Self {
         Self {
-            default_categories: vec![
+            expense_categories: vec![
                 "Food".to_string(),
                 "Transport".to_string(),
                 "Daily Goods".to_string(),
                 "Hobby".to_string(),
-                "Salary".to_string(), // Income category example
             ],
+            income_categories: vec!["Salary".to_string(), "Bonus".to_string()],
             default_accounts: vec!["Cash".to_string(), "Bank".to_string()],
         }
     }

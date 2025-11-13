@@ -46,36 +46,39 @@ impl Processor {
 
     /// Initializes the database with master data provided as arguments.
     ///
-    /// This replaces the old hardcoded initialization logic.
+    /// This method accepts separate lists for expense and income categories,
+    /// allowing users to freely define their own category structure without hardcoding.
     #[instrument(skip(self))]
     pub async fn init_master_data(
         &self,
-        categories: &[String],
+        expense_categories: &[String],
+        income_categories: &[String],
         accounts: &[String],
     ) -> Result<(), ProcessorError> {
         info!(
-            "Initializing master data with {} categories and {} accounts",
-            categories.len(),
+            "Initializing master data with {} expense categories, {} income categories, and {} accounts",
+            expense_categories.len(),
+            income_categories.len(),
             accounts.len()
         );
 
-        // 1. Create Categories
-        for cat_name in categories {
-            debug!("Processing category: {}", cat_name);
-            // Determine category type (simple logic for now)
-            let type_ = if cat_name.eq_ignore_ascii_case("Salary")
-                || cat_name.eq_ignore_ascii_case("Bonus")
-                || cat_name.eq_ignore_ascii_case("Income")
-            {
-                CategoryType::Income
-            } else {
-                CategoryType::Expense
-            };
-
-            self.repo.create_category(cat_name, type_).await?;
+        // 1. Create Expense Categories
+        for cat_name in expense_categories {
+            debug!("Processing expense category: {}", cat_name);
+            self.repo
+                .create_category(cat_name, CategoryType::Expense)
+                .await?;
         }
 
-        // 2. Create Accounts
+        // 2. Create Income Categories
+        for cat_name in income_categories {
+            debug!("Processing income category: {}", cat_name);
+            self.repo
+                .create_category(cat_name, CategoryType::Income)
+                .await?;
+        }
+
+        // 3. Create Accounts
         for acc_name in accounts {
             debug!("Processing account: {}", acc_name);
             // Default initial balance 0 JPY
@@ -168,5 +171,90 @@ impl Processor {
         let transactions = self.repo.get_recent_transactions(20).await?;
         debug!("Retrieved {} transactions", transactions.len());
         Ok(transactions)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Test that init_master_data correctly creates expense and income categories
+    #[tokio::test]
+    async fn test_init_master_data_with_separate_categories() {
+        let processor = Processor::new(":memory:")
+            .await
+            .expect("Failed to create processor");
+
+        let expense_categories = vec![
+            "Food".to_string(),
+            "Transport".to_string(),
+            "Utilities".to_string(),
+        ];
+        let income_categories = vec!["Salary".to_string(), "Freelance".to_string()];
+        let accounts = vec!["Cash".to_string(), "Bank".to_string()];
+
+        let result = processor
+            .init_master_data(&expense_categories, &income_categories, &accounts)
+            .await;
+
+        assert!(result.is_ok(), "init_master_data should succeed");
+
+        // Verify categories were created
+        let categories = processor
+            .repo
+            .get_all_categories()
+            .await
+            .expect("Failed to get categories");
+
+        assert_eq!(categories.len(), 5, "Should have 5 categories");
+
+        // Check expense categories
+        let expense_cats: Vec<_> = categories
+            .iter()
+            .filter(|c| c.type_ == CategoryType::Expense)
+            .collect();
+        assert_eq!(expense_cats.len(), 3, "Should have 3 expense categories");
+
+        // Check income categories
+        let income_cats: Vec<_> = categories
+            .iter()
+            .filter(|c| c.type_ == CategoryType::Income)
+            .collect();
+        assert_eq!(income_cats.len(), 2, "Should have 2 income categories");
+    }
+
+    /// Test that categories are correctly categorized as expense or income
+    #[tokio::test]
+    async fn test_category_types_are_correct() {
+        let processor = Processor::new(":memory:")
+            .await
+            .expect("Failed to create processor");
+
+        let expense_categories = vec!["Groceries".to_string()];
+        let income_categories = vec!["Investment".to_string()];
+        let accounts = vec!["Wallet".to_string()];
+
+        processor
+            .init_master_data(&expense_categories, &income_categories, &accounts)
+            .await
+            .expect("init_master_data should succeed");
+
+        // Verify the "Groceries" category is Expense
+        let groceries = processor
+            .repo
+            .find_category_by_name("Groceries")
+            .await
+            .expect("Failed to find category")
+            .expect("Category should exist");
+        assert_eq!(groceries.type_, CategoryType::Expense);
+
+        // Verify the "Investment" category is Income
+        let investment = processor
+            .repo
+            .find_category_by_name("Investment")
+            .await
+            .expect("Failed to find category")
+            .expect("Category should exist");
+        assert_eq!(investment.type_, CategoryType::Income);
     }
 }
