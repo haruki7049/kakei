@@ -60,7 +60,7 @@ pub enum Commands {
     /// Initialize configuration and database.
     Init,
 
-    /// (Future) List recent transactions.
+    /// List recent transactions.
     List,
 }
 
