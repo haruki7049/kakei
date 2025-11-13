@@ -298,7 +298,7 @@ impl KakeiRepository for SqliteKakeiRepository {
         account_id: AccountId,
     ) -> Result<TransactionId, DbError> {
         // Deconstruct Money into minor units (integer) and currency code (string) for storage
-        let amount_minor: i64 = amount.to_minor();
+        let amount_minor: i64 = amount.to_minor()?;
         let currency_code: String = amount.currency().to_string();
 
         let last_id: i64 = sqlx::query(

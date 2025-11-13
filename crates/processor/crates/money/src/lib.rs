@@ -21,6 +21,10 @@ pub enum MoneyError {
     /// Error returned when parsing an invalid currency string.
     #[error("Invalid currency code: {0}")]
     InvalidCurrency(String),
+
+    /// Error returned when conversion to minor units (i64) overflows.
+    #[error("Amount overflow: value is too large to fit in i64")]
+    Overflow,
 }
 
 /// Supported currencies.
@@ -132,10 +136,12 @@ impl Money {
     ///
     /// # Returns
     /// The amount scaled by the currency's decimal places, rounded to the nearest integer.
-    pub fn to_minor(&self) -> i64 {
+    /// Returns `Result` to handle potential overflow when converting to `i64`.
+    pub fn to_minor(&self) -> Result<i64, MoneyError> {
         let scale: u32 = self.currency.decimal_places();
         let minor: Decimal = self.amount * Decimal::from(10u32.pow(scale));
-        minor.round().to_i64().unwrap_or(0)
+        // Replace unwrap_or(0) with proper error handling
+        minor.round().to_i64().ok_or(MoneyError::Overflow)
     }
 
     /// Returns the underlying Decimal amount.
@@ -201,14 +207,14 @@ mod tests {
         fn test_jpy_creation() {
             let m: Money = Money::jpy(100);
             assert_eq!(m.to_string(), "¥100");
-            assert_eq!(m.to_minor(), 100);
+            assert_eq!(m.to_minor().unwrap(), 100);
         }
 
         #[test]
         fn test_usd_creation() {
             let m: Money = Money::usd(dec!(10.50));
             assert_eq!(m.to_string(), "$10.50");
-            assert_eq!(m.to_minor(), 1050);
+            assert_eq!(m.to_minor().unwrap(), 1050);
         }
 
         #[test]
@@ -239,6 +245,13 @@ mod tests {
             // JPY 1050 -> 1050 yen
             let m_jpy: Money = Money::from_minor(1050, Currency::JPY);
             assert_eq!(m_jpy.amount(), dec!(1050));
+        }
+
+        #[test]
+        fn test_minor_conversion_overflow() {
+            // Decimal::MAX causes overflow when converting to i64 minor units
+            let m: Money = Money::new(Decimal::MAX, Currency::JPY);
+            assert_eq!(m.to_minor(), Err(MoneyError::Overflow));
         }
     }
 }
