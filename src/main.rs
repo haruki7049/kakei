@@ -6,7 +6,7 @@ use kakei::{
 };
 use kakei_processor::Processor;
 use std::path::{Path, PathBuf};
-use tabled::{settings::Style, Table, Tabled};
+use tabled::{Table, Tabled, settings::Style};
 use tracing::debug;
 use tracing_subscriber::filter::EnvFilter;
 
