@@ -37,19 +37,19 @@ pub enum DbError {
 /// Wraps an `i64` value and maps transparently to the database INTEGER type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Type)]
 #[sqlx(transparent)]
-pub struct CategoryId(i64);
+pub struct CategoryId(pub i64);
 
 /// A strongly-typed identifier for an Account.
 /// Wraps an `i64` value and maps transparently to the database INTEGER type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Type)]
 #[sqlx(transparent)]
-pub struct AccountId(i64);
+pub struct AccountId(pub i64);
 
 /// A strongly-typed identifier for a Transaction.
 /// Wraps an `i64` value and maps transparently to the database INTEGER type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Type)]
 #[sqlx(transparent)]
-pub struct TransactionId(i64);
+pub struct TransactionId(pub i64);
 
 /// Represents the type of a category (Expense or Income).
 /// Maps to the TEXT column 'type' in the database ('expense' or 'income').
@@ -230,6 +230,12 @@ impl SqliteKakeiRepository {
             .await?;
 
         Ok(Self { pool })
+    }
+
+    /// Exposes the underlying connection pool.
+    /// This is useful for testing or advanced operations.
+    pub fn get_pool(&self) -> &Pool<Sqlite> {
+        &self.pool
     }
 
     /// Runs database migrations to initialize the schema tables.
