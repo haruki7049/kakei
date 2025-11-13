@@ -9,3 +9,9 @@ publish.workspace = true
 readme.workspace = true
 
 [dependencies]
+kakei_database.workspace = true
+kakei_money.workspace = true
+chrono.workspace = true
+tokio.workspace = true
+thiserror.workspace = true
+rust_decimal.workspace = true

@@ -1,6 +1,7 @@
 use crate::error::DbError;
-use crate::models::Category; // Account is used in DTO conversion logic internally
+use crate::models::{Category, Account}; // Account is used in DTO conversion logic internally
 use crate::types::{AccountId, CategoryId, TransactionId};
+use crate::dto::AccountDto;
 use chrono::NaiveDate;
 use kakei_money::{Currency, Money, MoneyError};
 use sqlx::Pool;
@@ -41,6 +42,34 @@ pub trait KakeiRepository {
     fn get_all_categories(
         &self,
     ) -> impl std::future::Future<Output = Result<Vec<Category>, DbError>> + Send;
+
+    /// Finds a category by its name.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the category to find.
+    ///
+    /// # Returns
+    ///
+    /// Returns `Some(Category)` if found, or `None` if it does not exist.
+    fn find_category_by_name(
+        &self,
+        name: &str,
+    ) -> impl std::future::Future<Output = Result<Option<Category>, DbError>> + Send;
+
+    /// Finds an account by its name.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the account to find.
+    ///
+    /// # Returns
+    ///
+    /// Returns `Some(Account)` if found, or `None` if it does not exist.
+    fn find_account_by_name(
+        &self,
+        name: &str,
+    ) -> impl std::future::Future<Output = Result<Option<Account>, DbError>> + Send;
 }
 
 // --- Database Implementation (Concrete) ---
@@ -200,6 +229,33 @@ impl KakeiRepository for SqliteKakeiRepository {
                 .await?;
 
         Ok(categories)
+    }
+
+    async fn find_category_by_name(&self, name: &str) -> Result<Option<Category>, DbError> {
+        let category = sqlx::query_as::<_, Category>(
+            "SELECT category_id, name, type FROM Categories WHERE name = ?"
+        )
+        .bind(name)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(category)
+    }
+
+    async fn find_account_by_name(&self, name: &str) -> Result<Option<Account>, DbError> {
+        // Use DTO to handle Money type conversion
+        let dto = sqlx::query_as::<_, AccountDto>(
+            "SELECT account_id, name, initial_balance, currency FROM Accounts WHERE name = ?"
+        )
+        .bind(name)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        // Convert DTO to Domain Model if present
+        match dto {
+            Some(d) => Ok(Some(d.try_into()?)),
+            None => Ok(None),
+        }
     }
 }
 

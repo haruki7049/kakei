@@ -1152,6 +1152,14 @@ dependencies = [
 [[package]]
 name = "processor"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "kakei_database",
+ "kakei_money",
+ "rust_decimal",
+ "thiserror 2.0.17",
+ "tokio",
+]
 
 [[package]]
 name = "ptr_meta"
