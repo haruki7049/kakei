@@ -99,6 +99,7 @@
           devShells.default = pkgs.mkShell {
             nativeBuildInputs = [
               rust
+              pkgs.sqlite # For debugging
             ];
           };
         };
