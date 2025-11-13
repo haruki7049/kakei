@@ -39,6 +39,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             todo!("📋 List command received (Not implemented yet).");
         }
     }
-
-    Ok(())
 }
