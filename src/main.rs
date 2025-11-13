@@ -25,6 +25,89 @@ struct TransactionDisplay {
     memo: String,
 }
 
+/// Handle the Add command
+async fn handle_add_command(
+    processor: &Processor,
+    date: &str,
+    amount: &str,
+    currency: &str,
+    category: &str,
+    account: &str,
+    memo: &Option<String>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match processor
+        .add_transaction(date, amount, currency, category, account, memo.clone())
+        .await
+    {
+        Ok(tx_id) => {
+            println!("✅ Transaction added successfully! (ID: {:?})", tx_id);
+            Ok(())
+        }
+        Err(e) => {
+            eprintln!("❌ Failed to add transaction: {}", e);
+            Err(e.into())
+        }
+    }
+}
+
+/// Handle the Init command
+async fn handle_init_command(
+    processor: &Processor,
+    config: &Configuration,
+    db_path_str: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match processor
+        .init_master_data(&config.default_categories, &config.default_accounts)
+        .await
+    {
+        Ok(_) => {
+            println!(
+                "✅ Initialization complete. Database ready at: {}",
+                db_path_str
+            );
+            Ok(())
+        }
+        Err(e) => {
+            eprintln!("❌ Failed to initialize database: {}", e);
+            Err(e.into())
+        }
+    }
+}
+
+/// Handle the List command
+async fn handle_list_command(processor: &Processor) -> Result<(), Box<dyn std::error::Error>> {
+    println!("📋 Recent Transactions:");
+    println!("--------------------------------------------------------------------------------");
+
+    match processor.get_recent_transactions().await {
+        Ok(transactions) => {
+            if transactions.is_empty() {
+                println!("No transactions found.");
+            } else {
+                for tx in transactions {
+                    // Simple formatting
+                    println!(
+                        "{: <12} | {: >15} | {: <10} | {: <10} | {}",
+                        tx.date,
+                        tx.amount, // Money implements Display (e.g. ¥-1000)
+                        tx.category_name,
+                        tx.account_name,
+                        tx.memo.unwrap_or_default()
+                    );
+                }
+            }
+            println!(
+                "--------------------------------------------------------------------------------"
+            );
+            Ok(())
+        }
+        Err(e) => {
+            eprintln!("❌ Failed to retrieve transactions: {}", e);
+            Err(e.into())
+        }
+    }
+}
+
 // Use tokio for async runtime
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -70,67 +153,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             account,
             memo,
         } => {
-            // Call the business logic in processor crate
-            match processor
-                .add_transaction(&date, &amount, &currency, &category, &account, memo)
-                .await
-            {
-                Ok(tx_id) => {
-                    println!("✅ Transaction added successfully! (ID: {:?})", tx_id);
-                }
-                Err(e) => {
-                    eprintln!("❌ Failed to add transaction: {}", e);
-                    return Err(e.into());
-                }
-            }
+            handle_add_command(
+                &processor, &date, &amount, &currency, &category, &account, &memo,
+            )
+            .await?
         }
-        Commands::Init => {
-            match processor
-                .init_master_data(&config.default_categories, &config.default_accounts)
-                .await
-            {
-                Ok(_) => {
-                    println!(
-                        "✅ Initialization complete. Database ready at: {}",
-                        db_path_str
-                    );
-                }
-                Err(e) => {
-                    eprintln!("❌ Failed to initialize database: {}", e);
-                    return Err(e.into());
-                }
-            }
-        }
-        Commands::List => {
-            match processor.get_recent_transactions().await {
-                Ok(transactions) => {
-                    if transactions.is_empty() {
-                        println!("No transactions found.");
-                    } else {
-                        // Convert transactions to display format
-                        let display_data: Vec<TransactionDisplay> = transactions
-                            .into_iter()
-                            .map(|tx| TransactionDisplay {
-                                date: tx.date.to_string(),
-                                amount: tx.amount.to_string(),
-                                category: tx.category_name,
-                                account: tx.account_name,
-                                memo: tx.memo.unwrap_or_default(),
-                            })
-                            .collect();
-
-                        // Create and display table
-                        let mut table = Table::new(display_data);
-                        table.with(Style::rounded());
-                        println!("{}", table);
-                    }
-                }
-                Err(e) => {
-                    eprintln!("❌ Failed to retrieve transactions: {}", e);
-                    return Err(e.into());
-                }
-            }
-        }
+        Commands::Init => handle_init_command(&processor, &config, db_path_str).await?,
+        Commands::List => handle_list_command(&processor).await?,
     }
 
     Ok(())
