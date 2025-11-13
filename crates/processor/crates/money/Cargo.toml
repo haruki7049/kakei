@@ -9,3 +9,10 @@ publish.workspace = true
 readme.workspace = true
 
 [dependencies]
+rust_decimal.workspace = true
+thiserror.workspace = true
+serde = { workspace = true, optional = true }
+
+[features]
+default = []
+serde = ["dep:serde", "rust_decimal/serde"]
