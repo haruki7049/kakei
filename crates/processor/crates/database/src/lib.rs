@@ -353,6 +353,7 @@ mod tests {
         }
 
         /// Helper to seed necessary master data (Category & Account) for foreign keys.
+        async fn seed_master_data(repo: &SqliteKakeiRepository) -> (CategoryId, AccountId) {
             let cat_result = sqlx::query(
                 "INSERT INTO Categories (name, type) VALUES ('Test Food', 'expense')"
             )
