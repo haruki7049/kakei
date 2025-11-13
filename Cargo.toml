@@ -13,7 +13,11 @@ readme.workspace = true
 
 [workspace]
 resolver = "3"
-members = ["crates/processor/crates/database", "crates/processor"]
+members = [
+  "crates/processor/crates/money",
+  "crates/processor/crates/database",
+  "crates/processor",
+]
 
 [workspace.package]
 authors = ["haruki7049 <tontonkirikiri@gmail.com>"]
@@ -25,15 +29,25 @@ publish = false
 readme = "README.md"
 
 [workspace.dependencies]
-sqlx = "0.8.6"
+kakei_money = { path = "./crates/processor/crates/money/" }
+sqlx = { version = "0.8.6", features = [
+  "sqlite",
+  "runtime-tokio",
+  "chrono",
+  "macros",
+] }
 tokio = { version = "1.48.0", features = ["full"] }
+chrono = { version = "0.4.42", features = ["serde"] }
+thiserror = "2.0.17"
+rust_decimal = { version = "1.39.0", features = ["macros", "serde"] }
+serde = { version = "1.0.219", features = ["derive"] }
 
 [dependencies]
 anyhow = "1.0.98"
 clap = { version = "4.4.11", features = ["derive"] }
 confy = "0.6.1"
 directories = "6.0.0"
-serde = { version = "1.0.219", features = ["derive"] }
 xdg = "3.0.0"
+serde.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
