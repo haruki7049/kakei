@@ -2,7 +2,7 @@ use clap::Parser;
 use kakei::cli::{CLIArgs, Commands};
 // use kakei::KakeiConfig; // (Will be used later)
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Parse CLI arguments
     let args: CLIArgs = CLIArgs::parse();
 

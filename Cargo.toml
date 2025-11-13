@@ -43,7 +43,6 @@ rust_decimal = { version = "1.39.0", features = ["macros", "serde"] }
 serde = { version = "1.0.219", features = ["derive"] }
 
 [dependencies]
-anyhow = "1.0.98"
 clap = { version = "4.4.11", features = ["derive"] }
 confy = "0.6.1"
 directories = "6.0.0"
