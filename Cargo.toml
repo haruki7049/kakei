@@ -47,6 +47,8 @@ clap = { version = "4.4.11", features = ["derive", "string"] }
 confy = "0.6.1"
 directories = "6.0.0"
 xdg = "3.0.0"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 
 [dependencies]
 kakei_processor.workspace = true
@@ -55,5 +57,7 @@ directories.workspace = true
 tokio.workspace = true
 confy.workspace = true
 serde.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

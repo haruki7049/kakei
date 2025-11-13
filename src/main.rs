@@ -6,14 +6,22 @@ use kakei::{
 };
 use kakei_processor::Processor;
 use std::path::{Path, PathBuf};
+use tracing::{Level, error, info, debug};
+use tracing_subscriber::filter::EnvFilter;
 
 // Use tokio for async runtime
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: CLIArgs = CLIArgs::parse();
 
+    // Initialize tracing by tracing-subscriber
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .with_max_level(Level::INFO)
+        .init();
+
     let config: Configuration = confy::load_path(args.config_file()).unwrap_or_else(|_| {
-        println!("Running kakei with default Configuration...");
+        debug!("Running kakei with default Configuration...");
         Configuration::default()
     });
 
@@ -45,40 +53,40 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             account,
             memo,
         } => {
-            println!("🚀 Adding transaction...");
+            info!("🚀 Adding transaction...");
 
             // Call the business logic in processor crate
             let tx_id = processor
                 .add_transaction(&date, &amount, &currency, &category, &account, memo)
                 .await?;
 
-            println!("Transaction added successfully! (ID: {:?})", tx_id);
+            info!("Transaction added successfully! (ID: {:?})", tx_id);
         }
         Commands::Init => {
-            println!("🔧 Initializing database with default data...");
+            info!("🔧 Initializing database with default data...");
             processor
                 .init_master_data(&config.default_categories, &config.default_accounts)
                 .await?;
 
-            println!(
+            info!(
                 "✅ Initialization complete. Database ready at: {}",
                 db_path_str
             );
         }
         Commands::List => {
-            println!("📋 Recent Transactions:");
-            println!(
+            info!("📋 Recent Transactions:");
+            info!(
                 "--------------------------------------------------------------------------------"
             );
 
             let transactions = processor.get_recent_transactions().await?;
 
             if transactions.is_empty() {
-                println!("No transactions found.");
+                info!("No transactions found.");
             } else {
                 for tx in transactions {
                     // Simple formatting
-                    println!(
+                    info!(
                         "{: <12} | {: >15} | {: <10} | {: <10} | {}",
                         tx.date,
                         tx.amount, // Money implements Display (e.g. ¥-1000)
@@ -88,7 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     );
                 }
             }
-            println!(
+            info!(
                 "--------------------------------------------------------------------------------"
             );
         }
