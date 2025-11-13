@@ -13,3 +13,5 @@ sqlx.workspace = true
 tokio.workspace = true
 chrono.workspace = true
 thiserror.workspace = true
+kakei_money.workspace = true
+rust_decimal.workspace = true

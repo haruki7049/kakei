@@ -872,6 +872,8 @@ name = "kakei_database"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "kakei_money",
+ "rust_decimal",
  "sqlx",
  "thiserror 2.0.17",
  "tokio",

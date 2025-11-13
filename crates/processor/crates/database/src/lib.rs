@@ -4,6 +4,7 @@
 //! This crate provides a strongly-typed interface to the SQLite database via the Repository pattern.
 
 use chrono::NaiveDate;
+use kakei_money::{Currency, Money, MoneyError};
 use sqlx::sqlite::{Sqlite, SqlitePoolOptions};
 use sqlx::{FromRow, Pool, Type};
 use thiserror::Error;
@@ -24,6 +25,10 @@ pub enum DbError {
     /// The requested item was not found in the database.
     #[error("Item not found: {0}")]
     NotFound(String),
+
+    /// An error occurred related to Money operations.
+    #[error("Money error: {0}")]
+    Money(#[from] MoneyError),
 }
 
 // --- 2. Strong Types (Newtype Pattern & Enums) ---
@@ -57,7 +62,7 @@ pub enum CategoryType {
     Income,
 }
 
-// --- 3. Table Structs (Mapping DB rows) ---
+// --- 3. Table Structs (Domain Models) ---
 
 /// Represents a row in the `Categories` table.
 #[derive(Debug, FromRow)]
@@ -72,33 +77,88 @@ pub struct Category {
     pub type_: CategoryType,
 }
 
-/// Represents a row in the `Accounts` table.
-#[derive(Debug, FromRow)]
+/// Represents an Account in the domain.
+///
+/// Note: The balance is represented by the `Money` type, which includes currency information.
+#[derive(Debug)]
 pub struct Account {
     /// The unique ID of the account.
     pub account_id: AccountId,
     /// The display name of the account (unique).
     pub name: String,
-    /// The initial balance of the account (in yen).
-    pub initial_balance: i64,
+    /// The initial balance of the account.
+    pub initial_balance: Money,
 }
 
-/// Represents a row in the `Transactions` table.
-#[derive(Debug, FromRow)]
+/// Represents a Transaction in the domain.
+///
+/// Note: The amount is represented by the `Money` type, which includes currency information.
+#[derive(Debug)]
 pub struct Transaction {
     /// The unique ID of the transaction.
     pub transaction_id: TransactionId,
     /// The date of the transaction.
-    /// Automatically converted between SQLite TEXT (ISO8601) and `NaiveDate`.
     pub date: NaiveDate,
-    /// The amount of the transaction (negative for expense, positive for income).
-    pub amount: i64,
+    /// The amount of the transaction.
+    pub amount: Money,
     /// An optional memo or note for the transaction.
     pub memo: Option<String>,
     /// The ID of the associated category.
     pub category_id: CategoryId,
     /// The ID of the associated account (source/destination).
     pub account_id: AccountId,
+}
+
+// --- Internal DTOs ---
+// DTOs (Data Transfer Objects) used to map between database rows (flat structure)
+// and domain models (rich types like Money).
+
+#[derive(FromRow)]
+struct AccountDto {
+    account_id: AccountId,
+    name: String,
+    initial_balance: i64, // Stored as minor units (e.g., cents)
+    currency: String,     // Stored as currency code (e.g., "USD")
+}
+
+impl TryFrom<AccountDto> for Account {
+    type Error = DbError;
+
+    fn try_from(dto: AccountDto) -> Result<Self, Self::Error> {
+        let currency: Currency = dto.currency.parse()?;
+        Ok(Account {
+            account_id: dto.account_id,
+            name: dto.name,
+            initial_balance: Money::from_minor(dto.initial_balance, currency),
+        })
+    }
+}
+
+#[derive(FromRow)]
+struct TransactionDto {
+    transaction_id: TransactionId,
+    date: NaiveDate,
+    amount: i64,      // Stored as minor units
+    currency: String, // Stored as currency code
+    memo: Option<String>,
+    category_id: CategoryId,
+    account_id: AccountId,
+}
+
+impl TryFrom<TransactionDto> for Transaction {
+    type Error = DbError;
+
+    fn try_from(dto: TransactionDto) -> Result<Self, Self::Error> {
+        let currency: Currency = dto.currency.parse()?;
+        Ok(Transaction {
+            transaction_id: dto.transaction_id,
+            date: dto.date,
+            amount: Money::from_minor(dto.amount, currency),
+            memo: dto.memo,
+            category_id: dto.category_id,
+            account_id: dto.account_id,
+        })
+    }
 }
 
 // --- 4. Repository Trait (Abstraction) ---
@@ -111,7 +171,7 @@ pub trait KakeiRepository {
     /// # Arguments
     ///
     /// * `date` - The date of the transaction.
-    /// * `amount` - The transaction amount.
+    /// * `amount` - The transaction amount (Money type including currency).
     /// * `memo` - An optional memo.
     /// * `category_id` - The ID of the category.
     /// * `account_id` - The ID of the account.
@@ -122,7 +182,7 @@ pub trait KakeiRepository {
     fn add_transaction(
         &self,
         date: NaiveDate,
-        amount: i64,
+        amount: Money,
         memo: Option<&str>,
         category_id: CategoryId,
         account_id: AccountId,
@@ -143,7 +203,6 @@ pub trait KakeiRepository {
 /// The concrete implementation of `KakeiRepository` using `sqlx` and SQLite.
 pub struct SqliteKakeiRepository {
     /// The connection pool to the SQLite database.
-    /// `Sqlite` implements the `sqlx::Database` trait.
     pool: Pool<Sqlite>,
 }
 
@@ -157,14 +216,13 @@ impl SqliteKakeiRepository {
     ///
     /// * `db_path` - The file path to the SQLite database (e.g., "kakei.db").
     pub async fn new(db_path: &str) -> Result<Self, DbError> {
-        // Append ?create=true to ensure the file is created if missing.
         let connection_string = format!("sqlite:{}", db_path);
 
         // Configure SQLite options explicitly
         let options = connection_string
             .parse::<sqlx::sqlite::SqliteConnectOptions>()?
-            .create_if_missing(true) // This enables automatic file creation
-            .foreign_keys(true); // This enables foreign key constraints
+            .create_if_missing(true) // Enable automatic file creation
+            .foreign_keys(true); // Enable foreign key constraints
 
         let pool = SqlitePoolOptions::new()
             .max_connections(5)
@@ -178,6 +236,7 @@ impl SqliteKakeiRepository {
     ///
     /// Creates `Categories`, `Accounts`, and `Transactions` tables if they do not exist.
     pub async fn migrate(&self) -> Result<(), DbError> {
+        // Categories table
         sqlx::query(
             "
             CREATE TABLE IF NOT EXISTS Categories (
@@ -190,24 +249,28 @@ impl SqliteKakeiRepository {
         .execute(&self.pool)
         .await?;
 
+        // Accounts table (includes currency)
         sqlx::query(
             "
             CREATE TABLE IF NOT EXISTS Accounts (
                 account_id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 name TEXT NOT NULL UNIQUE,
-                initial_balance INTEGER NOT NULL DEFAULT 0
+                initial_balance INTEGER NOT NULL DEFAULT 0,
+                currency TEXT NOT NULL DEFAULT 'JPY'
             );
             ",
         )
         .execute(&self.pool)
         .await?;
 
+        // Transactions table (includes currency)
         sqlx::query(
             "
             CREATE TABLE IF NOT EXISTS Transactions (
                 transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 date TEXT NOT NULL,
                 amount INTEGER NOT NULL, 
+                currency TEXT NOT NULL DEFAULT 'JPY',
                 memo TEXT,
                 category_id INTEGER NOT NULL, 
                 account_id INTEGER NOT NULL,
@@ -229,20 +292,24 @@ impl KakeiRepository for SqliteKakeiRepository {
     async fn add_transaction(
         &self,
         date: NaiveDate,
-        amount: i64,
+        amount: Money,
         memo: Option<&str>,
         category_id: CategoryId,
         account_id: AccountId,
     ) -> Result<TransactionId, DbError> {
-        // Use sqlx functionality (execute) to run the specific SQL query.
+        // Deconstruct Money into minor units (integer) and currency code (string) for storage
+        let amount_minor = amount.to_minor();
+        let currency_code = amount.currency().to_string();
+
         let last_id = sqlx::query(
             "
-            INSERT INTO Transactions (date, amount, memo, category_id, account_id)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO Transactions (date, amount, currency, memo, category_id, account_id)
+            VALUES (?, ?, ?, ?, ?, ?)
             ",
         )
         .bind(date)
-        .bind(amount)
+        .bind(amount_minor)
+        .bind(currency_code)
         .bind(memo)
         .bind(category_id)
         .bind(account_id)
@@ -270,6 +337,7 @@ mod tests {
     /// Group tests for SqliteKakeiRepository
     mod sqlite_kakei_repository {
         use crate::*;
+        use rust_decimal::prelude::*;
         use sqlx::Row;
 
         /// Helper function to create an in-memory database and run migrations.
@@ -296,9 +364,9 @@ mod tests {
             .expect("Failed to seed category")
             .get(0);
 
-            // Insert a dummy account
+            // Insert a dummy account with JPY currency
             let acc_id: i64 = sqlx::query(
-                "INSERT INTO Accounts (name, initial_balance) VALUES ('Test Cash', 1000) RETURNING account_id"
+                "INSERT INTO Accounts (name, initial_balance, currency) VALUES ('Test Cash', 1000, 'JPY') RETURNING account_id"
             )
             .fetch_one(&repo.pool)
             .await
@@ -327,12 +395,13 @@ mod tests {
         }
 
         #[tokio::test]
-        async fn test_add_transaction_success() {
+        async fn test_add_transaction_success_jpy() {
             let repo = create_test_repo().await;
             let (cat_id, acc_id) = seed_master_data(&repo).await;
 
             let date = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
-            let amount = -500;
+            // JPY 500
+            let amount = Money::jpy(-500);
             let memo = Some("Test Lunch");
 
             // Execute the method under test
@@ -343,18 +412,53 @@ mod tests {
             assert!(result.is_ok());
             let tx_id = result.unwrap();
 
-            // Verify data was actually inserted
-            let row = sqlx::query("SELECT amount, memo FROM Transactions WHERE transaction_id = ?")
-                .bind(tx_id)
-                .fetch_one(&repo.pool)
-                .await
-                .expect("Failed to fetch inserted transaction");
+            // Verify data was actually inserted with correct currency
+            let row = sqlx::query(
+                "SELECT amount, currency, memo FROM Transactions WHERE transaction_id = ?",
+            )
+            .bind(tx_id)
+            .fetch_one(&repo.pool)
+            .await
+            .expect("Failed to fetch inserted transaction");
 
             let db_amount: i64 = row.get("amount");
+            let db_currency: String = row.get("currency");
             let db_memo: String = row.get("memo");
 
-            assert_eq!(db_amount, amount);
+            assert_eq!(db_amount, -500); // JPY minor unit is same as integer
+            assert_eq!(db_currency, "JPY");
             assert_eq!(db_memo, "Test Lunch");
+        }
+
+        #[tokio::test]
+        async fn test_add_transaction_success_usd() {
+            let repo = create_test_repo().await;
+            let (cat_id, acc_id) = seed_master_data(&repo).await;
+
+            let date = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
+            // USD 10.50 -> stored as 1050
+            let amount = Money::usd(dec!(-10.50));
+            let memo = Some("Test Lunch USD");
+
+            let result = repo
+                .add_transaction(date, amount, memo, cat_id, acc_id)
+                .await;
+
+            assert!(result.is_ok());
+            let tx_id = result.unwrap();
+
+            let row =
+                sqlx::query("SELECT amount, currency FROM Transactions WHERE transaction_id = ?")
+                    .bind(tx_id)
+                    .fetch_one(&repo.pool)
+                    .await
+                    .expect("Failed to fetch inserted transaction");
+
+            let db_amount: i64 = row.get("amount");
+            let db_currency: String = row.get("currency");
+
+            assert_eq!(db_amount, -1050); // 10.50 * 100
+            assert_eq!(db_currency, "USD");
         }
 
         #[tokio::test]
@@ -393,7 +497,8 @@ mod tests {
             // No master data seeded
 
             let date = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
-            let amount = -500;
+            // Dummy money
+            let amount = Money::jpy(-500);
 
             // Specify non-existent IDs
             let invalid_cat_id = CategoryId(999);
@@ -419,9 +524,12 @@ mod tests {
             let (cat_id, acc_id) = seed_master_data(&repo).await;
 
             let date = NaiveDate::from_ymd_opt(2025, 12, 31).unwrap();
+            let amount = Money::jpy(-100);
 
             // Pass None to memo
-            let result = repo.add_transaction(date, -100, None, cat_id, acc_id).await;
+            let result = repo
+                .add_transaction(date, amount, None, cat_id, acc_id)
+                .await;
 
             assert!(result.is_ok());
 

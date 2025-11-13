@@ -29,6 +29,7 @@ publish = false
 readme = "README.md"
 
 [workspace.dependencies]
+kakei_money = { path = "./crates/processor/crates/money/" }
 sqlx = { version = "0.8.6", features = [
   "sqlite",
   "runtime-tokio",
