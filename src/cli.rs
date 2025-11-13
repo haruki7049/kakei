@@ -1,14 +1,32 @@
 use clap::{Parser, Subcommand};
+use directories::ProjectDirs;
+use std::{
+    path::PathBuf,
+    sync::{LazyLock, Mutex},
+};
 
 /// A CLI expense tracker for programmers.
 #[derive(Parser, Debug)]
 #[command(version, author, about)]
 pub struct CLIArgs {
     #[command(subcommand)]
-    pub command: Commands,
+    command: Commands,
+
+    #[arg(short, long, default_value = DEFAULT_CONFIG_PATH.lock().unwrap().display().to_string())]
+    config_file: PathBuf,
 }
 
-#[derive(Subcommand, Debug)]
+impl CLIArgs {
+    pub fn command(&self) -> Commands {
+        self.command.clone()
+    }
+
+    pub fn config_file(&self) -> PathBuf {
+        self.config_file.clone()
+    }
+}
+
+#[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum Commands {
     /// Add a new transaction.
     /// Example: kakei add --date 2025-01-01 --amount -1000 --category Food --account Cash
@@ -45,3 +63,14 @@ pub enum Commands {
     /// (Future) List recent transactions.
     List,
 }
+
+/// Default Configuration Path, using directories crate to calculate ProjectDirs (~/.config/kakei)
+static DEFAULT_CONFIG_PATH: LazyLock<Mutex<PathBuf>> = LazyLock::new(|| {
+    let proj_dirs = ProjectDirs::from("dev", "haruki7049", "kakei")
+        .expect("Failed to search ProjectDirs for dev.haruki7049.kakei");
+    let mut config_path: PathBuf = proj_dirs.config_dir().to_path_buf();
+    let filename: &str = "config.toml";
+
+    config_path.push(filename);
+    Mutex::new(config_path)
+});

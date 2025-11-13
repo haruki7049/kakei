@@ -40,29 +40,34 @@ impl Processor {
         Ok(Self { repo })
     }
 
-    /// Initializes the database with default categories and accounts.
-    /// Used by the `init` command.
-    pub async fn init_default_data(&self) -> Result<(), ProcessorError> {
-        // Default Categories
-        self.repo
-            .create_category("Food", CategoryType::Expense)
-            .await?;
-        self.repo
-            .create_category("Transport", CategoryType::Expense)
-            .await?;
-        self.repo
-            .create_category("Daily Goods", CategoryType::Expense)
-            .await?;
-        self.repo
-            .create_category("Hobby", CategoryType::Expense)
-            .await?;
-        self.repo
-            .create_category("Salary", CategoryType::Income)
-            .await?;
+    /// Initializes the database with master data provided as arguments.
+    ///
+    /// This replaces the old hardcoded initialization logic.
+    pub async fn init_master_data(
+        &self,
+        categories: &[String],
+        accounts: &[String],
+    ) -> Result<(), ProcessorError> {
+        // 1. Create Categories
+        for cat_name in categories {
+            // Determine category type (simple logic for now)
+            let type_ = if cat_name.eq_ignore_ascii_case("Salary")
+                || cat_name.eq_ignore_ascii_case("Bonus")
+                || cat_name.eq_ignore_ascii_case("Income")
+            {
+                CategoryType::Income
+            } else {
+                CategoryType::Expense
+            };
 
-        // Default Accounts (Initial balance 0 JPY)
-        self.repo.create_account("Cash", Money::jpy(0)).await?;
-        self.repo.create_account("Bank", Money::jpy(0)).await?;
+            self.repo.create_category(cat_name, type_).await?;
+        }
+
+        // 2. Create Accounts
+        for acc_name in accounts {
+            // Default initial balance 0 JPY
+            self.repo.create_account(acc_name, Money::jpy(0)).await?;
+        }
 
         Ok(())
     }

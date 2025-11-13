@@ -1,6 +1,9 @@
 use clap::Parser;
 use directories::ProjectDirs;
-use kakei::cli::{CLIArgs, Commands};
+use kakei::{
+    cli::{CLIArgs, Commands},
+    configs::Configuration,
+};
 use kakei_processor::Processor;
 use std::path::{Path, PathBuf};
 
@@ -8,6 +11,11 @@ use std::path::{Path, PathBuf};
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: CLIArgs = CLIArgs::parse();
+
+    let config: Configuration = confy::load_path(args.config_file()).unwrap_or_else(|_| {
+        println!("Running kakei with default Configuration...");
+        Configuration::default()
+    });
 
     // 1. Determine the database file path
     // Uses XDG directory standard (e.g. ~/.local/share/kakei/kakei.db on Linux)
@@ -28,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let processor: Processor = Processor::new(db_path_str).await?;
 
     // 3. Dispatch commands
-    match args.command {
+    match args.command() {
         Commands::Add {
             date,
             amount,
@@ -48,7 +56,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Commands::Init => {
             println!("🔧 Initializing database with default data...");
-            processor.init_default_data().await?;
+            processor
+                .init_master_data(&config.default_categories, &config.default_accounts)
+                .await?;
 
             println!(
                 "✅ Initialization complete. Database ready at: {}",
