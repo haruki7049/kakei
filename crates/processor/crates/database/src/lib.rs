@@ -11,6 +11,6 @@ mod types;
 
 // Re-export useful types for external use
 pub use error::DbError;
-pub use models::{Account, Category, Transaction};
+pub use models::{Account, Category, Transaction, TransactionDetail};
 pub use repository::{KakeiRepository, SqliteKakeiRepository};
 pub use types::{AccountId, CategoryId, CategoryType, TransactionId};

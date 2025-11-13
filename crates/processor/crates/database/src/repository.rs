@@ -1,6 +1,7 @@
+use crate::dto::{AccountDto, TransactionDetailDto};
 use crate::error::DbError;
-use crate::models::Category; // Account is used in DTO conversion logic internally
-use crate::types::{AccountId, CategoryId, TransactionId};
+use crate::models::{Account, Category, TransactionDetail};
+use crate::types::{AccountId, CategoryId, CategoryType, TransactionId};
 use chrono::NaiveDate;
 use kakei_money::{Currency, Money, MoneyError};
 use sqlx::Pool;
@@ -41,6 +42,74 @@ pub trait KakeiRepository {
     fn get_all_categories(
         &self,
     ) -> impl std::future::Future<Output = Result<Vec<Category>, DbError>> + Send;
+
+    /// Finds a category by its name.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the category to find.
+    ///
+    /// # Returns
+    ///
+    /// Returns `Some(Category)` if found, or `None` if it does not exist.
+    fn find_category_by_name(
+        &self,
+        name: &str,
+    ) -> impl std::future::Future<Output = Result<Option<Category>, DbError>> + Send;
+
+    /// Finds an account by its name.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the account to find.
+    ///
+    /// # Returns
+    ///
+    /// Returns `Some(Account)` if found, or `None` if it does not exist.
+    fn find_account_by_name(
+        &self,
+        name: &str,
+    ) -> impl std::future::Future<Output = Result<Option<Account>, DbError>> + Send;
+
+    /// Creates a new category if it doesn't exist, or returns the existing one.
+    /// This method is idempotent (safe to call multiple times).
+    ///
+    /// # Arguments
+    /// * `name` - The name of the category.
+    /// * `type_` - The type of the category.
+    fn create_category(
+        &self,
+        name: &str,
+        type_: CategoryType,
+    ) -> impl std::future::Future<Output = Result<CategoryId, DbError>> + Send;
+
+    /// Creates a new account if it doesn't exist, or returns the existing one.
+    /// This method is idempotent (safe to call multiple times).
+    ///
+    /// # Arguments
+    /// * `name` - The name of the account.
+    /// * `initial_balance` - The initial balance.
+    fn create_account(
+        &self,
+        name: &str,
+        initial_balance: Money,
+    ) -> impl std::future::Future<Output = Result<AccountId, DbError>> + Send;
+
+    /// Retrieves a list of recent transactions, including joined category and account names.
+    ///
+    /// The results are ordered by date descending (newest first).
+    ///
+    /// # Arguments
+    ///
+    /// * `limit` - The maximum number of transactions to return.
+    ///
+    /// # Returns
+    ///
+    /// Returns a vector of `TransactionDetail` structs.
+    fn get_recent_transactions(
+        &self,
+        limit: i64,
+    ) -> impl std::future::Future<Output = Result<Vec<TransactionDetail>, DbError>> + Send;
 }
 
 // --- Database Implementation (Concrete) ---
@@ -201,6 +270,116 @@ impl KakeiRepository for SqliteKakeiRepository {
 
         Ok(categories)
     }
+
+    async fn find_category_by_name(&self, name: &str) -> Result<Option<Category>, DbError> {
+        let category = sqlx::query_as::<_, Category>(
+            "SELECT category_id, name, type FROM Categories WHERE name = ?",
+        )
+        .bind(name)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        Ok(category)
+    }
+
+    async fn find_account_by_name(&self, name: &str) -> Result<Option<Account>, DbError> {
+        // Use DTO to handle Money type conversion
+        let dto = sqlx::query_as::<_, AccountDto>(
+            "SELECT account_id, name, initial_balance, currency FROM Accounts WHERE name = ?",
+        )
+        .bind(name)
+        .fetch_optional(&self.pool)
+        .await?;
+
+        // Convert DTO to Domain Model if present
+        match dto {
+            Some(d) => Ok(Some(d.try_into()?)),
+            None => Ok(None),
+        }
+    }
+
+    async fn create_category(
+        &self,
+        name: &str,
+        type_: CategoryType,
+    ) -> Result<CategoryId, DbError> {
+        // Do not error if it already exists (INSERT OR IGNORE)
+        let result = sqlx::query("INSERT OR IGNORE INTO Categories (name, type) VALUES (?, ?)")
+            .bind(name)
+            .bind(type_)
+            .execute(&self.pool)
+            .await?;
+
+        if result.rows_affected() > 0 {
+            Ok(CategoryId(result.last_insert_rowid()))
+        } else {
+            // If it already exists, fetch and return the ID
+            let id: i64 = sqlx::query_scalar("SELECT category_id FROM Categories WHERE name = ?")
+                .bind(name)
+                .fetch_one(&self.pool)
+                .await?;
+            Ok(CategoryId(id))
+        }
+    }
+
+    async fn create_account(
+        &self,
+        name: &str,
+        initial_balance: Money,
+    ) -> Result<AccountId, DbError> {
+        let amount_minor = initial_balance.to_minor()?;
+        let currency_code = initial_balance.currency().to_string();
+
+        let result = sqlx::query(
+            "INSERT OR IGNORE INTO Accounts (name, initial_balance, currency) VALUES (?, ?, ?)",
+        )
+        .bind(name)
+        .bind(amount_minor)
+        .bind(currency_code)
+        .execute(&self.pool)
+        .await?;
+
+        if result.rows_affected() > 0 {
+            Ok(AccountId(result.last_insert_rowid()))
+        } else {
+            let id: i64 = sqlx::query_scalar("SELECT account_id FROM Accounts WHERE name = ?")
+                .bind(name)
+                .fetch_one(&self.pool)
+                .await?;
+            Ok(AccountId(id))
+        }
+    }
+
+    async fn get_recent_transactions(&self, limit: i64) -> Result<Vec<TransactionDetail>, DbError> {
+        // Implementation details: performs a JOIN across Transactions, Categories, and Accounts.
+        let dtos = sqlx::query_as::<_, TransactionDetailDto>(
+            "
+            SELECT
+                t.transaction_id,
+                t.date,
+                t.amount,
+                t.currency,
+                t.memo,
+                c.name as category_name,
+                a.name as account_name
+            FROM Transactions t
+            JOIN Categories c ON t.category_id = c.category_id
+            JOIN Accounts a ON t.account_id = a.account_id
+            ORDER BY t.date DESC, t.transaction_id DESC
+            LIMIT ?
+            ",
+        )
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await?;
+
+        // DTO -> Domain Model
+        let mut result = Vec::new();
+        for dto in dtos {
+            result.push(dto.try_into()?);
+        }
+        Ok(result)
+    }
 }
 
 // --- Unit Tests ---
@@ -208,7 +387,6 @@ impl KakeiRepository for SqliteKakeiRepository {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::CategoryType;
 
     /// Group tests for SqliteKakeiRepository
     mod sqlite_kakei_repository {

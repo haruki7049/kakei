@@ -49,3 +49,21 @@ pub struct Transaction {
     /// The ID of the associated account (source/destination).
     pub account_id: AccountId,
 }
+
+/// Represents a transaction with resolved category and account names.
+/// Designed primarily for display purposes where IDs are less useful than names.
+#[derive(Debug)]
+pub struct TransactionDetail {
+    /// The unique ID of the transaction.
+    pub transaction_id: TransactionId,
+    /// The date when the transaction occurred.
+    pub date: NaiveDate,
+    /// The monetary amount and currency.
+    pub amount: Money,
+    /// An optional memo or note.
+    pub memo: Option<String>,
+    /// The display name of the associated category.
+    pub category_name: String,
+    /// The display name of the associated account.
+    pub account_name: String,
+}
