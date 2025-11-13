@@ -56,7 +56,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             );
         }
         Commands::List => {
-            todo!("List command received (Not implemented yet).");
+            println!("📋 Recent Transactions:");
+            println!(
+                "--------------------------------------------------------------------------------"
+            );
+
+            let transactions = processor.get_recent_transactions().await?;
+
+            if transactions.is_empty() {
+                println!("No transactions found.");
+            } else {
+                for tx in transactions {
+                    // Simple formatting
+                    println!(
+                        "{: <12} | {: >15} | {: <10} | {: <10} | {}",
+                        tx.date,
+                        tx.amount, // Money implements Display (e.g. ¥-1000)
+                        tx.category_name,
+                        tx.account_name,
+                        tx.memo.unwrap_or_default()
+                    );
+                }
+            }
+            println!(
+                "--------------------------------------------------------------------------------"
+            );
         }
     }
 

@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
 use kakei_database::{
-    CategoryType, DbError, KakeiRepository, SqliteKakeiRepository, TransactionId,
+    CategoryType, DbError, KakeiRepository, SqliteKakeiRepository, TransactionDetail, TransactionId,
 };
 use kakei_money::{Currency, Money, MoneyError};
 use rust_decimal::Decimal;
@@ -12,7 +12,6 @@ use thiserror::Error;
 pub enum ProcessorError {
     #[error("Database error: {0}")]
     Database(#[from] DbError),
-
     #[error("Money error: {0}")]
     Money(#[from] MoneyError),
 
@@ -115,5 +114,18 @@ impl Processor {
             .await?;
 
         Ok(tx_id)
+    }
+
+    /// Retrieves a list of recent transactions for display purposes.
+    ///
+    /// Currently defaults to fetching the latest 20 transactions.
+    ///
+    /// # Returns
+    ///
+    /// Returns a list of `TransactionDetail` containing readable names instead of IDs.
+    pub async fn get_recent_transactions(&self) -> Result<Vec<TransactionDetail>, ProcessorError> {
+        // Default limit to 20 for now
+        let transactions = self.repo.get_recent_transactions(20).await?;
+        Ok(transactions)
     }
 }

@@ -1,5 +1,5 @@
 use crate::error::DbError;
-use crate::models::{Account, Transaction};
+use crate::models::{Account, Transaction, TransactionDetail};
 use crate::types::{AccountId, CategoryId, TransactionId};
 use chrono::NaiveDate;
 use kakei_money::{Currency, Money};
@@ -53,6 +53,35 @@ impl TryFrom<TransactionDto> for Transaction {
             memo: dto.memo,
             category_id: dto.category_id,
             account_id: dto.account_id,
+        })
+    }
+}
+
+/// A Data Transfer Object representing a transaction joined with category and account names.
+/// This structure maps directly to the SQL query result row.
+#[derive(FromRow)]
+pub(crate) struct TransactionDetailDto {
+    pub transaction_id: TransactionId,
+    pub date: NaiveDate,
+    pub amount: i64,
+    pub currency: String,
+    pub memo: Option<String>,
+    pub category_name: String,
+    pub account_name: String,
+}
+
+impl TryFrom<TransactionDetailDto> for TransactionDetail {
+    type Error = DbError;
+
+    fn try_from(dto: TransactionDetailDto) -> Result<Self, Self::Error> {
+        let currency: Currency = dto.currency.parse()?;
+        Ok(TransactionDetail {
+            transaction_id: dto.transaction_id,
+            date: dto.date,
+            amount: Money::from_minor(dto.amount, currency),
+            memo: dto.memo,
+            category_name: dto.category_name,
+            account_name: dto.account_name,
         })
     }
 }

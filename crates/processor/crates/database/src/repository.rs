@@ -1,6 +1,6 @@
-use crate::dto::AccountDto;
+use crate::dto::{AccountDto, TransactionDetailDto};
 use crate::error::DbError;
-use crate::models::{Account, Category}; // Account is used in DTO conversion logic internally
+use crate::models::{Account, Category, TransactionDetail};
 use crate::types::{AccountId, CategoryId, CategoryType, TransactionId};
 use chrono::NaiveDate;
 use kakei_money::{Currency, Money, MoneyError};
@@ -94,6 +94,22 @@ pub trait KakeiRepository {
         name: &str,
         initial_balance: Money,
     ) -> impl std::future::Future<Output = Result<AccountId, DbError>> + Send;
+
+    /// Retrieves a list of recent transactions, including joined category and account names.
+    ///
+    /// The results are ordered by date descending (newest first).
+    ///
+    /// # Arguments
+    ///
+    /// * `limit` - The maximum number of transactions to return.
+    ///
+    /// # Returns
+    ///
+    /// Returns a vector of `TransactionDetail` structs.
+    fn get_recent_transactions(
+        &self,
+        limit: i64,
+    ) -> impl std::future::Future<Output = Result<Vec<TransactionDetail>, DbError>> + Send;
 }
 
 // --- Database Implementation (Concrete) ---
@@ -332,6 +348,37 @@ impl KakeiRepository for SqliteKakeiRepository {
                 .await?;
             Ok(AccountId(id))
         }
+    }
+
+    async fn get_recent_transactions(&self, limit: i64) -> Result<Vec<TransactionDetail>, DbError> {
+        // Implementation details: performs a JOIN across Transactions, Categories, and Accounts.
+        let dtos = sqlx::query_as::<_, TransactionDetailDto>(
+            "
+            SELECT
+                t.transaction_id,
+                t.date,
+                t.amount,
+                t.currency,
+                t.memo,
+                c.name as category_name,
+                a.name as account_name
+            FROM Transactions t
+            JOIN Categories c ON t.category_id = c.category_id
+            JOIN Accounts a ON t.account_id = a.account_id
+            ORDER BY t.date DESC, t.transaction_id DESC
+            LIMIT ?
+            ",
+        )
+        .bind(limit)
+        .fetch_all(&self.pool)
+        .await?;
+
+        // DTO -> Domain Model
+        let mut result = Vec::new();
+        for dto in dtos {
+            result.push(dto.try_into()?);
+        }
+        Ok(result)
     }
 }
 
