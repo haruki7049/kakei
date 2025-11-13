@@ -6,6 +6,7 @@ use kakei::{
 };
 use kakei_processor::Processor;
 use std::path::{Path, PathBuf};
+use tracing::debug;
 use tracing_subscriber::filter::EnvFilter;
 
 // Use tokio for async runtime
@@ -21,22 +22,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .init();
 
-    let config: Configuration = confy::load_path(args.config_file())
-        .unwrap_or_else(|_| Configuration::default());
+    let config: Configuration = confy::load_path(args.config_file()).unwrap_or_default();
 
     // 1. Determine the database file path
     // Uses XDG directory standard (e.g. ~/.local/share/kakei/kakei.db on Linux)
     let project_dirs: ProjectDirs = ProjectDirs::from("dev", "haruki7049", "kakei")
         .ok_or("Could not determine project directories")?;
     let data_dir: &Path = project_dirs.data_dir();
+    debug!("Data directory: {:?}", data_dir);
 
     // Create the data directory if it doesn't exist
     if !data_dir.exists() {
         std::fs::create_dir_all(data_dir)?;
+        debug!("Creating data directory: {:?}", data_dir);
     }
 
     let db_path: PathBuf = data_dir.join("kakei.db");
     let db_path_str: &str = db_path.to_str().ok_or("Invalid database path")?;
+    debug!("Database path: {}", db_path_str);
 
     // 2. Initialize the Processor
     // This establishes the DB connection and runs migrations if needed.
