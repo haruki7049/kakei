@@ -5,7 +5,7 @@
 
 use chrono::NaiveDate;
 use kakei_money::{Currency, Money, MoneyError};
-use sqlx::sqlite::{Sqlite, SqlitePoolOptions};
+use sqlx::sqlite::{Sqlite, SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::{FromRow, Pool, Type};
 use thiserror::Error;
 
@@ -216,15 +216,15 @@ impl SqliteKakeiRepository {
     ///
     /// * `db_path` - The file path to the SQLite database (e.g., "kakei.db").
     pub async fn new(db_path: &str) -> Result<Self, DbError> {
-        let connection_string = format!("sqlite:{}", db_path);
+        let connection_string: String = format!("sqlite:{}", db_path);
 
         // Configure SQLite options explicitly
-        let options = connection_string
-            .parse::<sqlx::sqlite::SqliteConnectOptions>()?
+        let options: SqliteConnectOptions = connection_string
+            .parse::<SqliteConnectOptions>()?
             .create_if_missing(true) // Enable automatic file creation
             .foreign_keys(true); // Enable foreign key constraints
 
-        let pool = SqlitePoolOptions::new()
+        let pool: Pool<Sqlite> = SqlitePoolOptions::new()
             .max_connections(5)
             .connect_with(options)
             .await?;
@@ -298,10 +298,10 @@ impl KakeiRepository for SqliteKakeiRepository {
         account_id: AccountId,
     ) -> Result<TransactionId, DbError> {
         // Deconstruct Money into minor units (integer) and currency code (string) for storage
-        let amount_minor = amount.to_minor();
-        let currency_code = amount.currency().to_string();
+        let amount_minor: i64 = amount.to_minor();
+        let currency_code: String = amount.currency().to_string();
 
-        let last_id = sqlx::query(
+        let last_id: i64 = sqlx::query(
             "
             INSERT INTO Transactions (date, amount, currency, memo, category_id, account_id)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -321,7 +321,7 @@ impl KakeiRepository for SqliteKakeiRepository {
     }
 
     async fn get_all_categories(&self) -> Result<Vec<Category>, DbError> {
-        let categories =
+        let categories: Vec<Category> =
             sqlx::query_as::<_, Category>("SELECT category_id, name, type FROM Categories")
                 .fetch_all(&self.pool)
                 .await?;
@@ -344,7 +344,7 @@ mod tests {
         /// This ensures each test runs in a clean, isolated environment.
         async fn create_test_repo() -> SqliteKakeiRepository {
             // Use ":memory:" for a temporary in-memory database
-            let repo = SqliteKakeiRepository::new(":memory:")
+            let repo: SqliteKakeiRepository = SqliteKakeiRepository::new(":memory:")
                 .await
                 .expect("Failed to create in-memory database");
 
@@ -378,7 +378,7 @@ mod tests {
 
         #[tokio::test]
         async fn test_migration_creates_tables() {
-            let repo = create_test_repo().await;
+            let repo: SqliteKakeiRepository = create_test_repo().await;
 
             // Verify tables exist by querying sqlite_schema
             let table_exists: bool = sqlx::query_scalar(
@@ -396,21 +396,21 @@ mod tests {
 
         #[tokio::test]
         async fn test_add_transaction_success_jpy() {
-            let repo = create_test_repo().await;
-            let (cat_id, acc_id) = seed_master_data(&repo).await;
+            let repo: SqliteKakeiRepository = create_test_repo().await;
+            let (cat_id, acc_id): (CategoryId, AccountId) = seed_master_data(&repo).await;
 
-            let date = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
+            let date: NaiveDate = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
             // JPY 500
-            let amount = Money::jpy(-500);
-            let memo = Some("Test Lunch");
+            let amount: Money = Money::jpy(-500);
+            let memo: Option<&str> = Some("Test Lunch");
 
             // Execute the method under test
-            let result = repo
+            let result: Result<TransactionId, DbError> = repo
                 .add_transaction(date, amount, memo, cat_id, acc_id)
                 .await;
 
             assert!(result.is_ok());
-            let tx_id = result.unwrap();
+            let tx_id: TransactionId = result.unwrap();
 
             // Verify data was actually inserted with correct currency
             let row = sqlx::query(
@@ -432,20 +432,20 @@ mod tests {
 
         #[tokio::test]
         async fn test_add_transaction_success_usd() {
-            let repo = create_test_repo().await;
-            let (cat_id, acc_id) = seed_master_data(&repo).await;
+            let repo: SqliteKakeiRepository = create_test_repo().await;
+            let (cat_id, acc_id): (CategoryId, AccountId) = seed_master_data(&repo).await;
 
-            let date = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
+            let date: NaiveDate = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
             // USD 10.50 -> stored as 1050
-            let amount = Money::usd(dec!(-10.50));
-            let memo = Some("Test Lunch USD");
+            let amount: Money = Money::usd(dec!(-10.50));
+            let memo: Option<&str> = Some("Test Lunch USD");
 
-            let result = repo
+            let result: Result<TransactionId, DbError> = repo
                 .add_transaction(date, amount, memo, cat_id, acc_id)
                 .await;
 
             assert!(result.is_ok());
-            let tx_id = result.unwrap();
+            let tx_id: TransactionId = result.unwrap();
 
             let row =
                 sqlx::query("SELECT amount, currency FROM Transactions WHERE transaction_id = ?")
@@ -463,7 +463,7 @@ mod tests {
 
         #[tokio::test]
         async fn test_get_all_categories() {
-            let repo = create_test_repo().await;
+            let repo: SqliteKakeiRepository = create_test_repo().await;
 
             // Insert multiple categories directly
             sqlx::query("INSERT INTO Categories (name, type) VALUES ('Salary', 'income')")
@@ -476,7 +476,7 @@ mod tests {
                 .unwrap();
 
             // Execute the method under test
-            let categories = repo
+            let categories: Vec<Category> = repo
                 .get_all_categories()
                 .await
                 .expect("Failed to get categories");
@@ -484,28 +484,28 @@ mod tests {
             // Verify results
             assert!(categories.len() >= 2);
 
-            let salary = categories.iter().find(|c| c.name == "Salary").unwrap();
+            let salary: &Category = categories.iter().find(|c| c.name == "Salary").unwrap();
             assert_eq!(salary.type_, CategoryType::Income);
 
-            let transport = categories.iter().find(|c| c.name == "Transport").unwrap();
+            let transport: &Category = categories.iter().find(|c| c.name == "Transport").unwrap();
             assert_eq!(transport.type_, CategoryType::Expense);
         }
 
         #[tokio::test]
         async fn test_add_transaction_foreign_key_error() {
-            let repo = create_test_repo().await;
+            let repo: SqliteKakeiRepository = create_test_repo().await;
             // No master data seeded
 
-            let date = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
+            let date: NaiveDate = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
             // Dummy money
-            let amount = Money::jpy(-500);
+            let amount: Money = Money::jpy(-500);
 
             // Specify non-existent IDs
-            let invalid_cat_id = CategoryId(999);
-            let invalid_acc_id = AccountId(999);
+            let invalid_cat_id: CategoryId = CategoryId(999);
+            let invalid_acc_id: AccountId = AccountId(999);
 
             // Execute
-            let result = repo
+            let result: Result<TransactionId, DbError> = repo
                 .add_transaction(date, amount, None, invalid_cat_id, invalid_acc_id)
                 .await;
 
@@ -520,16 +520,15 @@ mod tests {
 
         #[tokio::test]
         async fn test_add_transaction_with_none_memo() {
-            let repo = create_test_repo().await;
-            let (cat_id, acc_id) = seed_master_data(&repo).await;
+            let repo: SqliteKakeiRepository = create_test_repo().await;
+            let (cat_id, acc_id): (CategoryId, AccountId) = seed_master_data(&repo).await;
 
-            let date = NaiveDate::from_ymd_opt(2025, 12, 31).unwrap();
-            let amount = Money::jpy(-100);
+            let date: NaiveDate = NaiveDate::from_ymd_opt(2025, 12, 31).unwrap();
+            let amount: Money = Money::jpy(-100);
 
             // Pass None to memo
-            let result = repo
-                .add_transaction(date, amount, None, cat_id, acc_id)
-                .await;
+            let result: Result<TransactionId, DbError> =
+                repo.add_transaction(date, amount, None, cat_id, acc_id).await;
 
             assert!(result.is_ok());
 

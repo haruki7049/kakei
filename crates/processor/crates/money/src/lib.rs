@@ -88,7 +88,7 @@ impl Money {
     /// * `currency` - The currency of the money.
     pub fn new(amount: Decimal, currency: Currency) -> Self {
         // Ensure precision matches the currency standard
-        let amount = amount.round_dp(currency.decimal_places());
+        let amount: Decimal = amount.round_dp(currency.decimal_places());
         Self { amount, currency }
     }
 
@@ -122,8 +122,9 @@ impl Money {
     /// * JPY 100 -> 100 yen
     /// * USD 1050 -> 10.50 dollars
     pub fn from_minor(minor_amount: i64, currency: Currency) -> Self {
-        let scale = currency.decimal_places();
-        let amount = Decimal::from(minor_amount) / Decimal::from(10u32.pow(scale));
+        let scale: u32 = currency.decimal_places();
+        // Convert minor amount (i64) to Decimal and divide by 10^scale
+        let amount: Decimal = Decimal::from(minor_amount) / Decimal::from(10u32.pow(scale));
         Self { amount, currency }
     }
 
@@ -132,8 +133,8 @@ impl Money {
     /// # Returns
     /// The amount scaled by the currency's decimal places, rounded to the nearest integer.
     pub fn to_minor(&self) -> i64 {
-        let scale = self.currency.decimal_places();
-        let minor = self.amount * Decimal::from(10u32.pow(scale));
+        let scale: u32 = self.currency.decimal_places();
+        let minor: Decimal = self.amount * Decimal::from(10u32.pow(scale));
         minor.round().to_i64().unwrap_or(0)
     }
 
@@ -198,31 +199,31 @@ mod tests {
 
         #[test]
         fn test_jpy_creation() {
-            let m = Money::jpy(100);
+            let m: Money = Money::jpy(100);
             assert_eq!(m.to_string(), "¥100");
             assert_eq!(m.to_minor(), 100);
         }
 
         #[test]
         fn test_usd_creation() {
-            let m = Money::usd(dec!(10.50));
+            let m: Money = Money::usd(dec!(10.50));
             assert_eq!(m.to_string(), "$10.50");
             assert_eq!(m.to_minor(), 1050);
         }
 
         #[test]
         fn test_addition_success() {
-            let m1 = Money::jpy(100);
-            let m2 = Money::jpy(200);
-            let sum = (m1 + m2).unwrap();
+            let m1: Money = Money::jpy(100);
+            let m2: Money = Money::jpy(200);
+            let sum: Money = (m1 + m2).unwrap();
             assert_eq!(sum.amount(), dec!(300));
             assert_eq!(sum.currency(), Currency::JPY);
         }
 
         #[test]
         fn test_addition_mismatch() {
-            let m1 = Money::jpy(100);
-            let m2 = Money::usd(dec!(1.00));
+            let m1: Money = Money::jpy(100);
+            let m2: Money = Money::usd(dec!(1.00));
             assert_eq!(
                 m1 + m2,
                 Err(MoneyError::CurrencyMismatch(Currency::JPY, Currency::USD))
@@ -232,11 +233,11 @@ mod tests {
         #[test]
         fn test_minor_conversion() {
             // USD 10.50 -> 1050 cents
-            let m = Money::from_minor(1050, Currency::USD);
+            let m: Money = Money::from_minor(1050, Currency::USD);
             assert_eq!(m.amount(), dec!(10.50));
 
             // JPY 1050 -> 1050 yen
-            let m_jpy = Money::from_minor(1050, Currency::JPY);
+            let m_jpy: Money = Money::from_minor(1050, Currency::JPY);
             assert_eq!(m_jpy.amount(), dec!(1050));
         }
     }
