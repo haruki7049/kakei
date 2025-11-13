@@ -527,8 +527,9 @@ mod tests {
             let amount: Money = Money::jpy(-100);
 
             // Pass None to memo
-            let result: Result<TransactionId, DbError> =
-                repo.add_transaction(date, amount, None, cat_id, acc_id).await;
+            let result: Result<TransactionId, DbError> = repo
+                .add_transaction(date, amount, None, cat_id, acc_id)
+                .await;
 
             assert!(result.is_ok());
 
