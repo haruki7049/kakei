@@ -353,22 +353,22 @@ mod tests {
         }
 
         /// Helper to seed necessary master data (Category & Account) for foreign keys.
-        async fn seed_master_data(repo: &SqliteKakeiRepository) -> (CategoryId, AccountId) {
-            let cat_id: i64 = sqlx::query(
-                "INSERT INTO Categories (name, type) VALUES ('Test Food', 'expense') RETURNING category_id"
+            let cat_result = sqlx::query(
+                "INSERT INTO Categories (name, type) VALUES ('Test Food', 'expense')"
             )
-            .fetch_one(&repo.pool)
+            .execute(&repo.pool)
             .await
-            .expect("Failed to seed category")
-            .get(0);
+            .expect("Failed to seed category");
+            let cat_id: i64 = cat_result.last_insert_rowid();
 
-            let acc_id: i64 = sqlx::query(
-                "INSERT INTO Accounts (name, initial_balance, currency) VALUES ('Test Cash', 1000, 'JPY') RETURNING account_id"
+            // Insert a dummy account with JPY currency
+            let acc_result = sqlx::query(
+                "INSERT INTO Accounts (name, initial_balance, currency) VALUES ('Test Cash', 1000, 'JPY')"
             )
-            .fetch_one(&repo.pool)
+            .execute(&repo.pool)
             .await
-            .expect("Failed to seed account")
-            .get(0);
+            .expect("Failed to seed account");
+            let acc_id: i64 = acc_result.last_insert_rowid();
 
             (CategoryId(cat_id), AccountId(acc_id))
         }
