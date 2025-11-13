@@ -6,7 +6,7 @@ use kakei::{
 };
 use kakei_processor::Processor;
 use std::path::{Path, PathBuf};
-use tracing::{Level, info, debug};
+use tracing::{Level, debug, info};
 use tracing_subscriber::filter::EnvFilter;
 
 // Use tokio for async runtime
