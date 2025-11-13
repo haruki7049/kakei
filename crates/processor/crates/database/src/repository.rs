@@ -3,8 +3,8 @@ use crate::models::Category; // Account is used in DTO conversion logic internal
 use crate::types::{AccountId, CategoryId, TransactionId};
 use chrono::NaiveDate;
 use kakei_money::{Currency, Money, MoneyError};
-use sqlx::sqlite::{Sqlite, SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::Pool;
+use sqlx::sqlite::{Sqlite, SqliteConnectOptions, SqlitePoolOptions};
 
 // --- Repository Trait (Abstraction) ---
 
@@ -151,13 +151,12 @@ impl KakeiRepository for SqliteKakeiRepository {
     ) -> Result<TransactionId, DbError> {
         // 1. Validate that the transaction currency matches the account currency
         // Fetch the account's currency
-        let account_currency_str: String = sqlx::query_scalar(
-            "SELECT currency FROM Accounts WHERE account_id = ?"
-        )
-        .bind(account_id)
-        .fetch_optional(&self.pool)
-        .await?
-        .ok_or_else(|| DbError::NotFound(format!("Account not found: {:?}", account_id)))?;
+        let account_currency_str: String =
+            sqlx::query_scalar("SELECT currency FROM Accounts WHERE account_id = ?")
+                .bind(account_id)
+                .fetch_optional(&self.pool)
+                .await?
+                .ok_or_else(|| DbError::NotFound(format!("Account not found: {:?}", account_id)))?;
 
         // Parse the DB string into a Currency enum
         let account_currency: Currency = account_currency_str.parse()?;
@@ -172,7 +171,7 @@ impl KakeiRepository for SqliteKakeiRepository {
 
         // 2. Deconstruct Money into minor units (integer) and currency code (string) for storage
         // Use '?' to propagate overflow errors
-        let amount_minor: i64 = amount.to_minor()?; 
+        let amount_minor: i64 = amount.to_minor()?;
         let currency_code: String = amount.currency().to_string();
 
         let last_id: i64 = sqlx::query(
@@ -214,8 +213,8 @@ mod tests {
     /// Group tests for SqliteKakeiRepository
     mod sqlite_kakei_repository {
         use super::*;
-        use sqlx::Row;
         use rust_decimal::prelude::*;
+        use sqlx::Row;
 
         /// Helper function to create an in-memory database and run migrations.
         async fn create_test_repo() -> SqliteKakeiRepository {
@@ -230,13 +229,12 @@ mod tests {
 
         /// Helper to seed necessary master data (Category & Account) for foreign keys.
         async fn seed_master_data(repo: &SqliteKakeiRepository) -> (CategoryId, AccountId) {
-            let cat_id: i64 = sqlx::query(
-                "INSERT INTO Categories (name, type) VALUES ('Test Food', 'expense')"
-            )
-            .execute(&repo.pool)
-            .await
-            .expect("Failed to seed category")
-            .last_insert_rowid();
+            let cat_id: i64 =
+                sqlx::query("INSERT INTO Categories (name, type) VALUES ('Test Food', 'expense')")
+                    .execute(&repo.pool)
+                    .await
+                    .expect("Failed to seed category")
+                    .last_insert_rowid();
 
             let acc_id: i64 = sqlx::query(
                 "INSERT INTO Accounts (name, initial_balance, currency) VALUES ('Test Cash', 1000, 'JPY')"
@@ -302,9 +300,9 @@ mod tests {
         #[tokio::test]
         async fn test_add_transaction_success_usd() {
             let repo: SqliteKakeiRepository = create_test_repo().await;
-            
+
             let cat_id: i64 = sqlx::query(
-                "INSERT INTO Categories (name, type) VALUES ('Test Food USD', 'expense')"
+                "INSERT INTO Categories (name, type) VALUES ('Test Food USD', 'expense')",
             )
             .execute(&repo.pool)
             .await
@@ -394,8 +392,9 @@ mod tests {
             let date: NaiveDate = NaiveDate::from_ymd_opt(2025, 12, 31).unwrap();
             let amount: Money = Money::jpy(-100);
 
-            let result: Result<TransactionId, DbError> =
-                repo.add_transaction(date, amount, None, cat_id, acc_id).await;
+            let result: Result<TransactionId, DbError> = repo
+                .add_transaction(date, amount, None, cat_id, acc_id)
+                .await;
 
             assert!(result.is_ok());
 
@@ -438,7 +437,7 @@ mod tests {
             let (cat_id, acc_id): (CategoryId, AccountId) = seed_master_data(&repo).await;
 
             let date: NaiveDate = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
-            let amount: Money = Money::usd(dec!(10.00)); 
+            let amount: Money = Money::usd(dec!(10.00));
 
             let result: Result<TransactionId, DbError> = repo
                 .add_transaction(date, amount, None, cat_id, acc_id)
