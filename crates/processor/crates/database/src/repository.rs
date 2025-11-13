@@ -6,6 +6,7 @@ use chrono::NaiveDate;
 use kakei_money::{Currency, Money, MoneyError};
 use sqlx::Pool;
 use sqlx::sqlite::{Sqlite, SqliteConnectOptions, SqlitePoolOptions};
+use tracing::{debug, info, instrument};
 
 // --- Repository Trait (Abstraction) ---
 
@@ -129,7 +130,9 @@ impl SqliteKakeiRepository {
     /// # Arguments
     ///
     /// * `db_path` - The file path to the SQLite database (e.g., "kakei.db").
+    #[instrument]
     pub async fn new(db_path: &str) -> Result<Self, DbError> {
+        info!("Initializing database connection at path: {}", db_path);
         let connection_string: String = format!("sqlite:{}", db_path);
 
         // Configure SQLite options explicitly
@@ -138,11 +141,13 @@ impl SqliteKakeiRepository {
             .create_if_missing(true) // Enable automatic file creation
             .foreign_keys(true); // Enable foreign key constraints
 
+        debug!("Creating connection pool with max 5 connections");
         let pool: Pool<Sqlite> = SqlitePoolOptions::new()
             .max_connections(5)
             .connect_with(options)
             .await?;
 
+        info!("Database connection established successfully");
         Ok(Self { pool })
     }
 
@@ -155,8 +160,12 @@ impl SqliteKakeiRepository {
     /// Runs database migrations to initialize the schema tables.
     ///
     /// Creates `Categories`, `Accounts`, and `Transactions` tables if they do not exist.
+    #[instrument(skip(self))]
     pub async fn migrate(&self) -> Result<(), DbError> {
+        info!("Running database migrations");
+        
         // Categories table
+        debug!("Creating Categories table if not exists");
         sqlx::query(
             "
             CREATE TABLE IF NOT EXISTS Categories (
@@ -170,6 +179,7 @@ impl SqliteKakeiRepository {
         .await?;
 
         // Accounts table (includes currency)
+        debug!("Creating Accounts table if not exists");
         sqlx::query(
             "
             CREATE TABLE IF NOT EXISTS Accounts (
@@ -185,6 +195,7 @@ impl SqliteKakeiRepository {
 
         // Transactions table (includes currency)
         // Added CHECK constraint for ISO 8601 date format (YYYY-MM-DD)
+        debug!("Creating Transactions table if not exists");
         sqlx::query(
             "
             CREATE TABLE IF NOT EXISTS Transactions (
@@ -203,6 +214,7 @@ impl SqliteKakeiRepository {
         .execute(&self.pool)
         .await?;
 
+        info!("Database migrations completed successfully");
         Ok(())
     }
 }
@@ -210,6 +222,7 @@ impl SqliteKakeiRepository {
 // --- Trait Implementation ---
 
 impl KakeiRepository for SqliteKakeiRepository {
+    #[instrument(skip(self))]
     async fn add_transaction(
         &self,
         date: NaiveDate,
@@ -218,8 +231,14 @@ impl KakeiRepository for SqliteKakeiRepository {
         category_id: CategoryId,
         account_id: AccountId,
     ) -> Result<TransactionId, DbError> {
+        debug!(
+            "Adding transaction: date={}, amount={:?}, category_id={:?}, account_id={:?}",
+            date, amount, category_id, account_id
+        );
+        
         // 1. Validate that the transaction currency matches the account currency
         // Fetch the account's currency
+        debug!("Validating account currency");
         let account_currency_str: String =
             sqlx::query_scalar("SELECT currency FROM Accounts WHERE account_id = ?")
                 .bind(account_id)
@@ -232,6 +251,7 @@ impl KakeiRepository for SqliteKakeiRepository {
 
         // Check for mismatch
         if amount.currency() != account_currency {
+            debug!("Currency mismatch detected: transaction={:?}, account={:?}", amount.currency(), account_currency);
             return Err(DbError::Money(MoneyError::CurrencyMismatch(
                 amount.currency(),
                 account_currency,
@@ -243,6 +263,7 @@ impl KakeiRepository for SqliteKakeiRepository {
         let amount_minor: i64 = amount.to_minor()?;
         let currency_code: String = amount.currency().to_string();
 
+        debug!("Inserting transaction into database");
         let last_id: i64 = sqlx::query(
             "
             INSERT INTO Transactions (date, amount, currency, memo, category_id, account_id)
@@ -259,19 +280,25 @@ impl KakeiRepository for SqliteKakeiRepository {
         .await?
         .last_insert_rowid();
 
+        info!("Transaction added successfully with ID: {}", last_id);
         Ok(TransactionId(last_id))
     }
 
+    #[instrument(skip(self))]
     async fn get_all_categories(&self) -> Result<Vec<Category>, DbError> {
+        debug!("Fetching all categories from database");
         let categories: Vec<Category> =
             sqlx::query_as::<_, Category>("SELECT category_id, name, type FROM Categories")
                 .fetch_all(&self.pool)
                 .await?;
 
+        debug!("Found {} categories", categories.len());
         Ok(categories)
     }
 
+    #[instrument(skip(self))]
     async fn find_category_by_name(&self, name: &str) -> Result<Option<Category>, DbError> {
+        debug!("Finding category by name: {}", name);
         let category = sqlx::query_as::<_, Category>(
             "SELECT category_id, name, type FROM Categories WHERE name = ?",
         )
@@ -279,10 +306,16 @@ impl KakeiRepository for SqliteKakeiRepository {
         .fetch_optional(&self.pool)
         .await?;
 
+        match &category {
+            Some(c) => debug!("Category found: {:?}", c.category_id),
+            None => debug!("Category not found"),
+        }
         Ok(category)
     }
 
+    #[instrument(skip(self))]
     async fn find_account_by_name(&self, name: &str) -> Result<Option<Account>, DbError> {
+        debug!("Finding account by name: {}", name);
         // Use DTO to handle Money type conversion
         let dto = sqlx::query_as::<_, AccountDto>(
             "SELECT account_id, name, initial_balance, currency FROM Accounts WHERE name = ?",
@@ -293,16 +326,24 @@ impl KakeiRepository for SqliteKakeiRepository {
 
         // Convert DTO to Domain Model if present
         match dto {
-            Some(d) => Ok(Some(d.try_into()?)),
-            None => Ok(None),
+            Some(d) => {
+                debug!("Account found: {:?}", d.account_id);
+                Ok(Some(d.try_into()?))
+            }
+            None => {
+                debug!("Account not found");
+                Ok(None)
+            }
         }
     }
 
+    #[instrument(skip(self))]
     async fn create_category(
         &self,
         name: &str,
         type_: CategoryType,
     ) -> Result<CategoryId, DbError> {
+        debug!("Creating category: name={}, type={:?}", name, type_);
         // Do not error if it already exists (INSERT OR IGNORE)
         let result = sqlx::query("INSERT OR IGNORE INTO Categories (name, type) VALUES (?, ?)")
             .bind(name)
@@ -311,22 +352,28 @@ impl KakeiRepository for SqliteKakeiRepository {
             .await?;
 
         if result.rows_affected() > 0 {
-            Ok(CategoryId(result.last_insert_rowid()))
+            let category_id = CategoryId(result.last_insert_rowid());
+            info!("Category created: {:?}", category_id);
+            Ok(category_id)
         } else {
             // If it already exists, fetch and return the ID
+            debug!("Category already exists, fetching existing ID");
             let id: i64 = sqlx::query_scalar("SELECT category_id FROM Categories WHERE name = ?")
                 .bind(name)
                 .fetch_one(&self.pool)
                 .await?;
+            debug!("Found existing category ID: {}", id);
             Ok(CategoryId(id))
         }
     }
 
+    #[instrument(skip(self, initial_balance))]
     async fn create_account(
         &self,
         name: &str,
         initial_balance: Money,
     ) -> Result<AccountId, DbError> {
+        debug!("Creating account: name={}, initial_balance={:?}", name, initial_balance);
         let amount_minor = initial_balance.to_minor()?;
         let currency_code = initial_balance.currency().to_string();
 
@@ -340,17 +387,23 @@ impl KakeiRepository for SqliteKakeiRepository {
         .await?;
 
         if result.rows_affected() > 0 {
-            Ok(AccountId(result.last_insert_rowid()))
+            let account_id = AccountId(result.last_insert_rowid());
+            info!("Account created: {:?}", account_id);
+            Ok(account_id)
         } else {
+            debug!("Account already exists, fetching existing ID");
             let id: i64 = sqlx::query_scalar("SELECT account_id FROM Accounts WHERE name = ?")
                 .bind(name)
                 .fetch_one(&self.pool)
                 .await?;
+            debug!("Found existing account ID: {}", id);
             Ok(AccountId(id))
         }
     }
 
+    #[instrument(skip(self))]
     async fn get_recent_transactions(&self, limit: i64) -> Result<Vec<TransactionDetail>, DbError> {
+        debug!("Fetching recent {} transactions", limit);
         // Implementation details: performs a JOIN across Transactions, Categories, and Accounts.
         let dtos = sqlx::query_as::<_, TransactionDetailDto>(
             "
@@ -378,6 +431,8 @@ impl KakeiRepository for SqliteKakeiRepository {
         for dto in dtos {
             result.push(dto.try_into()?);
         }
+        
+        info!("Retrieved {} transactions", result.len());
         Ok(result)
     }
 }
