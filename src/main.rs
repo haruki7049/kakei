@@ -76,29 +76,28 @@ async fn handle_init_command(
 
 /// Handle the List command
 async fn handle_list_command(processor: &Processor) -> Result<(), Box<dyn std::error::Error>> {
-    println!("📋 Recent Transactions:");
-    println!("--------------------------------------------------------------------------------");
-
     match processor.get_recent_transactions().await {
         Ok(transactions) => {
             if transactions.is_empty() {
                 println!("No transactions found.");
             } else {
-                for tx in transactions {
-                    // Simple formatting
-                    println!(
-                        "{: <12} | {: >15} | {: <10} | {: <10} | {}",
-                        tx.date,
-                        tx.amount, // Money implements Display (e.g. ¥-1000)
-                        tx.category_name,
-                        tx.account_name,
-                        tx.memo.unwrap_or_default()
-                    );
-                }
+                // Convert transactions to display format
+                let display_data: Vec<TransactionDisplay> = transactions
+                    .into_iter()
+                    .map(|tx| TransactionDisplay {
+                        date: tx.date.to_string(),
+                        amount: tx.amount.to_string(),
+                        category: tx.category_name,
+                        account: tx.account_name,
+                        memo: tx.memo.unwrap_or_default(),
+                    })
+                    .collect();
+
+                // Create and display table
+                let mut table = Table::new(display_data);
+                table.with(Style::rounded());
+                println!("{}", table);
             }
-            println!(
-                "--------------------------------------------------------------------------------"
-            );
             Ok(())
         }
         Err(e) => {
