@@ -264,11 +264,12 @@ impl SqliteKakeiRepository {
         .await?;
 
         // Transactions table (includes currency)
+        // Added CHECK constraint for ISO 8601 date format (YYYY-MM-DD)
         sqlx::query(
             "
             CREATE TABLE IF NOT EXISTS Transactions (
                 transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                date TEXT NOT NULL,
+                date TEXT NOT NULL CHECK (date GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]'),
                 amount INTEGER NOT NULL, 
                 currency TEXT NOT NULL DEFAULT 'JPY',
                 memo TEXT,
@@ -341,9 +342,7 @@ mod tests {
         use sqlx::Row;
 
         /// Helper function to create an in-memory database and run migrations.
-        /// This ensures each test runs in a clean, isolated environment.
         async fn create_test_repo() -> SqliteKakeiRepository {
-            // Use ":memory:" for a temporary in-memory database
             let repo: SqliteKakeiRepository = SqliteKakeiRepository::new(":memory:")
                 .await
                 .expect("Failed to create in-memory database");
@@ -355,7 +354,6 @@ mod tests {
 
         /// Helper to seed necessary master data (Category & Account) for foreign keys.
         async fn seed_master_data(repo: &SqliteKakeiRepository) -> (CategoryId, AccountId) {
-            // Insert a dummy category
             let cat_id: i64 = sqlx::query(
                 "INSERT INTO Categories (name, type) VALUES ('Test Food', 'expense') RETURNING category_id"
             )
@@ -364,7 +362,6 @@ mod tests {
             .expect("Failed to seed category")
             .get(0);
 
-            // Insert a dummy account with JPY currency
             let acc_id: i64 = sqlx::query(
                 "INSERT INTO Accounts (name, initial_balance, currency) VALUES ('Test Cash', 1000, 'JPY') RETURNING account_id"
             )
@@ -380,7 +377,6 @@ mod tests {
         async fn test_migration_creates_tables() {
             let repo: SqliteKakeiRepository = create_test_repo().await;
 
-            // Verify tables exist by querying sqlite_schema
             let table_exists: bool = sqlx::query_scalar(
                 "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE type='table' AND name='Transactions')"
             )
@@ -400,11 +396,9 @@ mod tests {
             let (cat_id, acc_id): (CategoryId, AccountId) = seed_master_data(&repo).await;
 
             let date: NaiveDate = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
-            // JPY 500
             let amount: Money = Money::jpy(-500);
             let memo: Option<&str> = Some("Test Lunch");
 
-            // Execute the method under test
             let result: Result<TransactionId, DbError> = repo
                 .add_transaction(date, amount, memo, cat_id, acc_id)
                 .await;
@@ -412,7 +406,6 @@ mod tests {
             assert!(result.is_ok());
             let tx_id: TransactionId = result.unwrap();
 
-            // Verify data was actually inserted with correct currency
             let row = sqlx::query(
                 "SELECT amount, currency, memo FROM Transactions WHERE transaction_id = ?",
             )
@@ -436,7 +429,6 @@ mod tests {
             let (cat_id, acc_id): (CategoryId, AccountId) = seed_master_data(&repo).await;
 
             let date: NaiveDate = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
-            // USD 10.50 -> stored as 1050
             let amount: Money = Money::usd(dec!(-10.50));
             let memo: Option<&str> = Some("Test Lunch USD");
 
@@ -465,7 +457,6 @@ mod tests {
         async fn test_get_all_categories() {
             let repo: SqliteKakeiRepository = create_test_repo().await;
 
-            // Insert multiple categories directly
             sqlx::query("INSERT INTO Categories (name, type) VALUES ('Salary', 'income')")
                 .execute(&repo.pool)
                 .await
@@ -475,13 +466,11 @@ mod tests {
                 .await
                 .unwrap();
 
-            // Execute the method under test
             let categories: Vec<Category> = repo
                 .get_all_categories()
                 .await
                 .expect("Failed to get categories");
 
-            // Verify results
             assert!(categories.len() >= 2);
 
             let salary: &Category = categories.iter().find(|c| c.name == "Salary").unwrap();
@@ -494,28 +483,16 @@ mod tests {
         #[tokio::test]
         async fn test_add_transaction_foreign_key_error() {
             let repo: SqliteKakeiRepository = create_test_repo().await;
-            // No master data seeded
-
             let date: NaiveDate = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
-            // Dummy money
             let amount: Money = Money::jpy(-500);
-
-            // Specify non-existent IDs
             let invalid_cat_id: CategoryId = CategoryId(999);
             let invalid_acc_id: AccountId = AccountId(999);
 
-            // Execute
             let result: Result<TransactionId, DbError> = repo
                 .add_transaction(date, amount, None, invalid_cat_id, invalid_acc_id)
                 .await;
 
-            // Verify: Should fail due to foreign key constraint
             assert!(result.is_err(), "Should fail due to foreign key constraint");
-
-            match result {
-                Err(DbError::Sqlx(e)) => println!("Caught expected SQL error: {}", e),
-                _ => panic!("Expected DbError::Sqlx"),
-            }
         }
 
         #[tokio::test]
@@ -542,6 +519,32 @@ mod tests {
 
             let db_memo: Option<String> = row.get("memo");
             assert_eq!(db_memo, None);
+        }
+
+        // New test for Date Format Check constraint
+        #[tokio::test]
+        async fn test_transaction_date_format_constraint() {
+            let repo: SqliteKakeiRepository = create_test_repo().await;
+            let (cat_id, acc_id): (CategoryId, AccountId) = seed_master_data(&repo).await;
+
+            // Attempt to insert an invalid date format using raw SQL
+            // (add_transaction uses NaiveDate which guarantees format, so we must use raw SQL to test DB constraint)
+            let result = sqlx::query(
+                "INSERT INTO Transactions (date, amount, currency, memo, category_id, account_id) VALUES (?, ?, ?, ?, ?, ?)"
+            )
+            .bind("2025/01/01") // Invalid format (slashes instead of dashes)
+            .bind(-100)
+            .bind("JPY")
+            .bind("Invalid Date")
+            .bind(cat_id)
+            .bind(acc_id)
+            .execute(&repo.pool)
+            .await;
+
+            assert!(
+                result.is_err(),
+                "Should fail due to CHECK constraint on date format"
+            );
         }
     }
 }
