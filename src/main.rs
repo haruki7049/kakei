@@ -17,8 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize tracing by tracing-subscriber
     tracing_subscriber::fmt()
         .with_env_filter(
-            EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| EnvFilter::new("info"))
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
         )
         .init();
 
@@ -26,7 +25,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     debug!("Using config file: {:?}", args.config_file());
 
     let config: Configuration = confy::load_path(args.config_file()).unwrap_or_else(|e| {
-        debug!("Failed to load configuration: {}. Using default Configuration", e);
+        debug!(
+            "Failed to load configuration: {}. Using default Configuration",
+            e
+        );
         Configuration::default()
     });
 

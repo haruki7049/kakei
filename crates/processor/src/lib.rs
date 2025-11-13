@@ -53,8 +53,12 @@ impl Processor {
         categories: &[String],
         accounts: &[String],
     ) -> Result<(), ProcessorError> {
-        info!("Initializing master data with {} categories and {} accounts", categories.len(), accounts.len());
-        
+        info!(
+            "Initializing master data with {} categories and {} accounts",
+            categories.len(),
+            accounts.len()
+        );
+
         // 1. Create Categories
         for cat_name in categories {
             debug!("Processing category: {}", cat_name);
@@ -96,9 +100,11 @@ impl Processor {
         memo: Option<String>,
     ) -> Result<TransactionId, ProcessorError> {
         info!("Processing add transaction request");
-        debug!("Date: {}, Amount: {}, Currency: {}, Category: {}, Account: {}", 
-               date_str, amount_str, currency_str, category_name, account_name);
-        
+        debug!(
+            "Date: {}, Amount: {}, Currency: {}, Category: {}, Account: {}",
+            date_str, amount_str, currency_str, category_name, account_name
+        );
+
         // 1. Parse inputs
         let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d")?;
         debug!("Parsed date: {}", date);

@@ -438,7 +438,7 @@ impl KakeiRepository for SqliteKakeiRepository {
         for dto in dtos {
             result.push(dto.try_into()?);
         }
-        
+
         info!("Retrieved {} transactions", result.len());
         Ok(result)
     }
