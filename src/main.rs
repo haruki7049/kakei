@@ -37,11 +37,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let db_path: PathBuf = data_dir.join("kakei.db");
-    debug!("Database path: {}", db_path.display());
+    let db_path_str: &str = db_path.to_str().ok_or("Invalid database path")?;
+    debug!("Database path: {}", db_path_str);
 
     // 2. Initialize the Processor
     // This establishes the DB connection and runs migrations if needed.
-    let processor: Processor = Processor::new(&db_path).await?;
+    let processor: Processor = Processor::new(db_path_str).await?;
 
     // 3. Dispatch commands
     match args.command() {
@@ -75,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(_) => {
                     println!(
                         "✅ Initialization complete. Database ready at: {}",
-                        db_path.display()
+                        db_path_str
                     );
                 }
                 Err(e) => {

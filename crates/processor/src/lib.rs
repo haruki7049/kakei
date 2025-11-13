@@ -5,7 +5,6 @@ use kakei_database::{
 use kakei_money::{Currency, Money, MoneyError};
 use rust_decimal::Decimal;
 use std::str::FromStr;
-use std::{fmt::Debug, path::Path};
 use thiserror::Error;
 use tracing::{debug, info, instrument, warn};
 
@@ -37,11 +36,8 @@ pub struct Processor {
 impl Processor {
     /// Creates a new Processor and connects to the database.
     #[instrument]
-    pub async fn new<P>(db_path: P) -> Result<Self, ProcessorError>
-    where
-        P: AsRef<Path> + Debug,
-    {
-        info!("Initializing Processor with database at: {:?}", &db_path);
+    pub async fn new(db_path: &str) -> Result<Self, ProcessorError> {
+        info!("Initializing Processor with database at: {}", db_path);
         let repo = SqliteKakeiRepository::new(db_path).await?;
         repo.migrate().await?;
         info!("Processor initialized successfully");

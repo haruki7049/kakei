@@ -6,7 +6,6 @@ use chrono::NaiveDate;
 use kakei_money::{Currency, Money, MoneyError};
 use sqlx::Pool;
 use sqlx::sqlite::{Sqlite, SqliteConnectOptions, SqlitePoolOptions};
-use std::{fmt::Debug, path::Path};
 use tracing::{debug, info, instrument};
 
 // --- Repository Trait (Abstraction) ---
@@ -132,12 +131,9 @@ impl SqliteKakeiRepository {
     ///
     /// * `db_path` - The file path to the SQLite database (e.g., "kakei.db").
     #[instrument]
-    pub async fn new<P>(db_path: P) -> Result<Self, DbError>
-    where
-        P: AsRef<Path> + Debug,
-    {
-        info!("Initializing database connection at path: {:?}", db_path);
-        let connection_string: String = format!("sqlite:{:?}", db_path);
+    pub async fn new(db_path: &str) -> Result<Self, DbError> {
+        info!("Initializing database connection at path: {}", db_path);
+        let connection_string: String = format!("sqlite:{}", db_path);
 
         // Configure SQLite options explicitly
         let options: SqliteConnectOptions = connection_string
