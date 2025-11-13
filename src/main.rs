@@ -6,7 +6,7 @@ use kakei::{
 };
 use kakei_processor::Processor;
 use std::path::{Path, PathBuf};
-use tracing::{Level, debug, error, info};
+use tracing::{debug, error, info};
 use tracing_subscriber::filter::EnvFilter;
 
 // Use tokio for async runtime
@@ -16,8 +16,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Initialize tracing by tracing-subscriber
     tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .with_max_level(Level::INFO)
+        .with_env_filter(
+            EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| EnvFilter::new("info"))
+        )
         .init();
 
     info!("Starting kakei application");
