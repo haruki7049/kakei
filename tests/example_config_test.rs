@@ -48,7 +48,6 @@ fn test_example_config_creates_correct_categories() {
         .expect("Failed to copy example-config.toml");
     
     // Set HOME to temp directory and clear XDG variables to ensure consistent behavior
-    // ProjectDirs will use HOME/.local/share/kakei when XDG_DATA_HOME is not set
     Command::cargo_bin("kakei")
         .expect("Failed to find kakei binary")
         .env("HOME", temp_dir.path())
@@ -62,8 +61,22 @@ fn test_example_config_creates_correct_categories() {
         .success();
     
     // Verify the database was created at the expected location
-    // ProjectDirs uses HOME/.local/share/kakei on Linux when XDG_DATA_HOME is not set
+    // ProjectDirs uses different paths on different OSes:
+    // - Linux: HOME/.local/share/kakei
+    // - macOS: HOME/Library/Application Support/dev.haruki7049.kakei
+    // - Windows: HOME/AppData/Roaming/haruki7049/kakei/data
+    #[cfg(target_os = "linux")]
     let db_path = temp_dir.path().join(".local/share/kakei/kakei.db");
+    
+    #[cfg(target_os = "macos")]
+    let db_path = temp_dir
+        .path()
+        .join("Library/Application Support/dev.haruki7049.kakei/kakei.db");
+    
+    #[cfg(target_os = "windows")]
+    let db_path = temp_dir
+        .path()
+        .join("AppData/Roaming/haruki7049/kakei/data/kakei.db");
     
     assert!(
         db_path.exists(),
