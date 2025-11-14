@@ -13,15 +13,14 @@ fn test_example_config_is_valid() {
     // Create a temporary directory for the test
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let config_path = temp_dir.path().join("config.toml");
-    
+
     // Copy the example-config.toml to the temp directory
     let example_config_path = std::env::current_dir()
         .expect("Failed to get current directory")
         .join("example-config.toml");
-    
-    fs::copy(&example_config_path, &config_path)
-        .expect("Failed to copy example-config.toml");
-    
+
+    fs::copy(&example_config_path, &config_path).expect("Failed to copy example-config.toml");
+
     // Run the init command with the example config
     let mut cmd = Command::cargo_bin("kakei").expect("Failed to find kakei binary");
     cmd.arg("--config-file")
@@ -38,15 +37,14 @@ fn test_example_config_creates_correct_categories() {
     // Create a temporary directory for the test
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let config_path = temp_dir.path().join("config.toml");
-    
+
     // Copy the example-config.toml to the temp directory
     let example_config_path = std::env::current_dir()
         .expect("Failed to get current directory")
         .join("example-config.toml");
-    
-    fs::copy(&example_config_path, &config_path)
-        .expect("Failed to copy example-config.toml");
-    
+
+    fs::copy(&example_config_path, &config_path).expect("Failed to copy example-config.toml");
+
     // Set HOME to temp directory and clear XDG variables to ensure consistent behavior
     Command::cargo_bin("kakei")
         .expect("Failed to find kakei binary")
@@ -59,7 +57,7 @@ fn test_example_config_creates_correct_categories() {
         .arg("init")
         .assert()
         .success();
-    
+
     // Verify the database was created at the expected location
     // ProjectDirs uses different paths on different OSes:
     // - Linux: HOME/.local/share/kakei
@@ -67,17 +65,17 @@ fn test_example_config_creates_correct_categories() {
     // - Windows: HOME/AppData/Roaming/haruki7049/kakei/data
     #[cfg(target_os = "linux")]
     let db_path = temp_dir.path().join(".local/share/kakei/kakei.db");
-    
+
     #[cfg(target_os = "macos")]
     let db_path = temp_dir
         .path()
         .join("Library/Application Support/dev.haruki7049.kakei/kakei.db");
-    
+
     #[cfg(target_os = "windows")]
     let db_path = temp_dir
         .path()
         .join("AppData/Roaming/haruki7049/kakei/data/kakei.db");
-    
+
     assert!(
         db_path.exists(),
         "Database should be created at {:?}",
@@ -91,15 +89,14 @@ fn test_example_config_with_transaction() {
     // Create a temporary directory for the test
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let config_path = temp_dir.path().join("config.toml");
-    
+
     // Copy the example-config.toml to the temp directory
     let example_config_path = std::env::current_dir()
         .expect("Failed to get current directory")
         .join("example-config.toml");
-    
-    fs::copy(&example_config_path, &config_path)
-        .expect("Failed to copy example-config.toml");
-    
+
+    fs::copy(&example_config_path, &config_path).expect("Failed to copy example-config.toml");
+
     // Initialize the database
     Command::cargo_bin("kakei")
         .expect("Failed to find kakei binary")
@@ -109,7 +106,7 @@ fn test_example_config_with_transaction() {
         .arg("init")
         .assert()
         .success();
-    
+
     // Add a transaction with an expense category from the example config
     Command::cargo_bin("kakei")
         .expect("Failed to find kakei binary")
@@ -130,7 +127,7 @@ fn test_example_config_with_transaction() {
         .assert()
         .success()
         .stdout(predicate::str::contains("Transaction added successfully"));
-    
+
     // Add a transaction with an income category from the example config
     Command::cargo_bin("kakei")
         .expect("Failed to find kakei binary")
@@ -151,7 +148,7 @@ fn test_example_config_with_transaction() {
         .assert()
         .success()
         .stdout(predicate::str::contains("Transaction added successfully"));
-    
+
     // List transactions to verify they were added
     Command::cargo_bin("kakei")
         .expect("Failed to find kakei binary")
@@ -173,15 +170,14 @@ fn test_example_config_all_expense_categories() {
     // Create a temporary directory for the test
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let config_path = temp_dir.path().join("config.toml");
-    
+
     // Copy the example-config.toml to the temp directory
     let example_config_path = std::env::current_dir()
         .expect("Failed to get current directory")
         .join("example-config.toml");
-    
-    fs::copy(&example_config_path, &config_path)
-        .expect("Failed to copy example-config.toml");
-    
+
+    fs::copy(&example_config_path, &config_path).expect("Failed to copy example-config.toml");
+
     // Initialize the database
     Command::cargo_bin("kakei")
         .expect("Failed to find kakei binary")
@@ -191,7 +187,7 @@ fn test_example_config_all_expense_categories() {
         .arg("init")
         .assert()
         .success();
-    
+
     // Test all expense categories from example-config.toml
     let expense_categories = vec![
         "Food",
@@ -202,7 +198,7 @@ fn test_example_config_all_expense_categories() {
         "Healthcare",
         "Education",
     ];
-    
+
     for category in expense_categories {
         Command::cargo_bin("kakei")
             .expect("Failed to find kakei binary")
@@ -230,15 +226,14 @@ fn test_example_config_all_income_categories() {
     // Create a temporary directory for the test
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let config_path = temp_dir.path().join("config.toml");
-    
+
     // Copy the example-config.toml to the temp directory
     let example_config_path = std::env::current_dir()
         .expect("Failed to get current directory")
         .join("example-config.toml");
-    
-    fs::copy(&example_config_path, &config_path)
-        .expect("Failed to copy example-config.toml");
-    
+
+    fs::copy(&example_config_path, &config_path).expect("Failed to copy example-config.toml");
+
     // Initialize the database
     Command::cargo_bin("kakei")
         .expect("Failed to find kakei binary")
@@ -248,10 +243,10 @@ fn test_example_config_all_income_categories() {
         .arg("init")
         .assert()
         .success();
-    
+
     // Test all income categories from example-config.toml
     let income_categories = vec!["Salary", "Bonus", "Freelance", "Investment", "Gift"];
-    
+
     for category in income_categories {
         Command::cargo_bin("kakei")
             .expect("Failed to find kakei binary")
@@ -279,15 +274,14 @@ fn test_example_config_all_accounts() {
     // Create a temporary directory for the test
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let config_path = temp_dir.path().join("config.toml");
-    
+
     // Copy the example-config.toml to the temp directory
     let example_config_path = std::env::current_dir()
         .expect("Failed to get current directory")
         .join("example-config.toml");
-    
-    fs::copy(&example_config_path, &config_path)
-        .expect("Failed to copy example-config.toml");
-    
+
+    fs::copy(&example_config_path, &config_path).expect("Failed to copy example-config.toml");
+
     // Initialize the database
     Command::cargo_bin("kakei")
         .expect("Failed to find kakei binary")
@@ -297,10 +291,10 @@ fn test_example_config_all_accounts() {
         .arg("init")
         .assert()
         .success();
-    
+
     // Test all accounts from example-config.toml
     let accounts = vec!["Cash", "Bank", "Credit Card"];
-    
+
     for account in accounts {
         Command::cargo_bin("kakei")
             .expect("Failed to find kakei binary")

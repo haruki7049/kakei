@@ -4,29 +4,19 @@
 # Expense categories - Categories for money going out
 # Examples: Groceries, restaurants, transport, utilities, entertainment, etc.
 expense_categories = [
-    "Food",
-    "Transport",
-    "Daily Goods",
-    "Hobby",
-    "Utilities",
-    "Healthcare",
-    "Education",
+  "Food",
+  "Transport",
+  "Daily Goods",
+  "Hobby",
+  "Utilities",
+  "Healthcare",
+  "Education",
 ]
 
 # Income categories - Categories for money coming in
 # Examples: Salary, bonuses, freelance work, investments, gifts, etc.
-income_categories = [
-    "Salary",
-    "Bonus",
-    "Freelance",
-    "Investment",
-    "Gift",
-]
+income_categories = ["Salary", "Bonus", "Freelance", "Investment", "Gift"]
 
 # Default accounts - Where money is stored
 # Examples: Cash, bank accounts, credit cards, e-wallets, etc.
-default_accounts = [
-    "Cash",
-    "Bank",
-    "Credit Card",
-]
+default_accounts = ["Cash", "Bank", "Credit Card"]
