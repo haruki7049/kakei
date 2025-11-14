@@ -57,11 +57,11 @@ fn test_example_config_creates_correct_categories() {
         .env_remove("XDG_DATA_HOME")
         .env_remove("XDG_CONFIG_HOME")
         .env_remove("XDG_CACHE_HOME");
-    
+
     // On Windows, also set USERPROFILE (used by directories crate)
     #[cfg(target_os = "windows")]
     cmd.env("USERPROFILE", temp_dir.path());
-    
+
     cmd.arg("--config-file")
         .arg(config_path.to_str().unwrap())
         .arg("init")
