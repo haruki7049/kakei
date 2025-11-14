@@ -58,9 +58,12 @@ fn test_example_config_creates_correct_categories() {
         .env_remove("XDG_CONFIG_HOME")
         .env_remove("XDG_CACHE_HOME");
 
-    // On Windows, also set USERPROFILE (used by directories crate)
+    // On Windows, also set USERPROFILE and APPDATA (used by directories crate)
     #[cfg(target_os = "windows")]
-    cmd.env("USERPROFILE", temp_dir.path());
+    {
+        cmd.env("USERPROFILE", temp_dir.path());
+        cmd.env("APPDATA", temp_dir.path().join("AppData\\Roaming"));
+    }
 
     cmd.arg("--config-file")
         .arg(config_path.to_str().unwrap())
