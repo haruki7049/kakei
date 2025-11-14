@@ -51,14 +51,18 @@ fn test_example_config_creates_correct_categories() {
 
     fs::copy(&example_config_path, &config_path).expect("Failed to copy example-config.toml");
 
-    // Set HOME to temp directory and clear XDG variables to ensure consistent behavior
-    Command::cargo_bin("kakei")
-        .expect("Failed to find kakei binary")
-        .env("HOME", temp_dir.path())
+    // Set HOME/USERPROFILE to temp directory and clear XDG variables to ensure consistent behavior
+    let mut cmd = Command::cargo_bin("kakei").expect("Failed to find kakei binary");
+    cmd.env("HOME", temp_dir.path())
         .env_remove("XDG_DATA_HOME")
         .env_remove("XDG_CONFIG_HOME")
-        .env_remove("XDG_CACHE_HOME")
-        .arg("--config-file")
+        .env_remove("XDG_CACHE_HOME");
+    
+    // On Windows, also set USERPROFILE (used by directories crate)
+    #[cfg(target_os = "windows")]
+    cmd.env("USERPROFILE", temp_dir.path());
+    
+    cmd.arg("--config-file")
         .arg(config_path.to_str().unwrap())
         .arg("init")
         .assert()
