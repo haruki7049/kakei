@@ -3,6 +3,9 @@ name: Rust
 on:
   push:
 
+env:
+  RUST_BACKTRACE: full
+
 jobs:
   ci-on-Unix:
     strategy:
