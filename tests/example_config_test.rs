@@ -38,10 +38,6 @@ fn test_example_config_creates_correct_categories() {
     // Create a temporary directory for the test
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let config_path = temp_dir.path().join("config.toml");
-    let data_dir = temp_dir.path().join("data");
-    
-    // Create data directory
-    fs::create_dir_all(&data_dir).expect("Failed to create data directory");
     
     // Copy the example-config.toml to the temp directory
     let example_config_path = std::env::current_dir()
@@ -52,24 +48,23 @@ fn test_example_config_creates_correct_categories() {
         .expect("Failed to copy example-config.toml");
     
     // Set HOME to temp directory to control database location
-    let mut cmd = Command::cargo_bin("kakei").expect("Failed to find kakei binary");
-    cmd.env("HOME", temp_dir.path())
+    Command::cargo_bin("kakei")
+        .expect("Failed to find kakei binary")
+        .env("HOME", temp_dir.path())
         .arg("--config-file")
         .arg(config_path.to_str().unwrap())
         .arg("init")
         .assert()
         .success();
     
-    // Verify the database was created
-    let db_exists = std::path::Path::new(&format!(
-        "{}/.local/share/kakei/kakei.db",
-        temp_dir.path().display()
-    ))
-    .exists();
+    // Verify the database was created at the expected location
+    // ProjectDirs uses HOME/.local/share/kakei on Linux
+    let db_path = temp_dir.path().join(".local/share/kakei/kakei.db");
     
     assert!(
-        db_exists,
-        "Database should be created after initialization"
+        db_path.exists(),
+        "Database should be created at {:?}",
+        db_path
     );
 }
 
