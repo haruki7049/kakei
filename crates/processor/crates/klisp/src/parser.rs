@@ -8,7 +8,7 @@ use crate::whitespace::ws;
 use nom::{
     IResult, Parser,
     branch::alt,
-    bytes::complete::is_not,
+    bytes::complete::{is_not, take_while},
     character::complete::{alpha1, char, digit1},
     combinator::{map, map_res, recognize},
     error::Error,
@@ -22,14 +22,16 @@ type ParseResult<'a, O> = IResult<&'a str, O, Error<&'a str>>;
 /// The symbol name used for quoted expressions.
 const QUOTE_SYMBOL: &str = "quote";
 
-/// Parses a String literal, e.g., `"Alice"`.
+/// Parses a String literal, e.g., `"Alice"` or `""`.
 ///
 /// # Examples
 /// - Input: `"hello"` → Output: `Atom::String("hello")`
+/// - Input: `""` → Output: `Atom::String("")`
 fn parse_string(input: &str) -> ParseResult<'_, Atom> {
-    map(delimited(char('"'), is_not("\""), char('"')), |s: &str| {
-        Atom::String(s.to_string())
-    })
+    map(
+        delimited(char('"'), take_while(|c| c != '"'), char('"')),
+        |s: &str| Atom::String(s.to_string()),
+    )
     .parse(input)
 }
 
@@ -208,13 +210,13 @@ mod tests {
 
         /// Tests parsing an empty string literal.
         ///
-        /// TODO: Empty strings currently fail because is_not("\"") requires at least one character.
-        /// This is a known limitation that should be fixed to properly support empty string literals.
-        /// The parser should be updated to handle "" correctly and return Atom::String("".to_string()).
+        /// Verifies that empty strings "" are correctly parsed into Atom::String("").
         #[test]
         fn empty() {
-            // TODO: This test documents current behavior but should be updated when empty strings are supported
-            assert!(parse_string("\"\"").is_err());
+            assert_eq!(
+                parse_string("\"\""),
+                Ok(("", Atom::String("".to_string())))
+            );
         }
 
         /// Tests parsing a string with spaces.
