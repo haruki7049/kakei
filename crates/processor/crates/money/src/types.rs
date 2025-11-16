@@ -17,6 +17,9 @@ pub enum Currency {
     USD,
 }
 
+/// Implements formatting for `Currency`.
+///
+/// Displays the currency as its debug representation (e.g., "JPY", "USD").
 impl fmt::Display for Currency {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
@@ -134,6 +137,11 @@ impl Money {
     }
 }
 
+/// Implements formatting for `Money`.
+///
+/// Displays the money value with its currency symbol:
+/// - JPY: ¥100
+/// - USD: $10.50
 impl fmt::Display for Money {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.currency {
