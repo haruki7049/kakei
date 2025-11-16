@@ -2,7 +2,7 @@
 //!
 //! This module defines the standard library of built-in functions.
 
-use crate::value::{Environment, EvalError, Value};
+use super::value::{Environment, EvalError, Value};
 use std::collections::HashMap;
 use std::rc::Rc;
 
