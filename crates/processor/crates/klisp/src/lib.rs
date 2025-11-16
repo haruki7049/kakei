@@ -1,3 +1,12 @@
+//! `kakei_lisp` (klisp) provides a parser (reader) for a simple Lisp dialect.
+//!
+//! This crate is responsible for turning a string representation of Lisp code
+//! (S-expressions) into a Rust-native abstract syntax tree (AST) defined by
+//! the [Sexpr] and [Atom] enums.
+//!
+//! The main entry points are [parse_sexpr] for a single expression and
+//! [parse_toplevel] for parsing a complete file or input.
+
 use nom::{
     IResult, Parser,
     branch::alt,
@@ -9,58 +18,74 @@ use nom::{
     sequence::{delimited, pair, preceded},
 };
 
-// Represents an S-expression (Sexpr)
-// (Sexpr と Atom の enum 定義は変更なし)
+/// Represents a complete S-expression (Sexpr).
+/// This is the primary AST node for the Lisp dialect.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Sexpr {
+    /// An atomic value, such as a symbol, number, or string.
     Atom(Atom),
+    /// A proper list of S-expressions, e.g., `(a b c)`.
     List(Vec<Sexpr>),
+    /// An improper list or "dotted pair", e.g., `(a . b)` or `(a b . c)`.
     DottedList(Vec<Sexpr>, Box<Sexpr>),
 }
 
+/// Represents the smallest indivisible unit of the Lisp syntax (an "atom").
 #[derive(Debug, PartialEq, Clone)]
 pub enum Atom {
+    /// The empty list, `()`, also known as Nil.
     Nil,
+    /// A symbolic identifier, e.g., `define`, `ID-001`, or `+`.
     Symbol(String),
+    /// An integer number, e.g., `60000`.
     Number(i64),
+    /// A string literal, e.g., `"Alice"`.
     String(String),
 }
 
-// A type alias for our parser's result type
-// VerboseError を標準の Error に変更
+// A type alias for our parser's result type.
+// Uses nom's standard Error type.
 type ParseResult<'a, O> = IResult<&'a str, O, Error<&'a str>>;
 
-/// A helper parser that consumes whitespace or comments
-/// Comments start with ';' and go to the end of the line
+/// A helper parser that consumes whitespace (1+) or comments.
+/// Comments start with ';' and go to the end of the line.
 fn ws<'a>(input: &'a str) -> ParseResult<'a, &'a str> {
-    // 修正: (input) を .parse(input) に変更
+    // FIX: Use .parse(input) for nom 8+
     recognize(many0(alt((
+        // A comment starts with ; and consumes until newline
         recognize(pair(tag(";"), is_not("\n\r"))),
+        // Consume one or more whitespace characters
         multispace1,
     ))))
     .parse(input)
 }
 
-/// Parses a String (e.g., "Alice")
-/// TODO: Does not yet handle escaped quotes \"
+/// Parses a String literal, e.g., `"Alice"`.
+/// TODO: Does not yet handle escaped quotes (\").
 fn parse_string<'a>(input: &'a str) -> ParseResult<'a, Atom> {
-    // 修正: (input) を .parse(input) に変更
+    // FIX: Use .parse(input) for nom 8+
     map(delimited(char('"'), is_not("\""), char('"')), |s: &str| {
         Atom::String(s.to_string())
     })
     .parse(input)
 }
 
-/// Parses a Number (e.g., 60000)
+/// Parses a Number, e.g., `60000`.
 fn parse_number<'a>(input: &'a str) -> ParseResult<'a, Atom> {
-    // 修正: (input) を .parse(input) に変更
-    map(map_res(digit1, |s: &str| s.parse::<i64>()), Atom::Number).parse(input)
+    // FIX: Use .parse(input) for nom 8+
+    map(
+        // Use map_res to attempt parsing the string slice into i64
+        map_res(digit1, |s: &str| s.parse::<i64>()),
+        Atom::Number,
+    )
+    .parse(input)
 }
 
-/// Parses a Symbol (e.g., define, ID-001, +)
+/// Parses a Symbol, e.g., `define`, `ID-001`, or `+`.
 fn parse_symbol<'a>(input: &'a str) -> ParseResult<'a, Atom> {
-    // 修正: (input) を .parse(input) に変更
+    // FIX: Use .parse(input) for nom 8+
     map(
+        // A symbol starts with a letter or special char, then can have numbers/hyphens
         recognize(pair(
             alt((
                 alpha1,
@@ -73,6 +98,7 @@ fn parse_symbol<'a>(input: &'a str) -> ParseResult<'a, Atom> {
                 tag("="),
                 tag("?"),
             )),
+            // Subsequent characters
             many0(alt((alpha1, digit1, tag("-"), tag("?"), tag("!")))),
         )),
         |s: &str| Atom::Symbol(s.to_string()),
@@ -80,15 +106,16 @@ fn parse_symbol<'a>(input: &'a str) -> ParseResult<'a, Atom> {
     .parse(input)
 }
 
-/// Parses any Atom
+/// Parses any [Atom] (Number, String, or Symbol).
 fn parse_atom<'a>(input: &'a str) -> ParseResult<'a, Atom> {
-    // 修正: (input) を .parse(input) に変更
+    // FIX: Use .parse(input) for nom 8+
     alt((parse_number, parse_string, parse_symbol)).parse(input)
 }
 
-/// Parses a quoted S-expression (e.g., 'A or '(A B))
+/// Parses a quoted S-expression, e.g., `'A` or `'(A B)`.
+/// It converts the syntax `'A` into the internal representation `(quote A)`.
 fn parse_quoted<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
-    // 修正: (input) を .parse(input) に変更
+    // FIX: Use .parse(input) for nom 8+
     map(
         preceded(
             char('\''),
@@ -102,10 +129,10 @@ fn parse_quoted<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
     .parse(input)
 }
 
-/// Parses a list '()', '(A B C)', or a dotted list '(A . B)', '(A B . C)'
+/// Parses a list or dotted list: `()`, `(A B C)`, `(A . B)`, or `(A B . C)`.
 fn parse_list<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
-    // 内部のロジックは .parse() を使わない
-    // .parse() は IResult を返す関数全体を呼び出すときに使う
+    // This internal logic uses .parse() on sub-parsers,
+    // not on the function itself.
 
     // Must start with '('
     let (input, _) = preceded(ws, char('(')).parse(input)?;
@@ -129,7 +156,7 @@ fn parse_list<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
         }
 
         // If not ')' or '.', parse one S-expression
-        // 修正: parse_sexpr(current_input)? を parse_sexpr.parse(current_input)? に変更
+        // FIX: Use .parse() when calling the function
         let (next_input, sexpr) = parse_sexpr.parse(current_input)?;
         elements.push(sexpr);
         current_input = next_input;
@@ -159,10 +186,10 @@ fn parse_list<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
     }
 }
 
-/// This is the main parser function
-/// It tries to parse any valid S-expression
+/// Parses a single, complete S-expression (e.g., an atom, a quoted list, or a list).
+/// This is the main recursive parser function.
 pub fn parse_sexpr<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
-    // 修正: (input) を .parse(input) に変更
+    // FIX: Use .parse(input) for nom 8+
     preceded(
         ws,
         alt((
@@ -177,16 +204,14 @@ pub fn parse_sexpr<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
 /// Parses a sequence of S-expressions from an input string.
 /// This is the main entry point for parsing a file or a buffer.
 pub fn parse_toplevel<'a>(input: &'a str) -> ParseResult<'a, Vec<Sexpr>> {
-    // 修正: (input) を .parse(input) に変更
+    // FIX: Use .parse(input) for nom 8+
     many0(parse_sexpr).parse(input)
 }
 
 // --- Test Module ---
-// (テストモジュールは変更なし)
 
 #[cfg(test)]
 mod tests {
-    // Import all functions and structs from the parent module (this file)
     use super::*;
 
     #[test]
@@ -310,7 +335,7 @@ mod tests {
                 // Check that remaining input is empty or just whitespace
                 assert!(remaining_input.trim().is_empty());
             }
-            // 修正: convert_error を削除し、標準の Debug フォーマットでエラーを表示
+            // FIX: Use standard Debug formatting for the error
             Err(nom::Err::Error(e) | nom::Err::Failure(e)) => {
                 // This will fail the test if the parser errors
                 panic!("--- Parser Error ---\n{:#?}", e);
