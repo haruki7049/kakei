@@ -19,6 +19,9 @@ use nom::{
 /// Type alias for parser results to reduce repetition.
 type ParseResult<'a, O> = IResult<&'a str, O, Error<&'a str>>;
 
+/// The symbol name used for quoted expressions.
+const QUOTE_SYMBOL: &str = "quote";
+
 /// Parses a String literal, e.g., `"Alice"`.
 ///
 /// # Examples
@@ -95,7 +98,10 @@ fn parse_atom(input: &str) -> ParseResult<'_, Atom> {
 /// - `'(A B)` → `(quote (A B))`
 fn parse_quoted(input: &str) -> ParseResult<'_, Sexpr> {
     map(preceded(char('\''), parse_sexpr), |sexpr| {
-        Sexpr::List(vec![Sexpr::Atom(Atom::Symbol("quote".to_string())), sexpr])
+        Sexpr::List(vec![
+            Sexpr::Atom(Atom::Symbol(QUOTE_SYMBOL.to_string())),
+            sexpr,
+        ])
     })
     .parse(input)
 }
