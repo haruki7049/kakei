@@ -23,16 +23,9 @@
 //! }
 //! ```
 
-mod ast;
-mod builtins;
-mod evaluator;
 mod parser;
-mod value;
-mod whitespace;
+mod evaluator;
 
 // Re-export the main types and functions for public API
-pub use ast::{Atom, Sexpr};
-pub use builtins::create_global_env;
-pub use evaluator::eval;
-pub use parser::parse;
-pub use value::{Environment, EvalError, Value};
+pub use parser::{Atom, Sexpr, parse};
+pub use evaluator::{Environment, EvalError, Value, eval, create_global_env};

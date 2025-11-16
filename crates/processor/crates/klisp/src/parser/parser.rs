@@ -3,8 +3,8 @@
 //! This module contains all the nom-based parser combinators that transform
 //! text input into the AST types defined in the [ast] module.
 
-use crate::ast::{Atom, Sexpr};
-use crate::whitespace::ws;
+use super::ast::{Atom, Sexpr};
+use super::whitespace::ws;
 use nom::{
     IResult, Parser,
     branch::alt,

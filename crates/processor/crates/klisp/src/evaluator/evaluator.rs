@@ -2,8 +2,8 @@
 //!
 //! This module implements the evaluation of S-expressions into runtime values.
 
-use crate::ast::{Atom, Sexpr};
-use crate::value::{Environment, EvalError, Value};
+use crate::parser::{Atom, Sexpr};
+use super::value::{Environment, EvalError, Value};
 use std::rc::Rc;
 
 /// Evaluate a single S-expression in the given environment.
@@ -236,7 +236,7 @@ fn apply(func: Value, args: &[Value], env: &mut Environment) -> Result<Value, Ev
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::builtins::create_global_env;
+    use crate::evaluator::create_global_env;
 
     #[test]
     fn test_eval_number() {
