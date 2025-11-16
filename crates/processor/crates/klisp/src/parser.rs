@@ -213,10 +213,7 @@ mod tests {
         /// Verifies that empty strings "" are correctly parsed into Atom::String("").
         #[test]
         fn empty() {
-            assert_eq!(
-                parse_string("\"\""),
-                Ok(("", Atom::String("".to_string())))
-            );
+            assert_eq!(parse_string("\"\""), Ok(("", Atom::String("".to_string()))));
         }
 
         /// Tests parsing a string with spaces.
