@@ -1,3 +1,9 @@
+//! Core types for handling monetary values.
+//!
+//! This module provides the `Money` struct and `Currency` enum for type-safe monetary
+//! calculations. It ensures that operations are only performed between money values of
+//! the same currency and handles precision correctly for each currency type.
+
 use rust_decimal::prelude::*;
 use std::fmt;
 use std::ops::{Add, Sub};
