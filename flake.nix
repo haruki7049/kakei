@@ -28,13 +28,18 @@
       ];
 
       perSystem =
-        { pkgs, system, ... }:
+        {
+          pkgs,
+          lib,
+          system,
+          ...
+        }:
         let
           rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
           overlays = [ inputs.rust-overlay.overlays.default ];
           craneLib = (inputs.crane.mkLib pkgs).overrideToolchain rust;
 
-          src = craneLib.cleanCargoSource ./.;
+          src = lib.cleanSource ./.;
 
           cargoArtifacts = craneLib.buildDepsOnly {
             inherit src;
