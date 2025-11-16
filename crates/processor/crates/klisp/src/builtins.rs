@@ -130,10 +130,10 @@ fn builtin_assoc(args: &[Value], _env: &mut Environment) -> Result<Value, EvalEr
             Value::Nil => return Ok(Value::Nil),
             Value::Cons(car, cdr) => {
                 // Each element should be a cons cell (key . value)
-                if let Value::Cons(pair_key, _pair_value) = car.as_ref() {
-                    if values_equal(key, pair_key) {
-                        return Ok(car.as_ref().clone());
-                    }
+                if let Value::Cons(pair_key, _pair_value) = car.as_ref()
+                    && values_equal(key, pair_key)
+                {
+                    return Ok(car.as_ref().clone());
                 }
                 current = cdr.as_ref();
             }
@@ -186,7 +186,7 @@ fn builtin_group_by(args: &[Value], env: &mut Environment) -> Result<Value, Eval
 
     for row in rows {
         // Apply key function to get the group key
-        let key_value = apply_function(key_fn, &[row.clone()], env)?;
+        let key_value = apply_function(key_fn, std::slice::from_ref(&row), env)?;
         let key_str = value_to_string(&key_value)?;
 
         groups.entry(key_str).or_default().push(row);
