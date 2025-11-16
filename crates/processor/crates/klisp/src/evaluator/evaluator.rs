@@ -2,8 +2,8 @@
 //!
 //! This module implements the evaluation of S-expressions into runtime values.
 
-use crate::parser::{Atom, Sexpr};
 use super::value::{Environment, EvalError, Value};
+use crate::parser::{Atom, Sexpr};
 use std::rc::Rc;
 
 /// Evaluate a single S-expression in the given environment.

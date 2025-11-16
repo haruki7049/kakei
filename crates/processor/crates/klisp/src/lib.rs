@@ -23,9 +23,9 @@
 //! }
 //! ```
 
-mod parser;
 mod evaluator;
+mod parser;
 
 // Re-export the main types and functions for public API
+pub use evaluator::{Environment, EvalError, Value, create_global_env, eval};
 pub use parser::{Atom, Sexpr, parse};
-pub use evaluator::{Environment, EvalError, Value, eval, create_global_env};
