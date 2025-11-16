@@ -1,7 +1,13 @@
+//! Core types for handling monetary values.
+//!
+//! This module provides the `Money` struct and `Currency` enum for type-safe monetary
+//! calculations. It ensures that operations are only performed between money values of
+//! the same currency and handles precision correctly for each currency type.
+
+use crate::errors::MoneyError;
 use rust_decimal::prelude::*;
 use std::fmt;
 use std::ops::{Add, Sub};
-use crate::errors::MoneyError;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -17,6 +23,9 @@ pub enum Currency {
     USD,
 }
 
+/// Implements formatting for `Currency`.
+///
+/// Displays the currency as its debug representation (e.g., "JPY", "USD").
 impl fmt::Display for Currency {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
@@ -134,6 +143,11 @@ impl Money {
     }
 }
 
+/// Implements formatting for `Money`.
+///
+/// Displays the money value with its currency symbol:
+/// - JPY: ¥100
+/// - USD: $10.50
 impl fmt::Display for Money {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.currency {
