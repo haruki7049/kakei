@@ -36,10 +36,16 @@ pub struct Processor {
 impl Processor {
     /// Creates a new Processor and connects to the database.
     #[instrument]
-    pub async fn new(db_path: &str) -> Result<Self, ProcessorError> {
+    pub async fn new(db_path: &str) -> Result<Self, Box<dyn std::error::Error>> {
         info!("Initializing Processor with database at: {}", db_path);
         let repo = SqliteKakeiRepository::new(db_path).await?;
-        repo.migrate().await?;
+
+        // Database Migration
+        debug!("Running database migrations from sqpx::migrate!()...");
+        sqlx::migrate!("crates/database/db/migrations")
+            .run(repo.get_pool())
+            .await?;
+
         info!("Processor initialized successfully");
         Ok(Self { repo })
     }

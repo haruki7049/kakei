@@ -82,6 +82,10 @@
             programs.rustfmt.enable = true;
             settings.formatter.rustfmt.command = "${rust}/bin/rustfmt";
 
+            # SQL
+            programs.sql-formatter.enable = true;
+            programs.sql-formatter.dialect = "sqlite";
+
             # TOML
             programs.taplo.enable = true;
 
@@ -100,6 +104,7 @@
             nativeBuildInputs = [
               rust
               pkgs.sqlite # For debugging
+              pkgs.sqlx-cli # For Database migration
             ];
           };
         };

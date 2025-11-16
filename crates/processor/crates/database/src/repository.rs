@@ -156,67 +156,6 @@ impl SqliteKakeiRepository {
     pub fn get_pool(&self) -> &Pool<Sqlite> {
         &self.pool
     }
-
-    /// Runs database migrations to initialize the schema tables.
-    ///
-    /// Creates `Categories`, `Accounts`, and `Transactions` tables if they do not exist.
-    #[instrument(skip(self))]
-    pub async fn migrate(&self) -> Result<(), DbError> {
-        info!("Running database migrations");
-
-        // Categories table
-        debug!("Creating Categories table if not exists");
-        sqlx::query(
-            "
-            CREATE TABLE IF NOT EXISTS Categories (
-                category_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                name TEXT NOT NULL UNIQUE,
-                type TEXT NOT NULL CHECK(type IN ('expense', 'income'))
-            );
-            ",
-        )
-        .execute(&self.pool)
-        .await?;
-
-        // Accounts table (includes currency)
-        debug!("Creating Accounts table if not exists");
-        sqlx::query(
-            "
-            CREATE TABLE IF NOT EXISTS Accounts (
-                account_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                name TEXT NOT NULL UNIQUE,
-                initial_balance INTEGER NOT NULL DEFAULT 0,
-                currency TEXT NOT NULL DEFAULT 'JPY'
-            );
-            ",
-        )
-        .execute(&self.pool)
-        .await?;
-
-        // Transactions table (includes currency)
-        // Added CHECK constraint for ISO 8601 date format (YYYY-MM-DD)
-        debug!("Creating Transactions table if not exists");
-        sqlx::query(
-            "
-            CREATE TABLE IF NOT EXISTS Transactions (
-                transaction_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                date TEXT NOT NULL CHECK (date GLOB '[0-9][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9]'),
-                amount INTEGER NOT NULL, 
-                currency TEXT NOT NULL DEFAULT 'JPY',
-                memo TEXT,
-                category_id INTEGER NOT NULL, 
-                account_id INTEGER NOT NULL,
-                FOREIGN KEY (category_id) REFERENCES Categories(category_id),
-                FOREIGN KEY (account_id) REFERENCES Accounts(account_id)
-            );
-            ",
-        )
-        .execute(&self.pool)
-        .await?;
-
-        info!("Database migrations completed successfully");
-        Ok(())
-    }
 }
 
 // --- Trait Implementation ---
@@ -462,7 +401,10 @@ mod tests {
                 .await
                 .expect("Failed to create in-memory database");
 
-            repo.migrate().await.expect("Failed to run migrations");
+            sqlx::migrate!("db/migrations")
+                .run(repo.get_pool())
+                .await
+                .expect("Failed to run migrations");
 
             repo
         }

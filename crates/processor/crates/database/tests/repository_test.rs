@@ -12,7 +12,10 @@ async fn create_test_repo() -> SqliteKakeiRepository {
         .await
         .expect("Failed to create in-memory database");
 
-    repo.migrate().await.expect("Failed to run migrations");
+    sqlx::migrate!("db/migrations")
+        .run(repo.get_pool())
+        .await
+        .expect("Failed to run migrations");
 
     repo
 }
