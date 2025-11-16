@@ -100,6 +100,7 @@
             nativeBuildInputs = [
               rust
               pkgs.sqlite # For debugging
+              pkgs.sqlx-cli # For Database migration
             ];
           };
         };

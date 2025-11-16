@@ -915,6 +915,7 @@ dependencies = [
  "kakei_database",
  "kakei_money",
  "rust_decimal",
+ "sqlx",
  "thiserror 2.0.17",
  "tokio",
  "tracing",
