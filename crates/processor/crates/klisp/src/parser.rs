@@ -8,7 +8,7 @@ use crate::whitespace::ws;
 use nom::{
     IResult, Parser,
     branch::alt,
-    bytes::complete::{is_not, take_while},
+    bytes::complete::take_while,
     character::complete::{alpha1, char, digit1},
     combinator::{map, map_res, recognize},
     error::Error,
