@@ -52,9 +52,7 @@ fn builtin_car(args: &[Value], _env: &mut Environment) -> Result<Value, EvalErro
     }
     match &args[0] {
         Value::Cons(car, _) => Ok(car.as_ref().clone()),
-        _ => Err(EvalError::TypeError(
-            "car requires a cons cell".to_string(),
-        )),
+        _ => Err(EvalError::TypeError("car requires a cons cell".to_string())),
     }
 }
 
@@ -68,9 +66,7 @@ fn builtin_cdr(args: &[Value], _env: &mut Environment) -> Result<Value, EvalErro
     }
     match &args[0] {
         Value::Cons(_, cdr) => Ok(cdr.as_ref().clone()),
-        _ => Err(EvalError::TypeError(
-            "cdr requires a cons cell".to_string(),
-        )),
+        _ => Err(EvalError::TypeError("cdr requires a cons cell".to_string())),
     }
 }
 
@@ -140,7 +136,7 @@ fn builtin_assoc(args: &[Value], _env: &mut Environment) -> Result<Value, EvalEr
             _ => {
                 return Err(EvalError::TypeError(
                     "assoc requires a proper list".to_string(),
-                ))
+                ));
             }
         }
     }
@@ -176,7 +172,7 @@ fn builtin_group_by(args: &[Value], env: &mut Environment) -> Result<Value, Eval
             _ => {
                 return Err(EvalError::TypeError(
                     "group-by requires a proper list as table".to_string(),
-                ))
+                ));
             }
         }
     }
@@ -196,18 +192,12 @@ fn builtin_group_by(args: &[Value], env: &mut Environment) -> Result<Value, Eval
     let mut result = Value::Nil;
     for (key, group_rows) in groups.into_iter() {
         // Convert group_rows to a list
-        let group_list = group_rows
-            .into_iter()
-            .rev()
-            .fold(Value::Nil, |acc, row| {
-                Value::Cons(Rc::new(row), Rc::new(acc))
-            });
+        let group_list = group_rows.into_iter().rev().fold(Value::Nil, |acc, row| {
+            Value::Cons(Rc::new(row), Rc::new(acc))
+        });
 
         // Create (key . group-list) pair
-        let pair = Value::Cons(
-            Rc::new(Value::String(key)),
-            Rc::new(group_list),
-        );
+        let pair = Value::Cons(Rc::new(Value::String(key)), Rc::new(group_list));
 
         // Add to result list
         result = Value::Cons(Rc::new(pair), Rc::new(result));
@@ -217,11 +207,7 @@ fn builtin_group_by(args: &[Value], env: &mut Environment) -> Result<Value, Eval
 }
 
 /// Helper function to apply a function value to arguments.
-fn apply_function(
-    func: &Value,
-    args: &[Value],
-    env: &mut Environment,
-) -> Result<Value, EvalError> {
+fn apply_function(func: &Value, args: &[Value], env: &mut Environment) -> Result<Value, EvalError> {
     match func {
         Value::Primitive(prim) => prim(args, env),
         Value::Lambda {

@@ -2,7 +2,7 @@
 //!
 //! These tests verify the complete evaluation functionality using the public API.
 
-use kakei_lisp::{create_global_env, eval, parse, Value};
+use kakei_lisp::{Value, create_global_env, eval, parse};
 
 /// Helper function to parse and evaluate a single expression.
 fn eval_str(input: &str) -> Result<Value, String> {
@@ -426,7 +426,7 @@ mod group_by_tests {
 
         // The result should be a list of (dept . rows) pairs
         assert!(matches!(result, Value::Cons(_, _)));
-        
+
         // Count the number of groups (should be 3: Dev, Sales, HR)
         let mut count = 0;
         let mut current = &result;

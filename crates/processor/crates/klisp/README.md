@@ -21,12 +21,14 @@ The parser supports standard S-expression syntax:
 The evaluator provides a functional Lisp interpreter with the following features:
 
 **Special Forms:**
+
 - `quote` - Prevent evaluation, treat as data
 - `define` - Define variables in the environment
 - `lambda` - Create anonymous functions (closures)
 - `if` - Conditional evaluation
 
 **Built-in Functions:**
+
 - `cons` - Create cons cells (pairs)
 - `car` - Get the first element of a pair
 - `cdr` - Get the second element of a pair
@@ -38,6 +40,7 @@ The evaluator provides a functional Lisp interpreter with the following features
 ## API & Usage
 
 The primary public API consists of:
+
 - `parse` - Parse Lisp code into AST
 - `eval` - Evaluate an AST expression
 - `create_global_env` - Create an environment with built-in functions

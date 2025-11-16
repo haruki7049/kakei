@@ -68,12 +68,10 @@ fn eval_dotted_list(
     env: &mut Environment,
 ) -> Result<Value, EvalError> {
     let tail_val = eval(tail, env)?;
-    list.iter()
-        .rev()
-        .try_fold(tail_val, |acc, expr| {
-            let val = eval(expr, env)?;
-            Ok(Value::Cons(Rc::new(val), Rc::new(acc)))
-        })
+    list.iter().rev().try_fold(tail_val, |acc, expr| {
+        let val = eval(expr, env)?;
+        Ok(Value::Cons(Rc::new(val), Rc::new(acc)))
+    })
 }
 
 /// Evaluate a quote special form.
@@ -113,12 +111,9 @@ fn sexpr_to_value(expr: &Sexpr) -> Result<Value, EvalError> {
 
 /// Convert a list of values to a cons list.
 fn list_to_cons(values: &[Value]) -> Result<Value, EvalError> {
-    Ok(values
-        .iter()
-        .rev()
-        .fold(Value::Nil, |acc, val| {
-            Value::Cons(Rc::new(val.clone()), Rc::new(acc))
-        }))
+    Ok(values.iter().rev().fold(Value::Nil, |acc, val| {
+        Value::Cons(Rc::new(val.clone()), Rc::new(acc))
+    }))
 }
 
 /// Evaluate a define special form.
@@ -135,7 +130,7 @@ fn eval_define(args: &[Sexpr], env: &mut Environment) -> Result<Value, EvalError
         _ => {
             return Err(EvalError::TypeError(
                 "define requires a symbol as first argument".to_string(),
-            ))
+            ));
         }
     };
 
@@ -166,7 +161,7 @@ fn eval_lambda(args: &[Sexpr], env: &mut Environment) -> Result<Value, EvalError
         _ => {
             return Err(EvalError::TypeError(
                 "lambda requires a parameter list".to_string(),
-            ))
+            ));
         }
     };
 
