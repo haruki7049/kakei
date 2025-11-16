@@ -1,12 +1,14 @@
 # kakei_lisp
 
-`kakei_lisp` is a simple S-expression (Lisp) parser (or "reader") built with the [nom](https://crates.io/crates/nom) parser combinator library.
+`kakei_lisp` is a simple Lisp interpreter built with Rust, featuring both a parser (reader) and an evaluator. The parser is built with the [nom](https://crates.io/crates/nom) parser combinator library.
 
-This crate serves as the parsing foundation for the scripting and configuration language used by the main [`kakei`](https://github.com/haruki7049/kakei) financial ledger application. Its sole responsibility is to take a string input and transform it into a Rust-native Abstract Syntax Tree (AST), represented by the `Sexpr` and `Atom` enums.
+This crate serves as the scripting and configuration language for the main [`kakei`](https://github.com/haruki7049/kakei) financial ledger application. It can parse Lisp code into a Rust-native Abstract Syntax Tree (AST) and evaluate it to perform data transformations, particularly for table manipulation.
 
 ## Features
 
-This parser supports standard S-expression syntax:
+### Parser (Reader)
+
+The parser supports standard S-expression syntax:
 
 - **Atoms**: Symbols (`define`), Numbers (`60000`), Strings (`"Alice"`), and Nil (`()`).
 - **Lists**: Proper lists, e.g., `(a b c)`.
@@ -14,9 +16,36 @@ This parser supports standard S-expression syntax:
 - **Quoting**: The `'` (single quote) syntax, e.g., `'(a b)`, which is parsed into `(quote (a b))`.
 - **Comments**: Line comments starting with `;` which are ignored by the parser.
 
+### Evaluator
+
+The evaluator provides a functional Lisp interpreter with the following features:
+
+**Special Forms:**
+
+- `quote` - Prevent evaluation, treat as data
+- `define` - Define variables in the environment
+- `lambda` - Create anonymous functions (closures)
+- `if` - Conditional evaluation
+
+**Built-in Functions:**
+
+- `cons` - Create cons cells (pairs)
+- `car` - Get the first element of a pair
+- `cdr` - Get the second element of a pair
+- `null?` - Check if a value is nil
+- `equal?` - Check equality of two values
+- `assoc` - Search association lists by key
+- `group-by` - Group table rows by a key function (for data transformation)
+
 ## API & Usage
 
-The primary public API consists of the `parse` function and the `Sexpr` and `Atom` enums.
+The primary public API consists of:
+
+- `parse` - Parse Lisp code into AST
+- `eval` - Evaluate an AST expression
+- `create_global_env` - Create an environment with built-in functions
+- `Sexpr` and `Atom` - AST types
+- `Value` - Runtime value types
 
 ### Add to `Cargo.toml`
 
@@ -27,76 +56,113 @@ This crate is part of the `kakei` workspace.
 kakei_lisp = { path = "crates/processor/crates/klisp" }
 ```
 
+### Example: Basic Evaluation
+
+```rust
+use kakei_lisp::{parse, eval, create_global_env, Value};
+
+fn main() {
+    let input = r#"
+        (define x 42)
+        (define y 10)
+        (cons x y)
+    "#;
+
+    // Parse the input
+    let (_, sexprs) = parse(input).expect("Parse error");
+
+    // Create environment with built-in functions
+    let mut env = create_global_env();
+
+    // Evaluate each expression
+    let mut result = Value::Nil;
+    for sexpr in sexprs {
+        result = eval(&sexpr, &mut env).expect("Eval error");
+    }
+
+    // Result is (42 . 10)
+    println!("Result: {}", result);
+}
+```
+
+### Example: Table Manipulation with `group-by`
+
+The primary use case for this Lisp dialect is manipulating tabular data. Here's a complete example using the `group-by` function to organize employee data by department:
+
+```rust
+use kakei_lisp::{parse, eval, create_global_env};
+
+fn main() {
+    let program = r#"
+        ; Define employee table with row IDs and data
+        ; Each row is (ID . ((col . val) ...))
+        (define employee-table '(
+            (ID-001 . ((name . "Alice") (dept . "Dev") (salary . 60000)))
+            (ID-002 . ((name . "Bob") (dept . "Sales") (salary . 70000)))
+            (ID-003 . ((name . "Carol") (dept . "Dev") (salary . 65000)))
+            (ID-004 . ((name . "Dave") (dept . "HR") (salary . 55000)))
+        ))
+        
+        ; Define lambda to extract department from a row
+        ; The row format is (row-id . row-data)
+        ; We use assoc to get the dept column from row-data
+        (define get-dept (lambda (row)
+            (cdr (assoc 'dept (cdr row)))))
+        
+        ; Group by department
+        (group-by employee-table get-dept)
+    "#;
+
+    let (_, sexprs) = parse(program).expect("Parse error");
+    let mut env = create_global_env();
+    
+    let mut result = kakei_lisp::Value::Nil;
+    for sexpr in sexprs {
+        result = eval(&sexpr, &mut env).expect("Eval error");
+    }
+    
+    // Result is an association list:
+    // (("Dev" . ((ID-001 . ...) (ID-003 . ...)))
+    //  ("Sales" . ((ID-002 . ...)))
+    //  ("HR" . ((ID-004 . ...))))
+    println!("Grouped by department: {}", result);
+}
+```
+
 ### Data Structures
 
-The parser converts text into these Rust enums:
+#### AST Types (from Parser)
 
 ```rust
 /// Represents a complete S-expression (Sexpr).
-#[derive(Debug, PartialEq, Clone)]
 pub enum Sexpr {
-    /// An atomic value, such as a symbol, number, or string.
     Atom(Atom),
-    /// A proper list of S-expressions, e.g., `(a b c)`.
     List(Vec<Sexpr>),
-    /// An improper list or "dotted pair", e.g., `(a . b)` or `(a b . c)`.
     DottedList(Vec<Sexpr>, Box<Sexpr>),
 }
 
-/// Represents the smallest indivisible unit of the Lisp syntax (an "atom").
-#[derive(Debug, PartialEq, Clone)]
+/// Represents an atom in the AST.
 pub enum Atom {
-    /// The empty list, `()`, also known as Nil.
     Nil,
-    /// A symbolic identifier, e.g., `define`, `ID-001`, or `+`.
     Symbol(String),
-    /// An integer number, e.g., `60000`.
     Number(i64),
-    /// A string literal, e.g., `"Alice"`.
     String(String),
 }
 ```
 
-### Example
-
-The `parse` function takes a string slice (`&str`) and returns a `Result` containing a `Vec<Sexpr>` on success.
+#### Runtime Value Types (from Evaluator)
 
 ```rust
-use kakei_lisp::{parse, Atom, Sexpr};
-
-fn main() {
-    let input = r#"
-        ; This is the employee table
-        (define employee-table
-          '( (ID-001 . ((name . "Alice") (dept . "Dev")))
-             (ID-002 . ((name . "Bob") (dept . "Sales"))) ))
-        
-        ; A proper list
-        (a b c)
-        "#;
-
-    match parse(input) {
-        Ok((remaining_input, sexprs)) => {
-            // Success! `sexprs` is a Vec<Sexpr>
-            assert_eq!(sexprs.len(), 2);
-
-            // Check the first expression (define ...)
-            if let Sexpr::List(define_expr) = &sexprs[0] {
-                assert_eq!(define_expr[0], Sexpr::Atom(Atom::Symbol("define".to_string())));
-            }
-
-            // Check the second expression (a b c)
-            if let Sexpr::List(list_expr) = &sexprs[1] {
-                 assert_eq!(list_expr[0], Sexpr::Atom(Atom::Symbol("a".to_string())));
-            }
-
-            assert!(remaining_input.trim().is_empty());
-        }
-        Err(e) => {
-            // Handle parser error
-            panic!("Parser failed: {:?}", e);
-        }
-    }
+/// Runtime values that result from evaluation.
+pub enum Value {
+    Nil,
+    Bool(bool),
+    Number(i64),
+    String(String),
+    Symbol(String),
+    Cons(Rc<Value>, Rc<Value>),
+    Primitive(PrimitiveFn),
+    Lambda { params, body, closure },
 }
 ```
 
