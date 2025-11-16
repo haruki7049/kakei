@@ -52,7 +52,7 @@
           };
           cargo-clippy = craneLib.cargoClippy {
             inherit src cargoArtifacts;
-            cargoClippyExtraArgs = "--verbose -- --deny warning";
+            cargoClippyExtraArgs = "--verbose -- --deny warnings";
           };
           cargo-doc = craneLib.cargoDoc {
             inherit src cargoArtifacts;
