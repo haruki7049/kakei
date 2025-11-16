@@ -1,7 +1,7 @@
 //! Whitespace and comment handling for the parser.
 
 use nom::{
-    IResult,
+    IResult, Parser,
     branch::alt,
     bytes::complete::{is_not, tag},
     character::complete::multispace1,
@@ -9,7 +9,6 @@ use nom::{
     error::Error,
     multi::many0,
     sequence::pair,
-    Parser,
 };
 
 /// A helper parser that consumes whitespace and comments.

@@ -164,11 +164,7 @@ fn parse_list(input: &str) -> ParseResult<'_, Sexpr> {
 fn parse_sexpr(input: &str) -> ParseResult<'_, Sexpr> {
     preceded(
         ws,
-        alt((
-            parse_quoted,
-            parse_list,
-            map(parse_atom, Sexpr::Atom),
-        )),
+        alt((parse_quoted, parse_list, map(parse_atom, Sexpr::Atom))),
     )
     .parse(input)
 }
