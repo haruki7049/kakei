@@ -1,5 +1,5 @@
 use nom::{
-    IResult,
+    IResult, Parser,
     branch::alt,
     bytes::complete::{is_not, tag},
     character::complete::{alpha1, char, digit1, multispace1},
@@ -7,7 +7,6 @@ use nom::{
     error::Error,
     multi::many0,
     sequence::{delimited, pair, preceded},
-    Parser,
 };
 
 // Represents an S-expression (Sexpr)
@@ -55,11 +54,7 @@ fn parse_string<'a>(input: &'a str) -> ParseResult<'a, Atom> {
 /// Parses a Number (e.g., 60000)
 fn parse_number<'a>(input: &'a str) -> ParseResult<'a, Atom> {
     // 修正: (input) を .parse(input) に変更
-    map(
-        map_res(digit1, |s: &str| s.parse::<i64>()),
-        Atom::Number,
-    )
-    .parse(input)
+    map(map_res(digit1, |s: &str| s.parse::<i64>()), Atom::Number).parse(input)
 }
 
 /// Parses a Symbol (e.g., define, ID-001, +)
@@ -171,8 +166,8 @@ pub fn parse_sexpr<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
     preceded(
         ws,
         alt((
-            parse_quoted,             // Try 'A first
-            parse_list,               // Try (A B) or (A . B)
+            parse_quoted,                 // Try 'A first
+            parse_list,                   // Try (A B) or (A . B)
             map(parse_atom, Sexpr::Atom), // Try an Atom
         )),
     )
@@ -318,10 +313,7 @@ mod tests {
             // 修正: convert_error を削除し、標準の Debug フォーマットでエラーを表示
             Err(nom::Err::Error(e) | nom::Err::Failure(e)) => {
                 // This will fail the test if the parser errors
-                panic!(
-                    "--- Parser Error ---\n{:#?}",
-                    e
-                );
+                panic!("--- Parser Error ---\n{:#?}", e);
             }
             Err(e) => panic!("Incomplete input: {:?}", e),
         }
