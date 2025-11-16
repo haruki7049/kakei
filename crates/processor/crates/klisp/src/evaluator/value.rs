@@ -4,7 +4,7 @@
 //! S-expressions. These are different from the AST types in that they include
 //! functions and other runtime-specific values.
 
-use crate::ast::Sexpr;
+use crate::parser::Sexpr;
 use std::collections::HashMap;
 use std::fmt;
 use std::rc::Rc;
