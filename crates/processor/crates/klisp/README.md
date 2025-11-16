@@ -8,11 +8,11 @@ This crate serves as the parsing foundation for the scripting and configuration 
 
 This parser supports standard S-expression syntax:
 
-* **Atoms**: Symbols (`define`), Numbers (`60000`), Strings (`"Alice"`), and Nil (`()`).
-* **Lists**: Proper lists, e.g., `(a b c)`.
-* **Dotted Pairs**: Improper lists, e.g., `(a . b)` or `(a b . c)`.
-* **Quoting**: The `'` (single quote) syntax, e.g., `'(a b)`, which is parsed into `(quote (a b))`.
-* **Comments**: Line comments starting with `;` which are ignored by the parser.
+- **Atoms**: Symbols (`define`), Numbers (`60000`), Strings (`"Alice"`), and Nil (`()`).
+- **Lists**: Proper lists, e.g., `(a b c)`.
+- **Dotted Pairs**: Improper lists, e.g., `(a . b)` or `(a b . c)`.
+- **Quoting**: The `'` (single quote) syntax, e.g., `'(a b)`, which is parsed into `(quote (a b))`.
+- **Comments**: Line comments starting with `;` which are ignored by the parser.
 
 ## API & Usage
 
@@ -25,7 +25,7 @@ This crate is part of the `kakei` workspace.
 ```toml
 [dependencies]
 kakei_lisp = { path = "crates/processor/crates/klisp" }
-````
+```
 
 ### Data Structures
 
