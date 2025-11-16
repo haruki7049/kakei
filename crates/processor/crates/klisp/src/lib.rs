@@ -1,87 +1,72 @@
-/*
- * src/lib.rs
- */
-
 use nom::{
     IResult,
     branch::alt,
     bytes::complete::{is_not, tag},
-    // multispace1 をインポート
     character::complete::{alpha1, char, digit1, multispace1},
-    // 不要な 'opt', 'peek', 'terminated' などを削除
     combinator::{map, map_res, recognize},
-    error::VerboseError,
+    error::Error,
     multi::many0,
     sequence::{delimited, pair, preceded},
+    Parser,
 };
 
 // Represents an S-expression (Sexpr)
 // (Sexpr と Atom の enum 定義は変更なし)
 #[derive(Debug, PartialEq, Clone)]
 pub enum Sexpr {
-    // An Atom (Symbol, Number, String, or Nil)
     Atom(Atom),
-    // A proper list, e.g., (A B C)
     List(Vec<Sexpr>),
-    // An improper list or dotted pair, e.g., (A . B) or (A B . C)
     DottedList(Vec<Sexpr>, Box<Sexpr>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Atom {
-    // The empty list '()
     Nil,
-    // e.g., define, group-by, ID-001, +
     Symbol(String),
-    // e.g., 60000
     Number(i64),
-    // e.g., "Alice"
     String(String),
 }
 
 // A type alias for our parser's result type
-type ParseResult<'a, O> = IResult<&'a str, O, VerboseError<&'a str>>;
+// VerboseError を標準の Error に変更
+type ParseResult<'a, O> = IResult<&'a str, O, Error<&'a str>>;
 
 /// A helper parser that consumes whitespace or comments
 /// Comments start with ';' and go to the end of the line
 fn ws<'a>(input: &'a str) -> ParseResult<'a, &'a str> {
+    // 修正: (input) を .parse(input) に変更
     recognize(many0(alt((
-        // --- FIX ---
-        // 1. The specific parser (comment) must come FIRST.
-        // We must also consume the newline, so we use `pair`
-        // to match the comment AND the following newline (or end-of-input).
         recognize(pair(tag(";"), is_not("\n\r"))),
-        // 2. The general parser (whitespace) comes SECOND.
-        // Use multispace1 to ensure we consume at least one char
-        // to prevent infinite loops in many0 if it were just multispace0.
         multispace1,
-        // --- END FIX ---
-    ))))(input)
+    ))))
+    .parse(input)
 }
 
 /// Parses a String (e.g., "Alice")
 /// TODO: Does not yet handle escaped quotes \"
 fn parse_string<'a>(input: &'a str) -> ParseResult<'a, Atom> {
+    // 修正: (input) を .parse(input) に変更
     map(delimited(char('"'), is_not("\""), char('"')), |s: &str| {
         Atom::String(s.to_string())
-    })(input)
+    })
+    .parse(input)
 }
 
 /// Parses a Number (e.g., 60000)
 fn parse_number<'a>(input: &'a str) -> ParseResult<'a, Atom> {
+    // 修正: (input) を .parse(input) に変更
     map(
-        // Use map_res to attempt parsing the string slice into i64
         map_res(digit1, |s: &str| s.parse::<i64>()),
         Atom::Number,
-    )(input)
+    )
+    .parse(input)
 }
 
 /// Parses a Symbol (e.g., define, ID-001, +)
 fn parse_symbol<'a>(input: &'a str) -> ParseResult<'a, Atom> {
+    // 修正: (input) を .parse(input) に変更
     map(
-        // A symbol starts with a letter or special char, then can have numbers/hyphens
         recognize(pair(
-            // First char
             alt((
                 alpha1,
                 tag("-"),
@@ -93,22 +78,23 @@ fn parse_symbol<'a>(input: &'a str) -> ParseResult<'a, Atom> {
                 tag("="),
                 tag("?"),
             )),
-            // Subsequent chars
             many0(alt((alpha1, digit1, tag("-"), tag("?"), tag("!")))),
         )),
         |s: &str| Atom::Symbol(s.to_string()),
-    )(input)
+    )
+    .parse(input)
 }
 
 /// Parses any Atom
 fn parse_atom<'a>(input: &'a str) -> ParseResult<'a, Atom> {
-    alt((parse_number, parse_string, parse_symbol))(input)
+    // 修正: (input) を .parse(input) に変更
+    alt((parse_number, parse_string, parse_symbol)).parse(input)
 }
 
 /// Parses a quoted S-expression (e.g., 'A or '(A B))
 fn parse_quoted<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
+    // 修正: (input) を .parse(input) に変更
     map(
-        // Matches the quote char, then the expression
         preceded(
             char('\''),
             parse_sexpr, // Recursively calls the main parser
@@ -117,16 +103,20 @@ fn parse_quoted<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
             // Converts 'A into (quote A)
             Sexpr::List(vec![Sexpr::Atom(Atom::Symbol("quote".to_string())), sexpr])
         },
-    )(input)
+    )
+    .parse(input)
 }
 
 /// Parses a list '()', '(A B C)', or a dotted list '(A . B)', '(A B . C)'
 fn parse_list<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
+    // 内部のロジックは .parse() を使わない
+    // .parse() は IResult を返す関数全体を呼び出すときに使う
+
     // Must start with '('
-    let (input, _) = preceded(ws, char('('))(input)?;
+    let (input, _) = preceded(ws, char('(')).parse(input)?;
 
     // Handle the empty list '()' case first
-    if let Ok((input, _)) = preceded(ws, char(')'))(input) {
+    if let Ok((input, _)) = preceded(ws, char(')')).parse(input) {
         return Ok((input, Sexpr::Atom(Atom::Nil)));
     }
 
@@ -144,7 +134,8 @@ fn parse_list<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
         }
 
         // If not ')' or '.', parse one S-expression
-        let (next_input, sexpr) = parse_sexpr(current_input)?;
+        // 修正: parse_sexpr(current_input)? を parse_sexpr.parse(current_input)? に変更
+        let (next_input, sexpr) = parse_sexpr.parse(current_input)?;
         elements.push(sexpr);
         current_input = next_input;
     }
@@ -153,21 +144,21 @@ fn parse_list<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
     let (input, _) = ws(current_input)?; // Consume whitespace
 
     // Check for the dot
-    if let Ok((input, _)) = char::<&'a str, VerboseError<&'a str>>('.')(input) {
+    if let Ok((input, _)) = char::<&'a str, Error<&'a str>>('.').parse(input) {
         // Dot found: This is a DottedList
 
         // Must be followed by exactly one S-expression
-        let (input, final_expr) = preceded(ws, parse_sexpr)(input)?;
+        let (input, final_expr) = preceded(ws, parse_sexpr).parse(input)?;
 
         // Must be followed by ')'
-        let (input, _) = preceded(ws, char(')'))(input)?;
+        let (input, _) = preceded(ws, char(')')).parse(input)?;
 
         Ok((input, Sexpr::DottedList(elements, Box::new(final_expr))))
     } else {
         // No dot found: This must be a Proper List
 
         // Must be followed by ')'
-        let (input, _) = char(')')(input)?;
+        let (input, _) = char(')').parse(input)?;
 
         Ok((input, Sexpr::List(elements)))
     }
@@ -176,21 +167,23 @@ fn parse_list<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
 /// This is the main parser function
 /// It tries to parse any valid S-expression
 pub fn parse_sexpr<'a>(input: &'a str) -> ParseResult<'a, Sexpr> {
-    // Must be preceded by optional whitespace/comments
+    // 修正: (input) を .parse(input) に変更
     preceded(
         ws,
         alt((
-            parse_quoted,                 // Try 'A first
-            parse_list,                   // Try (A B) or (A . B)
+            parse_quoted,             // Try 'A first
+            parse_list,               // Try (A B) or (A . B)
             map(parse_atom, Sexpr::Atom), // Try an Atom
         )),
-    )(input)
+    )
+    .parse(input)
 }
 
 /// Parses a sequence of S-expressions from an input string.
 /// This is the main entry point for parsing a file or a buffer.
 pub fn parse_toplevel<'a>(input: &'a str) -> ParseResult<'a, Vec<Sexpr>> {
-    many0(parse_sexpr)(input)
+    // 修正: (input) を .parse(input) に変更
+    many0(parse_sexpr).parse(input)
 }
 
 // --- Test Module ---
@@ -322,11 +315,12 @@ mod tests {
                 // Check that remaining input is empty or just whitespace
                 assert!(remaining_input.trim().is_empty());
             }
+            // 修正: convert_error を削除し、標準の Debug フォーマットでエラーを表示
             Err(nom::Err::Error(e) | nom::Err::Failure(e)) => {
                 // This will fail the test if the parser errors
                 panic!(
-                    "--- Parser Error ---\n{}",
-                    nom::error::convert_error(input, e)
+                    "--- Parser Error ---\n{:#?}",
+                    e
                 );
             }
             Err(e) => panic!("Incomplete input: {:?}", e),
