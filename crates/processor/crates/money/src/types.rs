@@ -4,10 +4,10 @@
 //! calculations. It ensures that operations are only performed between money values of
 //! the same currency and handles precision correctly for each currency type.
 
+use crate::errors::MoneyError;
 use rust_decimal::prelude::*;
 use std::fmt;
 use std::ops::{Add, Sub};
-use crate::errors::MoneyError;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};

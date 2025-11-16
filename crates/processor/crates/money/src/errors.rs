@@ -3,8 +3,8 @@
 //! This module defines the error types that can occur when working with monetary values,
 //! including currency mismatches, invalid currency codes, and overflow errors.
 
-use thiserror::Error;
 use crate::types::Currency;
+use thiserror::Error;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
