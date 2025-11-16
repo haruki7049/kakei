@@ -76,7 +76,7 @@ mod quoted_expressions {
         let input = "'a 'b '(c d)";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 3);
-        
+
         // Each should be wrapped in quote
         for sexpr in &result {
             if let Sexpr::List(list) = sexpr {
@@ -96,11 +96,11 @@ mod quoted_expressions {
         let input = "(quote (quote (quote x)))";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 1);
-        
+
         // Verify nested quotes
         let mut current = &result[0];
         let mut quote_count = 0;
-        
+
         loop {
             if let Sexpr::List(list) = current {
                 if list[0] == Sexpr::Atom(Atom::Symbol("quote".to_string())) {
@@ -113,7 +113,7 @@ mod quoted_expressions {
                 break;
             }
         }
-        
+
         assert_eq!(quote_count, 3);
     }
 
@@ -124,7 +124,7 @@ mod quoted_expressions {
     fn quote_shorthand_equivalence() {
         let shorthand = parse("'x").unwrap().1;
         let longform = parse("(quote x)").unwrap().1;
-        
+
         assert_eq!(shorthand, longform);
     }
 }
@@ -177,7 +177,7 @@ mod dotted_lists {
         let input = "(a b . (c d))";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 1);
-        
+
         if let Sexpr::DottedList(vec, tail) = &result[0] {
             assert_eq!(vec.len(), 2);
             assert!(matches!(**tail, Sexpr::List(_)));
@@ -195,16 +195,16 @@ mod dotted_lists {
         let input = "((a . b) (c d) (e f . g))";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 1);
-        
+
         if let Sexpr::List(items) = &result[0] {
             assert_eq!(items.len(), 3);
-            
+
             // First is dotted list
             assert!(matches!(items[0], Sexpr::DottedList(_, _)));
-            
+
             // Second is proper list
             assert!(matches!(items[1], Sexpr::List(_)));
-            
+
             // Third is dotted list
             assert!(matches!(items[2], Sexpr::DottedList(_, _)));
         } else {
@@ -246,12 +246,15 @@ mod whitespace_and_comments {
             (define x ; variable name
                     10) ; value
         "#;
-        
+
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 1);
-        
+
         if let Sexpr::List(define_expr) = &result[0] {
-            assert_eq!(define_expr[0], Sexpr::Atom(Atom::Symbol("define".to_string())));
+            assert_eq!(
+                define_expr[0],
+                Sexpr::Atom(Atom::Symbol("define".to_string()))
+            );
             assert_eq!(define_expr[1], Sexpr::Atom(Atom::Symbol("x".to_string())));
             assert_eq!(define_expr[2], Sexpr::Atom(Atom::Number(10)));
         } else {
@@ -271,13 +274,13 @@ mod whitespace_and_comments {
             "(\na\nb\nc\n)",
             "(\ta\tb\tc\t)",
         ];
-        
+
         let expected = Sexpr::List(vec![
             Sexpr::Atom(Atom::Symbol("a".to_string())),
             Sexpr::Atom(Atom::Symbol("b".to_string())),
             Sexpr::Atom(Atom::Symbol("c".to_string())),
         ]);
-        
+
         for input in inputs {
             let result = parse(input).unwrap().1;
             assert_eq!(result.len(), 1);
@@ -299,12 +302,12 @@ mod complex_nesting {
         let input = "(a (b (c (d (e)))))";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 1);
-        
+
         // Verify deep nesting structure
         if let Sexpr::List(outer) = &result[0] {
             assert_eq!(outer.len(), 2);
             assert_eq!(outer[0], Sexpr::Atom(Atom::Symbol("a".to_string())));
-            
+
             if let Sexpr::List(level1) = &outer[1] {
                 assert_eq!(level1[0], Sexpr::Atom(Atom::Symbol("b".to_string())));
             } else {
@@ -378,7 +381,7 @@ mod lisp_constructs {
         let input = "(+ (* 2 3) (- 10 5))";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 1);
-        
+
         if let Sexpr::List(expr) = &result[0] {
             assert_eq!(expr[0], Sexpr::Atom(Atom::Symbol("+".to_string())));
             assert_eq!(expr.len(), 3);
@@ -395,9 +398,12 @@ mod lisp_constructs {
         let input = "(lambda (x y) (+ x y))";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 1);
-        
+
         if let Sexpr::List(lambda_expr) = &result[0] {
-            assert_eq!(lambda_expr[0], Sexpr::Atom(Atom::Symbol("lambda".to_string())));
+            assert_eq!(
+                lambda_expr[0],
+                Sexpr::Atom(Atom::Symbol("lambda".to_string()))
+            );
             assert_eq!(lambda_expr.len(), 3);
         } else {
             panic!("Expected lambda expression");
@@ -412,7 +418,7 @@ mod lisp_constructs {
         let input = "(let ((x 10) (y 20)) (+ x y))";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 1);
-        
+
         if let Sexpr::List(let_expr) = &result[0] {
             assert_eq!(let_expr[0], Sexpr::Atom(Atom::Symbol("let".to_string())));
             assert_eq!(let_expr.len(), 3);
@@ -429,7 +435,7 @@ mod lisp_constructs {
         let input = "(cond ((> x 0) 'positive) ((< x 0) 'negative) (else 'zero))";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 1);
-        
+
         if let Sexpr::List(cond_expr) = &result[0] {
             assert_eq!(cond_expr[0], Sexpr::Atom(Atom::Symbol("cond".to_string())));
             assert_eq!(cond_expr.len(), 4); // cond + 3 clauses
@@ -446,7 +452,7 @@ mod lisp_constructs {
         let input = "((name . \"Alice\") (age . 30) (dept . \"Engineering\"))";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 1);
-        
+
         if let Sexpr::List(alist) = &result[0] {
             assert_eq!(alist.len(), 3);
             for item in alist {
@@ -472,20 +478,26 @@ mod lisp_constructs {
             ; Use the function
             (factorial 5)
         "#;
-        
+
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 2); // Two top-level expressions
-        
+
         // First should be define
         if let Sexpr::List(define_expr) = &result[0] {
-            assert_eq!(define_expr[0], Sexpr::Atom(Atom::Symbol("define".to_string())));
+            assert_eq!(
+                define_expr[0],
+                Sexpr::Atom(Atom::Symbol("define".to_string()))
+            );
         } else {
             panic!("Expected define expression");
         }
-        
+
         // Second should be function call
         if let Sexpr::List(call_expr) = &result[1] {
-            assert_eq!(call_expr[0], Sexpr::Atom(Atom::Symbol("factorial".to_string())));
+            assert_eq!(
+                call_expr[0],
+                Sexpr::Atom(Atom::Symbol("factorial".to_string()))
+            );
             assert_eq!(call_expr[1], Sexpr::Atom(Atom::Number(5)));
         } else {
             panic!("Expected function call");
@@ -505,7 +517,7 @@ mod atom_types {
         let input = "0 1 42 1000 1000000 9223372036854775807";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 6);
-        
+
         let expected_numbers = vec![0, 1, 42, 1000, 1000000, 9223372036854775807];
         for (i, num) in expected_numbers.iter().enumerate() {
             assert_eq!(result[i], Sexpr::Atom(Atom::Number(*num)));
@@ -520,7 +532,7 @@ mod atom_types {
         let input = "define lambda set! null? list->vector + - * / < > =";
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 13);
-        
+
         for sexpr in &result {
             assert!(matches!(sexpr, Sexpr::Atom(Atom::Symbol(_))));
         }
@@ -534,7 +546,7 @@ mod atom_types {
         let input = r#""hello" "world 123" "with-dashes" "with_underscores" "with spaces!""#;
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 5);
-        
+
         for sexpr in &result {
             assert!(matches!(sexpr, Sexpr::Atom(Atom::String(_))));
         }
@@ -548,14 +560,17 @@ mod atom_types {
         // Number
         let result = parse("42").unwrap().1;
         assert_eq!(result, vec![Sexpr::Atom(Atom::Number(42))]);
-        
+
         // String
         let result = parse(r#""hello""#).unwrap().1;
         assert_eq!(result, vec![Sexpr::Atom(Atom::String("hello".to_string()))]);
-        
+
         // Symbol
         let result = parse("symbol").unwrap().1;
-        assert_eq!(result, vec![Sexpr::Atom(Atom::Symbol("symbol".to_string()))]);
+        assert_eq!(
+            result,
+            vec![Sexpr::Atom(Atom::Symbol("symbol".to_string()))]
+        );
     }
 }
 
@@ -609,7 +624,7 @@ mod edge_cases {
             (e . f)
             ((nested (list)))
         "#;
-        
+
         let result = parse(input).unwrap().1;
         assert_eq!(result.len(), 7);
     }

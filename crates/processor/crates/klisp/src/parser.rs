@@ -196,7 +196,7 @@ mod tests {
         use super::*;
 
         /// Tests parsing a simple string literal.
-        /// 
+        ///
         /// Verifies that a basic string "hello" is correctly parsed into an Atom::String.
         #[test]
         fn simple() {
@@ -207,7 +207,7 @@ mod tests {
         }
 
         /// Tests parsing an empty string literal.
-        /// 
+        ///
         /// Empty strings fail because is_not("\"") requires at least one character.
         /// This is a known limitation of the current parser implementation.
         #[test]
@@ -216,7 +216,7 @@ mod tests {
         }
 
         /// Tests parsing a string with spaces.
-        /// 
+        ///
         /// Verifies that strings containing spaces are correctly preserved.
         #[test]
         fn with_spaces() {
@@ -227,7 +227,7 @@ mod tests {
         }
 
         /// Tests parsing a string with special characters.
-        /// 
+        ///
         /// Verifies that dashes, underscores, digits, and exclamation marks
         /// are correctly included in the parsed string.
         #[test]
@@ -239,7 +239,7 @@ mod tests {
         }
 
         /// Tests parsing a string with remaining input.
-        /// 
+        ///
         /// Verifies that the parser returns the parsed string and leaves
         /// any remaining input unparsed.
         #[test]
@@ -255,7 +255,7 @@ mod tests {
         use super::*;
 
         /// Tests parsing a single digit number.
-        /// 
+        ///
         /// Verifies that single digit numbers like "5" are correctly parsed.
         #[test]
         fn single_digit() {
@@ -263,7 +263,7 @@ mod tests {
         }
 
         /// Tests parsing a number with multiple digits.
-        /// 
+        ///
         /// Verifies that larger numbers like "60000" are correctly parsed.
         #[test]
         fn multiple_digits() {
@@ -271,7 +271,7 @@ mod tests {
         }
 
         /// Tests parsing zero.
-        /// 
+        ///
         /// Verifies that the number "0" is correctly parsed.
         #[test]
         fn zero() {
@@ -279,7 +279,7 @@ mod tests {
         }
 
         /// Tests parsing a number with remaining non-numeric input.
-        /// 
+        ///
         /// Verifies that the parser stops at the first non-digit character
         /// and leaves the rest unparsed.
         #[test]
@@ -288,7 +288,7 @@ mod tests {
         }
 
         /// Tests parsing a very large number (i64::MAX).
-        /// 
+        ///
         /// Verifies that the parser can handle the maximum i64 value.
         #[test]
         fn large() {
@@ -303,7 +303,7 @@ mod tests {
         use super::*;
 
         /// Tests parsing a simple symbol.
-        /// 
+        ///
         /// Verifies that alphabetic symbols like "define" are correctly parsed.
         #[test]
         fn simple() {
@@ -314,7 +314,7 @@ mod tests {
         }
 
         /// Tests parsing a symbol with dashes.
-        /// 
+        ///
         /// Verifies that symbols containing dashes and numbers like "ID-001"
         /// are correctly parsed.
         #[test]
@@ -326,47 +326,23 @@ mod tests {
         }
 
         /// Tests parsing operator symbols.
-        /// 
+        ///
         /// Verifies that single-character operator symbols (+, -, *, /, >, <, =, ?)
         /// are correctly parsed as symbols.
         #[test]
         fn operators() {
-            assert_eq!(
-                parse_symbol("+"),
-                Ok(("", Atom::Symbol("+".to_string())))
-            );
-            assert_eq!(
-                parse_symbol("-"),
-                Ok(("", Atom::Symbol("-".to_string())))
-            );
-            assert_eq!(
-                parse_symbol("*"),
-                Ok(("", Atom::Symbol("*".to_string())))
-            );
-            assert_eq!(
-                parse_symbol("/"),
-                Ok(("", Atom::Symbol("/".to_string())))
-            );
-            assert_eq!(
-                parse_symbol(">"),
-                Ok(("", Atom::Symbol(">".to_string())))
-            );
-            assert_eq!(
-                parse_symbol("<"),
-                Ok(("", Atom::Symbol("<".to_string())))
-            );
-            assert_eq!(
-                parse_symbol("="),
-                Ok(("", Atom::Symbol("=".to_string())))
-            );
-            assert_eq!(
-                parse_symbol("?"),
-                Ok(("", Atom::Symbol("?".to_string())))
-            );
+            assert_eq!(parse_symbol("+"), Ok(("", Atom::Symbol("+".to_string()))));
+            assert_eq!(parse_symbol("-"), Ok(("", Atom::Symbol("-".to_string()))));
+            assert_eq!(parse_symbol("*"), Ok(("", Atom::Symbol("*".to_string()))));
+            assert_eq!(parse_symbol("/"), Ok(("", Atom::Symbol("/".to_string()))));
+            assert_eq!(parse_symbol(">"), Ok(("", Atom::Symbol(">".to_string()))));
+            assert_eq!(parse_symbol("<"), Ok(("", Atom::Symbol("<".to_string()))));
+            assert_eq!(parse_symbol("="), Ok(("", Atom::Symbol("=".to_string()))));
+            assert_eq!(parse_symbol("?"), Ok(("", Atom::Symbol("?".to_string()))));
         }
 
         /// Tests parsing a symbol ending with a question mark.
-        /// 
+        ///
         /// Verifies that predicate-style symbols like "null?" are correctly parsed.
         #[test]
         fn with_question_mark() {
@@ -377,7 +353,7 @@ mod tests {
         }
 
         /// Tests parsing a symbol ending with an exclamation mark.
-        /// 
+        ///
         /// Verifies that mutation-style symbols like "set!" are correctly parsed.
         #[test]
         fn with_exclamation() {
@@ -388,7 +364,7 @@ mod tests {
         }
 
         /// Tests parsing a complex symbol with multiple special characters.
-        /// 
+        ///
         /// Verifies that symbols combining letters, dashes, numbers, and
         /// question marks like "my-var-123?" are correctly parsed.
         #[test]
@@ -400,7 +376,7 @@ mod tests {
         }
 
         /// Tests parsing a symbol with remaining input.
-        /// 
+        ///
         /// Verifies that the parser stops at invalid symbol characters
         /// and leaves them unparsed.
         #[test]
@@ -416,7 +392,7 @@ mod tests {
         use super::*;
 
         /// Tests parsing a number atom.
-        /// 
+        ///
         /// Verifies that parse_atom correctly identifies and parses numeric values.
         #[test]
         fn number() {
@@ -424,7 +400,7 @@ mod tests {
         }
 
         /// Tests parsing a string atom.
-        /// 
+        ///
         /// Verifies that parse_atom correctly identifies and parses string literals.
         #[test]
         fn string() {
@@ -435,7 +411,7 @@ mod tests {
         }
 
         /// Tests parsing a symbol atom.
-        /// 
+        ///
         /// Verifies that parse_atom correctly identifies and parses symbolic identifiers.
         #[test]
         fn symbol() {
@@ -446,14 +422,11 @@ mod tests {
         }
 
         /// Tests parsing an operator symbol atom.
-        /// 
+        ///
         /// Verifies that parse_atom correctly identifies operator characters as symbols.
         #[test]
         fn operator() {
-            assert_eq!(
-                parse_atom("+"),
-                Ok(("", Atom::Symbol("+".to_string())))
-            );
+            assert_eq!(parse_atom("+"), Ok(("", Atom::Symbol("+".to_string()))));
         }
     }
 
@@ -461,7 +434,7 @@ mod tests {
         use super::*;
 
         /// Tests parsing a quoted symbol.
-        /// 
+        ///
         /// Verifies that 'A is transformed into (quote A).
         #[test]
         fn symbol() {
@@ -473,7 +446,7 @@ mod tests {
         }
 
         /// Tests parsing a quoted number.
-        /// 
+        ///
         /// Verifies that '42 is transformed into (quote 42).
         #[test]
         fn number() {
@@ -485,7 +458,7 @@ mod tests {
         }
 
         /// Tests parsing a quoted list.
-        /// 
+        ///
         /// Verifies that '(a b) is transformed into (quote (a b)).
         #[test]
         fn list() {
@@ -500,7 +473,7 @@ mod tests {
         }
 
         /// Tests parsing nested quoted expressions.
-        /// 
+        ///
         /// Verifies that ''x is transformed into (quote (quote x)).
         #[test]
         fn nested() {
@@ -519,7 +492,7 @@ mod tests {
         use super::*;
 
         /// Tests parsing an empty list.
-        /// 
+        ///
         /// Verifies that () is parsed as Nil.
         #[test]
         fn empty() {
@@ -527,7 +500,7 @@ mod tests {
         }
 
         /// Tests parsing an empty list with whitespace.
-        /// 
+        ///
         /// Verifies that ( ) and lists with various whitespace are parsed as Nil.
         #[test]
         fn empty_with_spaces() {
@@ -536,7 +509,7 @@ mod tests {
         }
 
         /// Tests parsing a list with a single element.
-        /// 
+        ///
         /// Verifies that (1) is parsed as a proper list with one element.
         #[test]
         fn single_element() {
@@ -545,7 +518,7 @@ mod tests {
         }
 
         /// Tests parsing a list with multiple elements.
-        /// 
+        ///
         /// Verifies that (a 1 "two") is parsed as a proper list with mixed types.
         #[test]
         fn multiple_elements() {
@@ -558,7 +531,7 @@ mod tests {
         }
 
         /// Tests parsing a nested list.
-        /// 
+        ///
         /// Verifies that (a (b c)) is parsed with proper nesting.
         #[test]
         fn nested() {
@@ -573,7 +546,7 @@ mod tests {
         }
 
         /// Tests parsing a simple dotted list.
-        /// 
+        ///
         /// Verifies that (a . b) is parsed as a dotted pair.
         #[test]
         fn dotted_simple() {
@@ -585,7 +558,7 @@ mod tests {
         }
 
         /// Tests parsing a dotted list with multiple elements before the dot.
-        /// 
+        ///
         /// Verifies that (a b c . d) is parsed as a dotted list.
         #[test]
         fn dotted_multiple() {
@@ -601,7 +574,7 @@ mod tests {
         }
 
         /// Tests parsing a dotted list with a list after the dot.
-        /// 
+        ///
         /// Verifies that (a . (b c)) is parsed correctly.
         #[test]
         fn dotted_with_list() {
@@ -620,18 +593,15 @@ mod tests {
         use super::*;
 
         /// Tests parsing an S-expression that is an atom.
-        /// 
+        ///
         /// Verifies that standalone atoms are correctly parsed as S-expressions.
         #[test]
         fn atom() {
-            assert_eq!(
-                parse_sexpr("42"),
-                Ok(("", Sexpr::Atom(Atom::Number(42))))
-            );
+            assert_eq!(parse_sexpr("42"), Ok(("", Sexpr::Atom(Atom::Number(42)))));
         }
 
         /// Tests parsing an S-expression that is a list.
-        /// 
+        ///
         /// Verifies that lists are correctly parsed as S-expressions.
         #[test]
         fn list() {
@@ -644,7 +614,7 @@ mod tests {
         }
 
         /// Tests parsing a quoted S-expression.
-        /// 
+        ///
         /// Verifies that the quote shorthand is correctly expanded.
         #[test]
         fn quoted() {
@@ -656,18 +626,15 @@ mod tests {
         }
 
         /// Tests parsing an S-expression with leading whitespace.
-        /// 
+        ///
         /// Verifies that leading whitespace is correctly consumed.
         #[test]
         fn with_leading_whitespace() {
-            assert_eq!(
-                parse_sexpr("  42"),
-                Ok(("", Sexpr::Atom(Atom::Number(42))))
-            );
+            assert_eq!(parse_sexpr("  42"), Ok(("", Sexpr::Atom(Atom::Number(42)))));
         }
 
         /// Tests parsing an S-expression with remaining input.
-        /// 
+        ///
         /// Verifies that parsing stops after the first S-expression
         /// and leaves the rest unparsed.
         #[test]
@@ -683,7 +650,7 @@ mod tests {
         use super::*;
 
         /// Tests parsing empty input.
-        /// 
+        ///
         /// Verifies that empty input returns an empty vector of S-expressions.
         #[test]
         fn empty() {
@@ -691,7 +658,7 @@ mod tests {
         }
 
         /// Tests parsing a single S-expression.
-        /// 
+        ///
         /// Verifies that a single expression is returned in a vector.
         #[test]
         fn single_expression() {
@@ -700,7 +667,7 @@ mod tests {
         }
 
         /// Tests parsing multiple S-expressions.
-        /// 
+        ///
         /// Verifies that all top-level expressions are parsed and returned.
         #[test]
         fn multiple_expressions() {
@@ -713,7 +680,7 @@ mod tests {
         }
 
         /// Tests parsing mixed types of expressions.
-        /// 
+        ///
         /// Verifies that lists and atoms can be parsed together.
         #[test]
         fn mixed_expressions() {
@@ -731,7 +698,7 @@ mod tests {
         }
 
         /// Tests parsing with leading and trailing whitespace.
-        /// 
+        ///
         /// Verifies that leading whitespace is consumed but trailing is not.
         #[test]
         fn with_whitespace() {
@@ -741,14 +708,11 @@ mod tests {
         }
 
         /// Tests parsing with newlines between expressions.
-        /// 
+        ///
         /// Verifies that newlines are treated as whitespace separators.
         #[test]
         fn with_newlines() {
-            let expected = vec![
-                Sexpr::Atom(Atom::Number(1)),
-                Sexpr::Atom(Atom::Number(2)),
-            ];
+            let expected = vec![Sexpr::Atom(Atom::Number(1)), Sexpr::Atom(Atom::Number(2))];
             assert_eq!(parse("1\n2"), Ok(("", expected)));
         }
     }

@@ -34,7 +34,7 @@ mod tests {
         use super::*;
 
         /// Tests parsing empty input.
-        /// 
+        ///
         /// Verifies that empty strings return empty consumed whitespace.
         #[test]
         fn empty() {
@@ -42,7 +42,7 @@ mod tests {
         }
 
         /// Tests parsing input with no whitespace.
-        /// 
+        ///
         /// Verifies that non-whitespace input is left unparsed.
         #[test]
         fn no_whitespace() {
@@ -50,7 +50,7 @@ mod tests {
         }
 
         /// Tests parsing a single space.
-        /// 
+        ///
         /// Verifies that a single space is correctly consumed.
         #[test]
         fn single_space() {
@@ -58,7 +58,7 @@ mod tests {
         }
 
         /// Tests parsing multiple spaces.
-        /// 
+        ///
         /// Verifies that consecutive spaces are correctly consumed.
         #[test]
         fn multiple_spaces() {
@@ -66,7 +66,7 @@ mod tests {
         }
 
         /// Tests parsing a tab character.
-        /// 
+        ///
         /// Verifies that tab characters are correctly consumed as whitespace.
         #[test]
         fn tab() {
@@ -74,7 +74,7 @@ mod tests {
         }
 
         /// Tests parsing a newline character.
-        /// 
+        ///
         /// Verifies that newline characters are correctly consumed as whitespace.
         #[test]
         fn newline() {
@@ -82,7 +82,7 @@ mod tests {
         }
 
         /// Tests parsing mixed whitespace characters.
-        /// 
+        ///
         /// Verifies that combinations of spaces, tabs, and newlines are consumed together.
         #[test]
         fn mixed_whitespace() {
@@ -90,7 +90,7 @@ mod tests {
         }
 
         /// Tests parsing only whitespace.
-        /// 
+        ///
         /// Verifies that input containing only whitespace is fully consumed.
         #[test]
         fn only_whitespace() {
@@ -98,7 +98,7 @@ mod tests {
         }
 
         /// Tests parsing carriage return and newline.
-        /// 
+        ///
         /// Verifies that CRLF line endings are correctly consumed.
         #[test]
         fn carriage_return() {
@@ -110,7 +110,7 @@ mod tests {
         use super::*;
 
         /// Tests parsing a simple comment.
-        /// 
+        ///
         /// Verifies that a comment line ending with newline is correctly consumed.
         #[test]
         fn simple() {
@@ -118,7 +118,7 @@ mod tests {
         }
 
         /// Tests parsing a comment without a newline.
-        /// 
+        ///
         /// Verifies that comments at end of input (no trailing newline) are consumed.
         #[test]
         fn without_newline() {
@@ -126,7 +126,7 @@ mod tests {
         }
 
         /// Tests parsing a comment with content.
-        /// 
+        ///
         /// Verifies that comment text with spaces and content is correctly consumed.
         #[test]
         fn with_content() {
@@ -137,7 +137,7 @@ mod tests {
         }
 
         /// Tests parsing multiple consecutive comments.
-        /// 
+        ///
         /// Verifies that multiple comment lines are all consumed together.
         #[test]
         fn multiple() {
@@ -148,7 +148,7 @@ mod tests {
         }
 
         /// Tests parsing only a comment.
-        /// 
+        ///
         /// Verifies that input containing only a comment is fully consumed.
         #[test]
         fn only_comment() {
@@ -160,29 +160,23 @@ mod tests {
         use super::*;
 
         /// Tests parsing spaces followed by a comment.
-        /// 
+        ///
         /// Verifies that whitespace before comments is consumed together.
         #[test]
         fn comment_and_spaces() {
-            assert_eq!(
-                ws("  ; comment\n  abc"),
-                Ok(("abc", "  ; comment\n  "))
-            );
+            assert_eq!(ws("  ; comment\n  abc"), Ok(("abc", "  ; comment\n  ")));
         }
 
         /// Tests parsing tabs and spaces before a comment.
-        /// 
+        ///
         /// Verifies that mixed whitespace before comments is correctly handled.
         #[test]
         fn spaces_before_comment() {
-            assert_eq!(
-                ws(" \t; comment\nabc"),
-                Ok(("abc", " \t; comment\n"))
-            );
+            assert_eq!(ws(" \t; comment\nabc"), Ok(("abc", " \t; comment\n")));
         }
 
         /// Tests parsing a complex mix of whitespace and comments.
-        /// 
+        ///
         /// Verifies that multiple whitespace types mixed with multiple comments
         /// are all consumed together correctly.
         #[test]
