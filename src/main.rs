@@ -1,3 +1,9 @@
+//! Kakei - A kakeibo (household financial ledger) CLI application.
+//!
+//! This is the main entry point for the kakei application, which provides
+//! a command-line interface for managing personal finances using the Japanese
+//! kakeibo method.
+
 use clap::Parser;
 use directories::ProjectDirs;
 use kakei::{

@@ -1,3 +1,8 @@
+//! Processor layer for the kakei application.
+//!
+//! This module provides high-level business logic for managing financial transactions,
+//! including adding transactions, initializing master data, and retrieving transaction history.
+
 use chrono::NaiveDate;
 use kakei_database::{
     CategoryType, DbError, KakeiRepository, SqliteKakeiRepository, TransactionDetail, TransactionId,
@@ -11,24 +16,34 @@ use tracing::{debug, info, instrument, warn};
 /// Errors specific to the Processor layer.
 #[derive(Debug, Error)]
 pub enum ProcessorError {
+    /// Database operation failed.
     #[error("Database error: {0}")]
     Database(#[from] DbError),
+    /// Money-related operation failed (e.g., currency mismatch).
     #[error("Money error: {0}")]
     Money(#[from] MoneyError),
 
+    /// Date string parsing failed.
     #[error("Invalid date format: {0}")]
     InvalidDate(#[from] chrono::ParseError),
 
+    /// Amount string parsing failed.
     #[error("Invalid amount format: {0}")]
     InvalidAmount(#[from] rust_decimal::Error),
 
+    /// The specified category was not found in the database.
     #[error("Category not found: {0}")]
     CategoryNotFound(String),
 
+    /// The specified account was not found in the database.
     #[error("Account not found: {0}")]
     AccountNotFound(String),
 }
 
+/// The main processor for handling kakeibo operations.
+///
+/// This struct provides methods for managing transactions, categories, and accounts
+/// in the kakeibo (household financial ledger) application.
 pub struct Processor {
     repo: SqliteKakeiRepository,
 }

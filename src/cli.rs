@@ -17,15 +17,18 @@ pub struct CLIArgs {
 }
 
 impl CLIArgs {
+    /// Returns the subcommand to execute.
     pub fn command(&self) -> Commands {
         self.command.clone()
     }
 
+    /// Returns the path to the configuration file.
     pub fn config_file(&self) -> PathBuf {
         self.config_file.clone()
     }
 }
 
+/// Available subcommands for the kakei application.
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum Commands {
     /// Add a new transaction.
