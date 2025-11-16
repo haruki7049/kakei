@@ -208,10 +208,12 @@ mod tests {
 
         /// Tests parsing an empty string literal.
         ///
-        /// Empty strings fail because is_not("\"") requires at least one character.
-        /// This is a known limitation of the current parser implementation.
+        /// TODO: Empty strings currently fail because is_not("\"") requires at least one character.
+        /// This is a known limitation that should be fixed to properly support empty string literals.
+        /// The parser should be updated to handle "" correctly and return Atom::String("".to_string()).
         #[test]
         fn empty() {
+            // TODO: This test documents current behavior but should be updated when empty strings are supported
             assert!(parse_string("\"\"").is_err());
         }
 
@@ -700,10 +702,13 @@ mod tests {
         /// Tests parsing with leading and trailing whitespace.
         ///
         /// Verifies that leading whitespace is consumed but trailing is not.
+        /// This is intentional behavior: the parser consumes only what's needed
+        /// for valid S-expressions, leaving any remaining input (including trailing
+        /// whitespace) for potential further parsing or validation.
         #[test]
         fn with_whitespace() {
             let expected = vec![Sexpr::Atom(Atom::Number(42))];
-            // Trailing whitespace is not consumed by parse
+            // Note: Trailing whitespace is intentionally not consumed
             assert_eq!(parse("  42  "), Ok(("  ", expected)));
         }
 
