@@ -4,27 +4,68 @@ A kakeibo (household financial ledger) CLI application with powerful Lisp-based 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Option A — Build from source](#option-a--build-from-source)
+  - [Option B — Install via cargo (local)](#option-b--install-via-cargo-local)
+  - [Option C — Releases](#option-c--releases)
+  - [Option D — Install via Nix flakes](#option-d--install-via-nix-flakes)
+  - [Platform notes](#platform-notes)
+- [Quick Start](#quick-start)
+  - [1. Initialize the database](#1-initialize-the-database)
+  - [2. Add transactions](#2-add-transactions)
+  - [3. List transactions](#3-list-transactions)
+  - [4. Transform transactions with Lisp](#4-transform-transactions-with-lisp)
+- [Commands](#commands)
+  - [`kakei init`](#kakei-init)
+  - [`kakei add`](#kakei-add)
+  - [`kakei list`](#kakei-list)
+  - [`kakei transform`](#kakei-transform)
+- [Data Format](#data-format)
+  - [Transaction Structure](#transaction-structure)
+  - [Table Structure](#table-structure)
+- [Lisp Functions](#lisp-functions)
+- [Configuration](#configuration)
+  - [Configuration File](#configuration-file)
+  - [Database Location](#database-location)
+- [Architecture](#architecture)
+- [Development](#development)
+  - [Running Tests](#running-tests)
+  - [Linting](#linting)
+  - [Building](#building)
+- [Examples](#examples)
+  - [Monthly Budget Tracking](#monthly-budget-tracking)
+  - [Analyzing Spending Patterns](#analyzing-spending-patterns)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author](#author)
+- [Repository](#repository)
+
 ## Overview
 
-`kakei` is a command-line interface application for managing personal finances using the Japanese kakeibo (家計簿) method. It provides transaction tracking, categorization, and powerful data transformation capabilities through an embedded Lisp dialect.
+`kakei` is a command-line application for managing personal finances using the Japanese kakeibo (家計簿) method. It provides transaction tracking, categorization, and powerful Lisp-based table transformations for flexible analysis and reporting.
 
 ## Features
 
-- 📊 **Transaction Management**: Add, list, and manage financial transactions
-- 🏷️ **Category & Account Organization**: Organize transactions by customizable categories and accounts
-- 🔄 **Lisp-Based Transformations**: Transform and analyze transaction data using a Lisp dialect
-- 📋 **Table Display**: Beautiful table formatting using the `tabled` crate
-- 💾 **SQLite Database**: Persistent storage with automatic migrations
-- ⚙️ **Configuration**: Customizable categories and accounts
+- 📊 Transaction Management: Add, list, and manage financial transactions
+- 🏷️ Category & Account Organization: Organize transactions by customizable categories and accounts
+- 🔄 Lisp-Based Transformations: Transform and analyze transaction data using a small Lisp dialect
+- 📋 Table Display: Beautiful table formatting using the `tabled` crate
+- 💾 SQLite Database: Persistent storage with automatic migrations
+- ⚙️ Configuration: Customizable categories and accounts
 
 ## Installation
 
 ### Prerequisites
 
-- Rust 1.91.1 or later
+- Rust 1.91.1 or later (for building from source)
 - SQLite 3
 
-### Build from source
+### Option A — Build from source
 
 ```bash
 git clone https://github.com/haruki7049/kakei.git
@@ -32,7 +73,46 @@ cd kakei
 cargo build --release
 ```
 
-The binary will be available at `target/release/kakei`.
+The binary will be available at `target/release/kakei`. You can copy it to a directory on your PATH (e.g., `/usr/local/bin`) if desired.
+
+### Option B — Install via cargo (local)
+
+From the repository root:
+
+```bash
+cargo install --path .
+```
+
+This installs `kakei` to your cargo bin directory (usually `~/.cargo/bin`).
+
+### Option C — Releases
+
+If release binaries are published on GitHub Releases, you can download the appropriate archive for your platform and unpack the `kakei` binary.
+
+### Option D — Install via Nix flakes
+
+If you have Nix with flakes enabled, you can install `kakei` directly from the repository:
+
+```bash
+# Install from the flake
+nix profile install github:haruki7049/kakei
+
+# Or run directly without installing
+nix run github:haruki7049/kakei -- --help
+
+# For local development
+nix develop
+```
+
+The flake provides:
+
+- `packages.default`: The kakei binary
+- `devShells.default`: Development environment with Rust toolchain and dependencies
+
+### Platform notes
+
+- On Linux `kakei` follows the XDG spec for config and data directories (see Configuration section).
+- On macOS/Windows, the app will fall back to reasonable defaults if XDG variables are not set (see Configuration section).
 
 ## Quick Start
 
@@ -42,9 +122,11 @@ The binary will be available at `target/release/kakei`.
 kakei init
 ```
 
-This creates the database at `~/.local/share/kakei/kakei.db` and initializes default categories and accounts.
+This creates the database at `~/.local/share/kakei/kakei.db` (on Linux when XDG is used) and initializes default categories and accounts.
 
 ### 2. Add transactions
+
+Example usages:
 
 ```bash
 # Add an expense
@@ -57,13 +139,19 @@ kakei add --date 2025-01-02 --amount -2000 --category Transport --account Cash -
 kakei add --date 2025-01-15 --amount 50000 --category Salary --account Bank --memo "Monthly salary"
 ```
 
+Note on amounts:
+
+- `--amount` expects the value in the currency's minor units as an integer.
+- For JPY (no subunits), use integer yen (e.g., `-1000` represents ¥-1000).
+- For other currencies, follow that currency's minor unit convention (e.g., cents for USD).
+
 ### 3. List transactions
 
 ```bash
 kakei list
 ```
 
-Output:
+Example output:
 
 ```
 ╭────────────┬────────┬───────────┬─────────┬──────────────╮
@@ -85,9 +173,16 @@ kakei transform --program "table"
 
 Group transactions by category:
 
+Note about quoting:
+
+- When passing Lisp programs on a shell command line, ensure correct quoting/escaping.
+- Example for POSIX shells where the program contains parentheses and single quotes:
+
 ```bash
 kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))"
 ```
+
+If you run into shell quoting issues, put the program in a file and read from it or use alternate quoting.
 
 ## Commands
 
@@ -95,15 +190,15 @@ kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category 
 
 Initialize the database and configuration.
 
-**Usage:**
+Usage:
 
 ```bash
 kakei init
 ```
 
-**Description:**
+Description:
 
-- Creates the database file at `~/.local/share/kakei/kakei.db`
+- Creates the database file (default: `~/.local/share/kakei/kakei.db` on Linux when XDG is available)
 - Runs database migrations
 - Initializes default categories: Food, Transport, Daily Goods, Hobby, Salary
 - Initializes default accounts: Cash, Bank
@@ -112,22 +207,22 @@ kakei init
 
 Add a new transaction.
 
-**Usage:**
+Usage:
 
 ```bash
 kakei add --date <DATE> --amount <AMOUNT> --category <CATEGORY> --account <ACCOUNT> [--currency <CURRENCY>] [--memo <MEMO>]
 ```
 
-**Arguments:**
+Arguments:
 
 - `--date <DATE>`: Transaction date in YYYY-MM-DD format (required)
-- `--amount <AMOUNT>`: Transaction amount (negative for expenses, positive for income) (required)
+- `--amount <AMOUNT>`: Transaction amount in minor units (negative for expenses, positive for income) (required)
 - `--category <CATEGORY>`: Category name (required)
 - `--account <ACCOUNT>`: Account name (required)
 - `--currency <CURRENCY>`: Currency code (default: JPY)
 - `--memo <MEMO>`: Optional memo/note
 
-**Examples:**
+Examples:
 
 ```bash
 # Simple expense
@@ -147,13 +242,13 @@ kakei add --date 2025-01-20 --amount -50 --category Food --account Cash --curren
 
 List recent transactions in a formatted table.
 
-**Usage:**
+Usage:
 
 ```bash
 kakei list
 ```
 
-**Description:**
+Description:
 
 - Displays the 20 most recent transactions
 - Shows: Date, Amount, Category, Account, Memo
@@ -163,17 +258,17 @@ kakei list
 
 Transform and analyze transactions using Lisp programs.
 
-**Usage:**
+Usage:
 
 ```bash
 kakei transform --program <LISP_PROGRAM>
 ```
 
-**Arguments:**
+Arguments:
 
 - `--program <LISP_PROGRAM>`: Lisp expression to transform the transaction table (required)
 
-**Examples:**
+Examples:
 
 View all transactions:
 
@@ -225,7 +320,7 @@ Transactions are represented as association lists in Lisp format:
            (memo . "")))
 ```
 
-**Fields:**
+Fields:
 
 - `date`: Transaction date (string, YYYY-MM-DD format)
 - `amount`: Transaction amount in minor units (integer, e.g., -1000 for ¥-1000)
@@ -323,9 +418,9 @@ The `kakei_lisp` dialect provides the following built-in functions:
 
 ### Configuration File
 
-Location: `~/.config/kakei/config.toml`
+Location: `~/.config/kakei/config.toml` (on Linux when XDG is used)
 
-**Example:**
+Example:
 
 ```toml
 default_categories = ["Food", "Transport", "Daily Goods", "Hobby", "Salary"]
@@ -334,9 +429,9 @@ default_accounts = ["Cash", "Bank"]
 
 ### Database Location
 
-The SQLite database is stored at: `~/.local/share/kakei/kakei.db`
+The SQLite database is stored at: `~/.local/share/kakei/kakei.db` (on Linux when XDG is used)
 
-This follows the XDG Base Directory specification on Linux.
+This follows the XDG Base Directory specification on Linux. On macOS/Windows, the app will use platform-appropriate directories if XDG environment variables are not set.
 
 ## Architecture
 
