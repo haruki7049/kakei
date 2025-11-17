@@ -80,6 +80,10 @@ pub fn transactions_to_table(transactions: &[TransactionDetail]) -> Value {
 ///
 /// The Lisp program receives the table as a variable named `table`.
 /// The program should return the transformed table.
+/// 
+/// The result is always normalized to a grouped format. If the Lisp program
+/// returns a flat list of transactions, it will be wrapped in a single group
+/// named "All".
 pub fn transform_table(table: Value, lisp_program: &str) -> Result<Value, TransformError> {
     // Parse the Lisp program
     let (remaining, sexprs) =
@@ -104,7 +108,18 @@ pub fn transform_table(table: Value, lisp_program: &str) -> Result<Value, Transf
         result = eval(&sexpr, &mut env)?;
     }
 
-    Ok(result)
+    // Normalize the result to grouped format
+    // If the result is already grouped, return it as-is
+    // Otherwise, wrap it in a single group named "All"
+    if is_grouped_result(&result) {
+        Ok(result)
+    } else {
+        // Wrap the flat list in a single group: (("All" . result))
+        let group_name = Value::String("All".to_string());
+        let group_pair = Value::Cons(Rc::new(group_name), Rc::new(result));
+        let grouped_result = Value::Cons(Rc::new(group_pair), Rc::new(Value::Nil));
+        Ok(grouped_result)
+    }
 }
 
 /// Format a Value into a human-readable string for display.
@@ -354,7 +369,14 @@ mod tests {
         let program = "table";
         let result = transform_table(table, program).unwrap();
 
-        assert!(matches!(result, Value::Cons(_, _)));
+        // The result should now be grouped (wrapped in a single "All" group)
+        assert!(is_grouped_result(&result));
+        
+        // Verify we can extract grouped tables
+        let groups = value_to_grouped_tables(&result).unwrap();
+        assert_eq!(groups.len(), 1);
+        assert_eq!(groups[0].group_name, "All");
+        assert_eq!(groups[0].rows.len(), 1);
     }
 
     #[test]
@@ -537,9 +559,13 @@ mod tests {
         let program = "(cons (car table) ())";
         let result = transform_table(table, program).unwrap();
 
-        let rows = value_to_display_rows(&result).unwrap();
-        assert_eq!(rows.len(), 1);
-        assert_eq!(rows[0].category, "Food");
+        // The result should now be grouped (wrapped in a single "All" group)
+        assert!(is_grouped_result(&result));
+        let groups = value_to_grouped_tables(&result).unwrap();
+        assert_eq!(groups.len(), 1);
+        assert_eq!(groups[0].group_name, "All");
+        assert_eq!(groups[0].rows.len(), 1);
+        assert_eq!(groups[0].rows[0].category, "Food");
     }
 
     #[test]
@@ -554,9 +580,13 @@ mod tests {
         let program = "(cdr table)";
         let result = transform_table(table, program).unwrap();
 
-        let rows = value_to_display_rows(&result).unwrap();
-        assert_eq!(rows.len(), 1);
-        assert_eq!(rows[0].category, "Transport");
+        // The result should now be grouped (wrapped in a single "All" group)
+        assert!(is_grouped_result(&result));
+        let groups = value_to_grouped_tables(&result).unwrap();
+        assert_eq!(groups.len(), 1);
+        assert_eq!(groups[0].group_name, "All");
+        assert_eq!(groups[0].rows.len(), 1);
+        assert_eq!(groups[0].rows[0].category, "Transport");
     }
 
     #[test]

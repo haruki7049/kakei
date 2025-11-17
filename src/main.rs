@@ -137,34 +137,17 @@ async fn handle_transform_command(
 ) -> Result<(), Box<dyn std::error::Error>> {
     match processor.transform_transactions(program).await {
         Ok(result) => {
-            // Check if the result is a grouped table or a flat table
-            if kakei_processor::is_grouped_result(&result) {
-                // Handle grouped results
-                let grouped_tables = kakei_processor::value_to_grouped_tables(&result)?;
+            // The result is always in grouped format
+            let grouped_tables = kakei_processor::value_to_grouped_tables(&result)?;
 
-                for group in grouped_tables {
-                    println!("\n=== {} ===", group.group_name);
+            for group in grouped_tables {
+                println!("\n=== {} ===", group.group_name);
 
-                    if group.rows.is_empty() {
-                        println!("No transactions in this group.");
-                    } else {
-                        let display_data: Vec<TransactionDisplay> = group
-                            .rows
-                            .into_iter()
-                            .map(TransactionDisplay::from_display_row)
-                            .collect();
-
-                        display_table(display_data);
-                    }
-                }
-            } else {
-                // Handle flat table results
-                let rows = kakei_processor::value_to_display_rows(&result)?;
-
-                if rows.is_empty() {
-                    println!("No transactions found.");
+                if group.rows.is_empty() {
+                    println!("No transactions in this group.");
                 } else {
-                    let display_data: Vec<TransactionDisplay> = rows
+                    let display_data: Vec<TransactionDisplay> = group
+                        .rows
                         .into_iter()
                         .map(TransactionDisplay::from_display_row)
                         .collect();
