@@ -66,4 +66,9 @@ tracing-subscriber.workspace = true
 tabled.workspace = true
 nom.workspace = true
 
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "3.0"
+tempfile = "3.8"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
