@@ -56,6 +56,7 @@ nom = "8.0.0"
 assert_cmd = "2.0"
 predicates = "3.0"
 tempfile = "3.8"
+rust-i18n = "3"
 
 [dependencies]
 kakei_processor.workspace = true
@@ -68,6 +69,7 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 tabled.workspace = true
 nom.workspace = true
+rust-i18n.workspace = true
 
 [dev-dependencies]
 assert_cmd.workspace = true

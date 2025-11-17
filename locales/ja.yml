@@ -1,0 +1,23 @@
+# Success messages
+transaction_added: "✅ 取引を正常に追加しました！（ID: %{id}）"
+init_complete: "✅ 初期化が完了しました。データベース: %{path}"
+
+# Error messages
+transaction_add_failed: "❌ 取引の追加に失敗しました: %{error}"
+init_failed: "❌ データベースの初期化に失敗しました: %{error}"
+transaction_list_failed: "❌ 取引の取得に失敗しました: %{error}"
+transform_failed: "❌ 取引の変換に失敗しました: %{error}"
+
+# List command
+no_transactions: "取引が見つかりません。"
+
+# Table headers
+date: "日付"
+amount: "金額"
+category: "カテゴリー"
+account: "口座"
+memo: "メモ"
+
+# Transform command
+group_header: "=== %{group} ==="
+no_transactions_in_group: "このグループには取引がありません。"

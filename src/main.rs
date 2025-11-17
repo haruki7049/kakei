@@ -11,10 +11,14 @@ use kakei::{
     configs::Configuration,
 };
 use kakei_processor::Processor;
+use rust_i18n::t;
 use std::path::{Path, PathBuf};
 use tabled::{Table, Tabled, settings::Style};
 use tracing::debug;
 use tracing_subscriber::filter::EnvFilter;
+
+// Re-export the i18n macro setup from lib
+rust_i18n::i18n!("locales", fallback = "en");
 
 /// Display struct for transactions in table format
 #[derive(Tabled)]
@@ -59,11 +63,11 @@ async fn handle_add_command(
         .await
     {
         Ok(tx_id) => {
-            println!("✅ Transaction added successfully! (ID: {:?})", tx_id);
+            println!("{}", t!("transaction_added", id = format!("{:?}", tx_id)));
             Ok(())
         }
         Err(e) => {
-            eprintln!("❌ Failed to add transaction: {}", e);
+            eprintln!("{}", t!("transaction_add_failed", error = e.to_string()));
             Err(e.into())
         }
     }
@@ -80,14 +84,11 @@ async fn handle_init_command(
         .await
     {
         Ok(_) => {
-            println!(
-                "✅ Initialization complete. Database ready at: {}",
-                db_path_str
-            );
+            println!("{}", t!("init_complete", path = db_path_str));
             Ok(())
         }
         Err(e) => {
-            eprintln!("❌ Failed to initialize database: {}", e);
+            eprintln!("{}", t!("init_failed", error = e.to_string()));
             Err(e.into())
         }
     }
@@ -98,7 +99,7 @@ async fn handle_list_command(processor: &Processor) -> Result<(), Box<dyn std::e
     match processor.get_recent_transactions().await {
         Ok(transactions) => {
             if transactions.is_empty() {
-                println!("No transactions found.");
+                println!("{}", t!("no_transactions"));
             } else {
                 // Convert transactions to display format
                 let display_data: Vec<TransactionDisplay> = transactions
@@ -117,7 +118,7 @@ async fn handle_list_command(processor: &Processor) -> Result<(), Box<dyn std::e
             Ok(())
         }
         Err(e) => {
-            eprintln!("❌ Failed to retrieve transactions: {}", e);
+            eprintln!("{}", t!("transaction_list_failed", error = e.to_string()));
             Err(e.into())
         }
     }
@@ -141,10 +142,10 @@ async fn handle_transform_command(
             let grouped_tables = kakei_processor::value_to_grouped_tables(&result)?;
 
             for group in grouped_tables {
-                println!("\n=== {} ===", group.group_name);
+                println!("\n{}", t!("group_header", group = group.group_name));
 
                 if group.rows.is_empty() {
-                    println!("No transactions in this group.");
+                    println!("{}", t!("no_transactions_in_group"));
                 } else {
                     let display_data: Vec<TransactionDisplay> = group
                         .rows
@@ -158,7 +159,7 @@ async fn handle_transform_command(
             Ok(())
         }
         Err(e) => {
-            eprintln!("❌ Failed to transform transactions: {}", e);
+            eprintln!("{}", t!("transform_failed", error = e.to_string()));
             Err(e.into())
         }
     }
@@ -175,6 +176,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("warn")),
         )
         .init();
+
+    // Set locale from environment variable if specified
+    if let Ok(locale) = std::env::var("RUST_I18N_LOCALE") {
+        rust_i18n::set_locale(&locale);
+    } else if let Ok(lang) = std::env::var("LANG") {
+        // Extract language code from LANG (e.g., ja_JP.UTF-8 -> ja)
+        let locale_code = lang.split('_').next().unwrap_or("en");
+        rust_i18n::set_locale(locale_code);
+    }
 
     let config: Configuration = confy::load_path(args.config_file()).unwrap_or_default();
 

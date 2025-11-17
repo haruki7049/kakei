@@ -1,0 +1,23 @@
+# Success messages
+transaction_added: "✅ Transaction added successfully! (ID: %{id})"
+init_complete: "✅ Initialization complete. Database ready at: %{path}"
+
+# Error messages
+transaction_add_failed: "❌ Failed to add transaction: %{error}"
+init_failed: "❌ Failed to initialize database: %{error}"
+transaction_list_failed: "❌ Failed to retrieve transactions: %{error}"
+transform_failed: "❌ Failed to transform transactions: %{error}"
+
+# List command
+no_transactions: "No transactions found."
+
+# Table headers (these are in the TransactionDisplay struct)
+date: "Date"
+amount: "Amount"
+category: "Category"
+account: "Account"
+memo: "Memo"
+
+# Transform command
+group_header: "=== %{group} ==="
+no_transactions_in_group: "No transactions in this group."
