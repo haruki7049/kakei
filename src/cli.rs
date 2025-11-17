@@ -17,14 +17,14 @@ pub struct CLIArgs {
 }
 
 impl CLIArgs {
-    /// Returns the subcommand to execute.
-    pub fn command(&self) -> Commands {
-        self.command.clone()
+    /// Returns a reference to the subcommand to execute.
+    pub fn command(&self) -> &Commands {
+        &self.command
     }
 
-    /// Returns the path to the configuration file.
-    pub fn config_file(&self) -> PathBuf {
-        self.config_file.clone()
+    /// Returns a reference to the path to the configuration file.
+    pub fn config_file(&self) -> &PathBuf {
+        &self.config_file
     }
 }
 

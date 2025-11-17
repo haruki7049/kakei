@@ -6,6 +6,28 @@ use super::value::{Environment, EvalError, Value};
 use crate::parser::{Atom, Sexpr};
 use std::rc::Rc;
 
+/// Helper function to check argument arity for special forms
+fn check_arity_exact(args: &[Sexpr], expected: usize) -> Result<(), EvalError> {
+    if args.len() != expected {
+        return Err(EvalError::ArityError {
+            expected: expected.to_string(),
+            got: args.len(),
+        });
+    }
+    Ok(())
+}
+
+/// Helper function to check minimum argument arity for special forms
+fn check_arity_min(args: &[Sexpr], min: usize) -> Result<(), EvalError> {
+    if args.len() < min {
+        return Err(EvalError::ArityError {
+            expected: format!("at least {}", min),
+            got: args.len(),
+        });
+    }
+    Ok(())
+}
+
 /// Evaluate a single S-expression in the given environment.
 pub fn eval(expr: &Sexpr, env: &mut Environment) -> Result<Value, EvalError> {
     match expr {
@@ -76,12 +98,7 @@ fn eval_dotted_list(
 
 /// Evaluate a quote special form.
 fn eval_quote(args: &[Sexpr]) -> Result<Value, EvalError> {
-    if args.len() != 1 {
-        return Err(EvalError::ArityError {
-            expected: "1".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity_exact(args, 1)?;
     sexpr_to_value(&args[0])
 }
 
@@ -118,12 +135,7 @@ fn list_to_cons(values: &[Value]) -> Result<Value, EvalError> {
 
 /// Evaluate a define special form.
 fn eval_define(args: &[Sexpr], env: &mut Environment) -> Result<Value, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::ArityError {
-            expected: "2".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity_exact(args, 2)?;
 
     let name = match &args[0] {
         Sexpr::Atom(Atom::Symbol(s)) => s.clone(),
@@ -141,12 +153,7 @@ fn eval_define(args: &[Sexpr], env: &mut Environment) -> Result<Value, EvalError
 
 /// Evaluate a lambda special form.
 fn eval_lambda(args: &[Sexpr], env: &mut Environment) -> Result<Value, EvalError> {
-    if args.len() < 2 {
-        return Err(EvalError::ArityError {
-            expected: "at least 2".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity_min(args, 2)?;
 
     let params = match &args[0] {
         Sexpr::List(list) => list
@@ -177,12 +184,7 @@ fn eval_lambda(args: &[Sexpr], env: &mut Environment) -> Result<Value, EvalError
 
 /// Evaluate an if special form.
 fn eval_if(args: &[Sexpr], env: &mut Environment) -> Result<Value, EvalError> {
-    if args.len() != 3 {
-        return Err(EvalError::ArityError {
-            expected: "3".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity_exact(args, 3)?;
 
     let test = eval(&args[0], env)?;
     if is_truthy(&test) {

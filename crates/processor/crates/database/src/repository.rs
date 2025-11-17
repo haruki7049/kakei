@@ -8,6 +8,9 @@ use sqlx::Pool;
 use sqlx::sqlite::{Sqlite, SqliteConnectOptions, SqlitePoolOptions};
 use tracing::{debug, info, instrument};
 
+/// Maximum number of connections in the SQLite connection pool
+const MAX_POOL_CONNECTIONS: u32 = 5;
+
 // --- Repository Trait (Abstraction) ---
 
 /// Defines the interface for database operations.
@@ -141,9 +144,12 @@ impl SqliteKakeiRepository {
             .create_if_missing(true) // Enable automatic file creation
             .foreign_keys(true); // Enable foreign key constraints
 
-        debug!("Creating connection pool with max 5 connections");
+        debug!(
+            "Creating connection pool with max {} connections",
+            MAX_POOL_CONNECTIONS
+        );
         let pool: Pool<Sqlite> = SqlitePoolOptions::new()
-            .max_connections(5)
+            .max_connections(MAX_POOL_CONNECTIONS)
             .connect_with(options)
             .await?;
 

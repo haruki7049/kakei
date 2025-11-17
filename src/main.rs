@@ -31,6 +31,19 @@ struct TransactionDisplay {
     memo: String,
 }
 
+impl TransactionDisplay {
+    /// Create a TransactionDisplay from a DisplayRow
+    fn from_display_row(row: kakei_processor::DisplayRow) -> Self {
+        Self {
+            date: row.date,
+            amount: row.amount,
+            category: row.category,
+            account: row.account,
+            memo: row.memo,
+        }
+    }
+}
+
 /// Handle the Add command
 async fn handle_add_command(
     processor: &Processor,
@@ -99,10 +112,7 @@ async fn handle_list_command(processor: &Processor) -> Result<(), Box<dyn std::e
                     })
                     .collect();
 
-                // Create and display table
-                let mut table = Table::new(display_data);
-                table.with(Style::rounded());
-                println!("{}", table);
+                display_table(display_data);
             }
             Ok(())
         }
@@ -111,6 +121,13 @@ async fn handle_list_command(processor: &Processor) -> Result<(), Box<dyn std::e
             Err(e.into())
         }
     }
+}
+
+/// Display a table of transactions
+fn display_table(display_data: Vec<TransactionDisplay>) {
+    let mut table = Table::new(display_data);
+    table.with(Style::rounded());
+    println!("{}", table);
 }
 
 /// Handle the Transform command
@@ -134,18 +151,10 @@ async fn handle_transform_command(
                         let display_data: Vec<TransactionDisplay> = group
                             .rows
                             .into_iter()
-                            .map(|row| TransactionDisplay {
-                                date: row.date,
-                                amount: row.amount,
-                                category: row.category,
-                                account: row.account,
-                                memo: row.memo,
-                            })
+                            .map(TransactionDisplay::from_display_row)
                             .collect();
 
-                        let mut table = Table::new(display_data);
-                        table.with(Style::rounded());
-                        println!("{}", table);
+                        display_table(display_data);
                     }
                 }
             } else {
@@ -157,18 +166,10 @@ async fn handle_transform_command(
                 } else {
                     let display_data: Vec<TransactionDisplay> = rows
                         .into_iter()
-                        .map(|row| TransactionDisplay {
-                            date: row.date,
-                            amount: row.amount,
-                            category: row.category,
-                            account: row.account,
-                            memo: row.memo,
-                        })
+                        .map(TransactionDisplay::from_display_row)
                         .collect();
 
-                    let mut table = Table::new(display_data);
-                    table.with(Style::rounded());
-                    println!("{}", table);
+                    display_table(display_data);
                 }
             }
             Ok(())
@@ -225,14 +226,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             account,
             memo,
         } => {
-            handle_add_command(
-                &processor, &date, &amount, &currency, &category, &account, &memo,
-            )
-            .await?
+            handle_add_command(&processor, date, amount, currency, category, account, memo).await?
         }
         Commands::Init => handle_init_command(&processor, &config, db_path_str).await?,
         Commands::List => handle_list_command(&processor).await?,
-        Commands::Transform { program } => handle_transform_command(&processor, &program).await?,
+        Commands::Transform { program } => handle_transform_command(&processor, program).await?,
     }
 
     Ok(())
