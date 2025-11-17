@@ -164,7 +164,8 @@ fn parse_template(content: &str) -> Result<EditorTransaction, EditorError> {
     // Validate required fields
     let date = require_field(date, "date")?;
     let amount = require_field(amount, "amount")?;
-    let currency = require_field(currency, "currency")?;
+    // Currency is optional and defaults to DEFAULT_CURRENCY if not provided
+    let currency = currency.unwrap_or_else(|| DEFAULT_CURRENCY.to_string());
     let category = require_field(category, "category")?;
     let account = require_field(account, "account")?;
 
@@ -328,5 +329,32 @@ unknown: value
         // Whitespace-only currency should default to JPY
         let template = generate_template("  ");
         assert!(template.contains("currency: JPY"));
+    }
+
+    #[test]
+    fn test_parse_template_without_currency() {
+        // Currency should default to JPY if not provided
+        let content = r#"
+date: 2025-01-15
+amount: -1000
+category: Food
+account: Cash
+"#;
+        let result = parse_template(content).unwrap();
+        assert_eq!(result.currency, "JPY");
+    }
+
+    #[test]
+    fn test_parse_template_with_empty_currency() {
+        // Empty currency field should also default to JPY
+        let content = r#"
+date: 2025-01-15
+amount: -1000
+currency: 
+category: Food
+account: Cash
+"#;
+        let result = parse_template(content).unwrap();
+        assert_eq!(result.currency, "JPY");
     }
 }
