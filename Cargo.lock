@@ -921,6 +921,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "kakei_database",
+ "kakei_lisp",
  "kakei_money",
  "rust_decimal",
  "sqlx",

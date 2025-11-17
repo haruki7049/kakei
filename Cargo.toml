@@ -33,6 +33,7 @@ readme = "README.md"
 kakei_processor = { path = "crates/processor" }
 kakei_database = { path = "crates/processor/crates/database" }
 kakei_money = { path = "crates/processor/crates/money" }
+kakei_lisp = { path = "crates/processor/crates/klisp" }
 sqlx = { version = "0.8.6", features = [
   "sqlite",
   "runtime-tokio",

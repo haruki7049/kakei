@@ -3,6 +3,8 @@
 //! This module provides high-level business logic for managing financial transactions,
 //! including adding transactions, initializing master data, and retrieving transaction history.
 
+pub mod table_transform;
+
 use chrono::NaiveDate;
 use kakei_database::{
     CategoryType, DbError, KakeiRepository, SqliteKakeiRepository, TransactionDetail, TransactionId,
@@ -12,6 +14,8 @@ use rust_decimal::Decimal;
 use std::str::FromStr;
 use thiserror::Error;
 use tracing::{debug, info, instrument, warn};
+
+pub use table_transform::{TransformError, format_value, transactions_to_table, transform_table};
 
 /// Errors specific to the Processor layer.
 #[derive(Debug, Error)]
@@ -38,6 +42,10 @@ pub enum ProcessorError {
     /// The specified account was not found in the database.
     #[error("Account not found: {0}")]
     AccountNotFound(String),
+
+    /// Table transformation error.
+    #[error("Table transformation error: {0}")]
+    Transform(#[from] TransformError),
 }
 
 /// The main processor for handling kakeibo operations.
@@ -189,5 +197,39 @@ impl Processor {
         let transactions = self.repo.get_recent_transactions(20).await?;
         debug!("Retrieved {} transactions", transactions.len());
         Ok(transactions)
+    }
+
+    /// Transform transactions using a Lisp program.
+    ///
+    /// This method retrieves recent transactions, converts them to a Lisp table,
+    /// applies the transformation program, and returns the result as a Lisp Value.
+    ///
+    /// # Arguments
+    ///
+    /// * `lisp_program` - The Lisp program to transform the table
+    ///
+    /// # Returns
+    ///
+    /// Returns the transformed table as a Lisp Value.
+    #[instrument(skip(self, lisp_program))]
+    pub async fn transform_transactions(
+        &self,
+        lisp_program: &str,
+    ) -> Result<kakei_lisp::Value, ProcessorError> {
+        info!("Transforming transactions with Lisp program");
+        
+        // Get recent transactions
+        let transactions = self.get_recent_transactions().await?;
+        debug!("Converting {} transactions to Lisp table", transactions.len());
+        
+        // Convert to Lisp table
+        let table = transactions_to_table(&transactions);
+        
+        // Apply transformation
+        debug!("Applying Lisp transformation");
+        let result = transform_table(table, lisp_program)?;
+        
+        info!("Transformation complete");
+        Ok(result)
     }
 }

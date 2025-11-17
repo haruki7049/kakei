@@ -11,6 +11,7 @@ readme.workspace = true
 [dependencies]
 kakei_database.workspace = true
 kakei_money.workspace = true
+kakei_lisp.workspace = true
 chrono.workspace = true
 tokio.workspace = true
 thiserror.workspace = true

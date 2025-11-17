@@ -65,6 +65,14 @@ pub enum Commands {
 
     /// List recent transactions.
     List,
+
+    /// Transform transactions using a Lisp program.
+    /// Example: kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))"
+    Transform {
+        /// Lisp program to transform the table.
+        #[arg(long)]
+        program: String,
+    },
 }
 
 /// Default Configuration Path, using directories crate to calculate ProjectDirs (~/.config/kakei)

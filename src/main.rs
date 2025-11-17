@@ -113,6 +113,23 @@ async fn handle_list_command(processor: &Processor) -> Result<(), Box<dyn std::e
     }
 }
 
+/// Handle the Transform command
+async fn handle_transform_command(
+    processor: &Processor,
+    program: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match processor.transform_transactions(program).await {
+        Ok(result) => {
+            println!("{}", kakei_processor::format_value(&result));
+            Ok(())
+        }
+        Err(e) => {
+            eprintln!("❌ Failed to transform transactions: {}", e);
+            Err(e.into())
+        }
+    }
+}
+
 // Use tokio for async runtime
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -165,6 +182,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Commands::Init => handle_init_command(&processor, &config, db_path_str).await?,
         Commands::List => handle_list_command(&processor).await?,
+        Commands::Transform { program } => handle_transform_command(&processor, &program).await?,
     }
 
     Ok(())
