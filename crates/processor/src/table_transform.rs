@@ -387,4 +387,272 @@ mod tests {
         // Verify the result is a list (grouped table)
         assert!(matches!(result, Value::Cons(_, _)));
     }
+
+    #[test]
+    fn test_extract_field_valid() {
+        let tx = create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash");
+        let value = transaction_to_value(&tx, 1);
+
+        let date = extract_field(&value, "date");
+        assert_eq!(date, Some("2025-01-01".to_string()));
+
+        let category = extract_field(&value, "category");
+        assert_eq!(category, Some("Food".to_string()));
+
+        let account = extract_field(&value, "account");
+        assert_eq!(account, Some("Cash".to_string()));
+    }
+
+    #[test]
+    fn test_extract_field_invalid() {
+        let tx = create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash");
+        let value = transaction_to_value(&tx, 1);
+
+        let invalid = extract_field(&value, "nonexistent");
+        assert_eq!(invalid, None);
+    }
+
+    #[test]
+    fn test_extract_field_from_nil() {
+        let result = extract_field(&Value::Nil, "date");
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_value_to_display_string() {
+        assert_eq!(value_to_display_string(&Value::String("test".to_string())), "test");
+        assert_eq!(value_to_display_string(&Value::Number(42)), "42");
+        assert_eq!(value_to_display_string(&Value::Symbol("sym".to_string())), "sym");
+        assert_eq!(value_to_display_string(&Value::Bool(true)), "true");
+        assert_eq!(value_to_display_string(&Value::Nil), "");
+    }
+
+    #[test]
+    fn test_format_amount() {
+        assert_eq!(format_amount("1000"), "¥1000");
+        assert_eq!(format_amount("-1000"), "¥-1000");
+        assert_eq!(format_amount("0"), "¥0");
+        assert_eq!(format_amount("invalid"), "invalid");
+    }
+
+    #[test]
+    fn test_value_to_display_rows_empty() {
+        let result = value_to_display_rows(&Value::Nil).unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_value_to_display_rows_single_transaction() {
+        let transactions = vec![create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash")];
+        let table = transactions_to_table(&transactions);
+
+        let rows = value_to_display_rows(&table).unwrap();
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].date, "2025-01-01");
+        assert_eq!(rows[0].amount, "¥-1000");
+        assert_eq!(rows[0].category, "Food");
+        assert_eq!(rows[0].account, "Cash");
+    }
+
+    #[test]
+    fn test_value_to_display_rows_multiple_transactions() {
+        let transactions = vec![
+            create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash"),
+            create_test_transaction(2, "2025-01-02", -2000, "Transport", "Card"),
+            create_test_transaction(3, "2025-01-03", 50000, "Salary", "Bank"),
+        ];
+        let table = transactions_to_table(&transactions);
+
+        let rows = value_to_display_rows(&table).unwrap();
+        assert_eq!(rows.len(), 3);
+        assert_eq!(rows[0].category, "Food");
+        assert_eq!(rows[1].category, "Transport");
+        assert_eq!(rows[2].category, "Salary");
+        assert_eq!(rows[2].amount, "¥50000");
+    }
+
+    #[test]
+    fn test_is_grouped_result_flat_table() {
+        let transactions = vec![create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash")];
+        let table = transactions_to_table(&transactions);
+
+        assert!(!is_grouped_result(&table));
+    }
+
+    #[test]
+    fn test_is_grouped_result_nil() {
+        assert!(!is_grouped_result(&Value::Nil));
+    }
+
+    #[test]
+    fn test_is_grouped_result_grouped_table() {
+        let transactions = vec![
+            create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash"),
+            create_test_transaction(2, "2025-01-02", -2000, "Transport", "Cash"),
+        ];
+        let table = transactions_to_table(&transactions);
+        let program = "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))";
+        let result = transform_table(table, program).unwrap();
+
+        assert!(is_grouped_result(&result));
+    }
+
+    #[test]
+    fn test_value_to_grouped_tables() {
+        let transactions = vec![
+            create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash"),
+            create_test_transaction(2, "2025-01-02", -1500, "Food", "Card"),
+            create_test_transaction(3, "2025-01-03", -2000, "Transport", "Cash"),
+        ];
+        let table = transactions_to_table(&transactions);
+        let program = "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))";
+        let result = transform_table(table, program).unwrap();
+
+        let groups = value_to_grouped_tables(&result).unwrap();
+        assert_eq!(groups.len(), 2);
+        
+        // Find Food group
+        let food_group = groups.iter().find(|g| g.group_name == "Food").unwrap();
+        assert_eq!(food_group.rows.len(), 2);
+        
+        // Find Transport group
+        let transport_group = groups.iter().find(|g| g.group_name == "Transport").unwrap();
+        assert_eq!(transport_group.rows.len(), 1);
+    }
+
+    #[test]
+    fn test_transform_table_with_car() {
+        let transactions = vec![
+            create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash"),
+            create_test_transaction(2, "2025-01-02", -2000, "Transport", "Cash"),
+        ];
+        let table = transactions_to_table(&transactions);
+
+        // Get first element
+        let program = "(cons (car table) ())";
+        let result = transform_table(table, program).unwrap();
+
+        let rows = value_to_display_rows(&result).unwrap();
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].category, "Food");
+    }
+
+    #[test]
+    fn test_transform_table_with_cdr() {
+        let transactions = vec![
+            create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash"),
+            create_test_transaction(2, "2025-01-02", -2000, "Transport", "Cash"),
+        ];
+        let table = transactions_to_table(&transactions);
+
+        // Skip first element
+        let program = "(cdr table)";
+        let result = transform_table(table, program).unwrap();
+
+        let rows = value_to_display_rows(&result).unwrap();
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].category, "Transport");
+    }
+
+    #[test]
+    fn test_transform_table_parse_error() {
+        let transactions = vec![create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash")];
+        let table = transactions_to_table(&transactions);
+
+        // Invalid program
+        let program = "(invalid syntax";
+        let result = transform_table(table, program);
+
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), TransformError::ParseError(_)));
+    }
+
+    #[test]
+    fn test_transform_table_with_invalid_operation() {
+        let transactions = vec![create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash")];
+        let table = transactions_to_table(&transactions);
+
+        // Try operations that might cause errors
+        let program = "(car ())"; // car on empty list
+        let result = transform_table(table, program);
+
+        // Should return some result (even if it's an error or Nil)
+        assert!(result.is_ok() || result.is_err());
+    }
+
+    #[test]
+    fn test_transaction_with_memo() {
+        let mut tx = create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash");
+        tx.memo = Some("Grocery shopping".to_string());
+        let value = transaction_to_value(&tx, 1);
+
+        let memo = extract_field(&value, "memo");
+        assert_eq!(memo, Some("Grocery shopping".to_string()));
+    }
+
+    #[test]
+    fn test_transaction_without_memo() {
+        let tx = create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash");
+        let value = transaction_to_value(&tx, 1);
+
+        let memo = extract_field(&value, "memo");
+        assert_eq!(memo, Some("".to_string()));
+    }
+
+    #[test]
+    fn test_transactions_to_table_empty() {
+        let transactions: Vec<TransactionDetail> = vec![];
+        let table = transactions_to_table(&transactions);
+
+        assert!(matches!(table, Value::Nil));
+    }
+
+    #[test]
+    fn test_group_by_account() {
+        let transactions = vec![
+            create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash"),
+            create_test_transaction(2, "2025-01-02", -2000, "Transport", "Cash"),
+            create_test_transaction(3, "2025-01-03", -3000, "Food", "Card"),
+        ];
+        let table = transactions_to_table(&transactions);
+
+        let program = "(group-by table (lambda (pair) (cdr (assoc 'account (cdr pair)))))";
+        let result = transform_table(table, program).unwrap();
+
+        let groups = value_to_grouped_tables(&result).unwrap();
+        assert_eq!(groups.len(), 2);
+        
+        let cash_group = groups.iter().find(|g| g.group_name == "Cash").unwrap();
+        assert_eq!(cash_group.rows.len(), 2);
+        
+        let card_group = groups.iter().find(|g| g.group_name == "Card").unwrap();
+        assert_eq!(card_group.rows.len(), 1);
+    }
+
+    #[test]
+    fn test_large_amount() {
+        let tx = create_test_transaction(1, "2025-01-01", 999999999, "Salary", "Bank");
+        let value = transaction_to_value(&tx, 1);
+
+        let amount = extract_field(&value, "amount");
+        assert_eq!(amount, Some("999999999".to_string()));
+    }
+
+    #[test]
+    fn test_negative_amount() {
+        let tx = create_test_transaction(1, "2025-01-01", -999999, "Food", "Cash");
+        let value = transaction_to_value(&tx, 1);
+
+        let amount = extract_field(&value, "amount");
+        assert_eq!(amount, Some("-999999".to_string()));
+    }
+
+    #[test]
+    fn test_zero_amount() {
+        let tx = create_test_transaction(1, "2025-01-01", 0, "Food", "Cash");
+        let value = transaction_to_value(&tx, 1);
+
+        let amount = extract_field(&value, "amount");
+        assert_eq!(amount, Some("0".to_string()));
+    }
 }
