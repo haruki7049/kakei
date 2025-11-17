@@ -144,7 +144,10 @@ impl SqliteKakeiRepository {
             .create_if_missing(true) // Enable automatic file creation
             .foreign_keys(true); // Enable foreign key constraints
 
-        debug!("Creating connection pool with max {} connections", MAX_POOL_CONNECTIONS);
+        debug!(
+            "Creating connection pool with max {} connections",
+            MAX_POOL_CONNECTIONS
+        );
         let pool: Pool<Sqlite> = SqlitePoolOptions::new()
             .max_connections(MAX_POOL_CONNECTIONS)
             .connect_with(options)

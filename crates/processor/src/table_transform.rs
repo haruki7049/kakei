@@ -24,10 +24,7 @@ pub enum TransformError {
 
 /// Helper function to create an association list pair (key . value)
 fn make_assoc_pair(key: &str, value: Value) -> Value {
-    Value::Cons(
-        Rc::new(Value::Symbol(key.to_string())),
-        Rc::new(value),
-    )
+    Value::Cons(Rc::new(Value::Symbol(key.to_string())), Rc::new(value))
 }
 
 /// Helper function to cons a pair onto a list
@@ -41,10 +38,12 @@ fn cons_pair(pair: Value, list: Value) -> Value {
 fn transaction_to_value(tx: &TransactionDetail, row_id: usize) -> Value {
     // Create the row data as an association list
     // Build in reverse order since we're consing onto the front
-    let memo_val = tx.memo.as_ref()
+    let memo_val = tx
+        .memo
+        .as_ref()
         .map(|m| Value::String(m.clone()))
         .unwrap_or_else(|| Value::String(String::new()));
-    
+
     let row_data = cons_pair(
         make_assoc_pair("date", Value::String(tx.date.to_string())),
         cons_pair(
@@ -53,13 +52,10 @@ fn transaction_to_value(tx: &TransactionDetail, row_id: usize) -> Value {
                 make_assoc_pair("category", Value::String(tx.category_name.clone())),
                 cons_pair(
                     make_assoc_pair("account", Value::String(tx.account_name.clone())),
-                    cons_pair(
-                        make_assoc_pair("memo", memo_val),
-                        Value::Nil
-                    )
-                )
-            )
-        )
+                    cons_pair(make_assoc_pair("memo", memo_val), Value::Nil),
+                ),
+            ),
+        ),
     );
 
     // Create the row ID and final pair (row-id . row-data)

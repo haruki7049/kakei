@@ -226,10 +226,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             account,
             memo,
         } => {
-            handle_add_command(
-                &processor, date, amount, currency, category, account, memo,
-            )
-            .await?
+            handle_add_command(&processor, date, amount, currency, category, account, memo).await?
         }
         Commands::Init => handle_init_command(&processor, &config, db_path_str).await?,
         Commands::List => handle_list_command(&processor).await?,

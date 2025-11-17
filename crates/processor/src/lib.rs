@@ -199,7 +199,10 @@ impl Processor {
     #[instrument(skip(self))]
     pub async fn get_recent_transactions(&self) -> Result<Vec<TransactionDetail>, ProcessorError> {
         info!("Fetching recent transactions");
-        let transactions = self.repo.get_recent_transactions(DEFAULT_TRANSACTION_LIMIT).await?;
+        let transactions = self
+            .repo
+            .get_recent_transactions(DEFAULT_TRANSACTION_LIMIT)
+            .await?;
         debug!("Retrieved {} transactions", transactions.len());
         Ok(transactions)
     }
