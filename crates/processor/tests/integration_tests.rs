@@ -3,14 +3,24 @@
 //! These tests verify that the table transformation functionality works
 //! correctly end-to-end with realistic data scenarios.
 
-use kakei_database::TransactionDetail;
-use kakei_money::Money;
-use kakei_processor::{transactions_to_table, transform_table, value_to_display_rows, value_to_grouped_tables, is_grouped_result};
 use chrono::NaiveDate;
+use kakei_database::TransactionDetail;
 use kakei_database::TransactionId;
+use kakei_money::Money;
+use kakei_processor::{
+    is_grouped_result, transactions_to_table, transform_table, value_to_display_rows,
+    value_to_grouped_tables,
+};
 
 /// Helper to create a test transaction
-fn create_transaction(id: i64, date: &str, amount: i64, category: &str, account: &str, memo: Option<&str>) -> TransactionDetail {
+fn create_transaction(
+    id: i64,
+    date: &str,
+    amount: i64,
+    category: &str,
+    account: &str,
+    memo: Option<&str>,
+) -> TransactionDetail {
     TransactionDetail {
         transaction_id: TransactionId(id),
         date: NaiveDate::parse_from_str(date, "%Y-%m-%d").unwrap(),
@@ -26,9 +36,23 @@ fn test_realistic_monthly_transactions() {
     // Simulate a month of transactions
     let transactions = vec![
         create_transaction(1, "2025-01-01", -1000, "Food", "Cash", Some("Lunch")),
-        create_transaction(2, "2025-01-05", -2000, "Transport", "Card", Some("Train pass")),
+        create_transaction(
+            2,
+            "2025-01-05",
+            -2000,
+            "Transport",
+            "Card",
+            Some("Train pass"),
+        ),
         create_transaction(3, "2025-01-10", -500, "Food", "Cash", None),
-        create_transaction(4, "2025-01-15", 50000, "Salary", "Bank", Some("Monthly salary")),
+        create_transaction(
+            4,
+            "2025-01-15",
+            50000,
+            "Salary",
+            "Bank",
+            Some("Monthly salary"),
+        ),
         create_transaction(5, "2025-01-20", -3000, "Hobby", "Card", Some("Books")),
         create_transaction(6, "2025-01-25", -800, "Food", "Cash", Some("Dinner")),
         create_transaction(7, "2025-01-30", -1500, "Transport", "Card", Some("Gas")),
@@ -87,9 +111,14 @@ fn test_empty_transactions_list() {
 
 #[test]
 fn test_single_transaction() {
-    let transactions = vec![
-        create_transaction(1, "2025-01-01", -1000, "Food", "Cash", Some("Only one")),
-    ];
+    let transactions = vec![create_transaction(
+        1,
+        "2025-01-01",
+        -1000,
+        "Food",
+        "Cash",
+        Some("Only one"),
+    )];
 
     let table = transactions_to_table(&transactions);
     let rows = value_to_display_rows(&table).unwrap();
@@ -104,15 +133,20 @@ fn test_single_transaction() {
 
 #[test]
 fn test_invalid_lisp_program() {
-    let transactions = vec![
-        create_transaction(1, "2025-01-01", -1000, "Food", "Cash", None),
-    ];
+    let transactions = vec![create_transaction(
+        1,
+        "2025-01-01",
+        -1000,
+        "Food",
+        "Cash",
+        None,
+    )];
 
     let table = transactions_to_table(&transactions);
-    
+
     // Invalid syntax
     let program = "(group-by table";
     let result = transform_table(table, program);
-    
+
     assert!(result.is_err());
 }

@@ -420,9 +420,15 @@ mod tests {
 
     #[test]
     fn test_value_to_display_string() {
-        assert_eq!(value_to_display_string(&Value::String("test".to_string())), "test");
+        assert_eq!(
+            value_to_display_string(&Value::String("test".to_string())),
+            "test"
+        );
         assert_eq!(value_to_display_string(&Value::Number(42)), "42");
-        assert_eq!(value_to_display_string(&Value::Symbol("sym".to_string())), "sym");
+        assert_eq!(
+            value_to_display_string(&Value::Symbol("sym".to_string())),
+            "sym"
+        );
         assert_eq!(value_to_display_string(&Value::Bool(true)), "true");
         assert_eq!(value_to_display_string(&Value::Nil), "");
     }
@@ -443,7 +449,13 @@ mod tests {
 
     #[test]
     fn test_value_to_display_rows_single_transaction() {
-        let transactions = vec![create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash")];
+        let transactions = vec![create_test_transaction(
+            1,
+            "2025-01-01",
+            -1000,
+            "Food",
+            "Cash",
+        )];
         let table = transactions_to_table(&transactions);
 
         let rows = value_to_display_rows(&table).unwrap();
@@ -473,7 +485,13 @@ mod tests {
 
     #[test]
     fn test_is_grouped_result_flat_table() {
-        let transactions = vec![create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash")];
+        let transactions = vec![create_test_transaction(
+            1,
+            "2025-01-01",
+            -1000,
+            "Food",
+            "Cash",
+        )];
         let table = transactions_to_table(&transactions);
 
         assert!(!is_grouped_result(&table));
@@ -510,11 +528,11 @@ mod tests {
 
         let groups = value_to_grouped_tables(&result).unwrap();
         assert_eq!(groups.len(), 2);
-        
+
         // Find Food group
         let food_group = groups.iter().find(|g| g.group_name == "Food").unwrap();
         assert_eq!(food_group.rows.len(), 2);
-        
+
         // Find Transport group
         let transport_group = groups.iter().find(|g| g.group_name == "Transport").unwrap();
         assert_eq!(transport_group.rows.len(), 1);
@@ -556,7 +574,13 @@ mod tests {
 
     #[test]
     fn test_transform_table_parse_error() {
-        let transactions = vec![create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash")];
+        let transactions = vec![create_test_transaction(
+            1,
+            "2025-01-01",
+            -1000,
+            "Food",
+            "Cash",
+        )];
         let table = transactions_to_table(&transactions);
 
         // Invalid program
@@ -569,7 +593,13 @@ mod tests {
 
     #[test]
     fn test_transform_table_with_invalid_operation() {
-        let transactions = vec![create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash")];
+        let transactions = vec![create_test_transaction(
+            1,
+            "2025-01-01",
+            -1000,
+            "Food",
+            "Cash",
+        )];
         let table = transactions_to_table(&transactions);
 
         // Try operations that might cause errors
@@ -621,10 +651,10 @@ mod tests {
 
         let groups = value_to_grouped_tables(&result).unwrap();
         assert_eq!(groups.len(), 2);
-        
+
         let cash_group = groups.iter().find(|g| g.group_name == "Cash").unwrap();
         assert_eq!(cash_group.rows.len(), 2);
-        
+
         let card_group = groups.iter().find(|g| g.group_name == "Card").unwrap();
         assert_eq!(card_group.rows.len(), 1);
     }
