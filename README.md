@@ -119,6 +119,7 @@ kakei add --date 2025-01-15 --amount 50000 --category Salary --account Bank --me
 ```
 
 Note on amounts:
+
 - `--amount` expects the value in the currency's minor units as an integer.
 - For JPY (no subunits), use integer yen (e.g., `-1000` represents ¥-1000).
 - For other currencies, follow that currency's minor unit convention (e.g., cents for USD).
@@ -152,6 +153,7 @@ kakei transform --program "table"
 Group transactions by category:
 
 Note about quoting:
+
 - When passing Lisp programs on a shell command line, ensure correct quoting/escaping.
 - Example for POSIX shells where the program contains parentheses and single quotes:
 
