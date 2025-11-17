@@ -10,6 +10,15 @@ use tracing::warn;
 /// Default currency code used when none is specified
 const DEFAULT_CURRENCY: &str = "JPY";
 
+/// Returns the provided currency or DEFAULT_CURRENCY if empty/whitespace
+fn get_currency_or_default(currency: &str) -> &str {
+    if currency.trim().is_empty() {
+        DEFAULT_CURRENCY
+    } else {
+        currency
+    }
+}
+
 /// Represents a parsed transaction from the editor.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EditorTransaction {
@@ -46,12 +55,7 @@ impl Error for EditorError {}
 
 /// Generate a transaction template for the editor.
 fn generate_template(currency: &str) -> String {
-    // Use a default if currency is empty
-    let currency_code = if currency.trim().is_empty() {
-        DEFAULT_CURRENCY
-    } else {
-        currency
-    };
+    let currency_code = get_currency_or_default(currency);
     
     format!(
         r#"# Enter transaction details below.
@@ -185,7 +189,24 @@ fn parse_template(content: &str) -> Result<EditorTransaction, EditorError> {
 /// environment variables, or a platform-appropriate default) with a template
 /// for entering transaction details.
 ///
-/// Returns the parsed transaction or an error if the operation failed.
+/// # Arguments
+/// * `default_currency` - The default currency code to pre-fill in the template
+///
+/// # Returns
+/// * `Ok(EditorTransaction)` - Successfully parsed transaction from the editor
+/// * `Err(EditorError::Cancelled)` - User exited the editor without entering data
+/// * `Err(EditorError::EditorFailed)` - Failed to open or use the editor
+/// * `Err(EditorError::ParseError)` - Failed to parse the transaction template
+///
+/// # Examples
+/// ```no_run
+/// use kakei::editor::edit_transaction;
+///
+/// match edit_transaction("JPY") {
+///     Ok(tx) => println!("Transaction: {:?}", tx),
+///     Err(e) => eprintln!("Error: {}", e),
+/// }
+/// ```
 pub fn edit_transaction(default_currency: &str) -> Result<EditorTransaction, EditorError> {
     let template = generate_template(default_currency);
     

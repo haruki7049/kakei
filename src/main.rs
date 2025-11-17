@@ -45,7 +45,12 @@ impl TransactionDisplay {
     }
 }
 
-/// Helper function to extract a required field from Option with a descriptive error
+/// Helper function to extract a required field from Option with a descriptive error.
+///
+/// # Panics
+/// This function panics if the field is None, which should never happen due to
+/// clap's `required_unless_present = "edit"` validation. The panic indicates a
+/// programmer error in the CLI argument configuration.
 fn require_cli_field<'a>(field: &'a Option<String>, name: &str) -> &'a str {
     field.as_ref()
         .map(|s| s.as_str())
