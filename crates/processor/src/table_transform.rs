@@ -110,13 +110,21 @@ pub fn transform_table(table: Value, lisp_program: &str) -> Result<Value, Transf
 
     // Normalize the result to grouped format
     // If the result is already grouped, return it as-is
-    // Otherwise, wrap it in a single group named "All"
+    // If it's a single row, wrap it in a list first, then group it
+    // Otherwise, wrap the flat list in a single group named "All"
     if is_grouped_result(&result) {
         Ok(result)
     } else {
-        // Wrap the flat list in a single group: (("All" . result))
+        // If result is a single row, wrap it in a list first
+        let normalized_result = if is_single_row(&result) {
+            Value::Cons(Rc::new(result.clone()), Rc::new(Value::Nil))
+        } else {
+            result
+        };
+        
+        // Wrap the flat list in a single group: (("All" . normalized_result))
         let group_name = Value::String("All".to_string());
-        let group_pair = Value::Cons(Rc::new(group_name), Rc::new(result));
+        let group_pair = Value::Cons(Rc::new(group_name), Rc::new(normalized_result));
         let grouped_result = Value::Cons(Rc::new(group_pair), Rc::new(Value::Nil));
         Ok(grouped_result)
     }
@@ -304,6 +312,23 @@ pub fn is_grouped_result(value: &Value) -> bool {
             }
         }
         Value::Nil => false,
+        _ => false,
+    }
+}
+
+/// Check if a Value represents a single row (not wrapped in a list).
+/// A single row has the structure: (row-id . row-data)
+/// where row-id is a Symbol starting with "ID-"
+fn is_single_row(value: &Value) -> bool {
+    match value {
+        Value::Cons(car, _cdr) => {
+            // Check if car is a Symbol starting with "ID-"
+            if let Value::Symbol(s) = car.as_ref() {
+                s.starts_with("ID-")
+            } else {
+                false
+            }
+        }
         _ => false,
     }
 }
@@ -525,6 +550,26 @@ mod tests {
     }
 
     #[test]
+    fn test_is_single_row() {
+        let tx = create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash");
+        let row = transaction_to_value(&tx, 1);
+        
+        // A single row should be detected
+        assert!(is_single_row(&row));
+        
+        // A list of rows should not be detected as a single row
+        let transactions = vec![
+            create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash"),
+            create_test_transaction(2, "2025-01-02", -2000, "Transport", "Cash"),
+        ];
+        let table = transactions_to_table(&transactions);
+        assert!(!is_single_row(&table));
+        
+        // Nil should not be detected as a single row
+        assert!(!is_single_row(&Value::Nil));
+    }
+
+    #[test]
     fn test_value_to_grouped_tables() {
         let transactions = vec![
             create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash"),
@@ -566,6 +611,30 @@ mod tests {
         assert_eq!(groups[0].group_name, "All");
         assert_eq!(groups[0].rows.len(), 1);
         assert_eq!(groups[0].rows[0].category, "Food");
+    }
+
+    #[test]
+    fn test_transform_table_with_car_unwrapped() {
+        let transactions = vec![
+            create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash"),
+            create_test_transaction(2, "2025-01-02", -2000, "Transport", "Cash"),
+            create_test_transaction(3, "2025-01-03", -3000, "Transport", "Cash"),
+        ];
+        let table = transactions_to_table(&transactions);
+
+        // Get first element directly without wrapping
+        let program = "(car table)";
+        let result = transform_table(table, program).unwrap();
+
+        // The result should be grouped (wrapped in a single "All" group)
+        assert!(is_grouped_result(&result));
+        let groups = value_to_grouped_tables(&result).unwrap();
+        assert_eq!(groups.len(), 1);
+        assert_eq!(groups[0].group_name, "All");
+        assert_eq!(groups[0].rows.len(), 1);
+        assert_eq!(groups[0].rows[0].date, "2025-01-01");
+        assert_eq!(groups[0].rows[0].category, "Food");
+        assert_eq!(groups[0].rows[0].amount, "¥-1000");
     }
 
     #[test]
