@@ -64,6 +64,7 @@ kakei list
 ```
 
 Output:
+
 ```
 ╭────────────┬────────┬───────────┬─────────┬──────────────╮
 │ Date       │ Amount │ Category  │ Account │ Memo         │
@@ -95,11 +96,13 @@ kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category 
 Initialize the database and configuration.
 
 **Usage:**
+
 ```bash
 kakei init
 ```
 
 **Description:**
+
 - Creates the database file at `~/.local/share/kakei/kakei.db`
 - Runs database migrations
 - Initializes default categories: Food, Transport, Daily Goods, Hobby, Salary
@@ -110,11 +113,13 @@ kakei init
 Add a new transaction.
 
 **Usage:**
+
 ```bash
 kakei add --date <DATE> --amount <AMOUNT> --category <CATEGORY> --account <ACCOUNT> [--currency <CURRENCY>] [--memo <MEMO>]
 ```
 
 **Arguments:**
+
 - `--date <DATE>`: Transaction date in YYYY-MM-DD format (required)
 - `--amount <AMOUNT>`: Transaction amount (negative for expenses, positive for income) (required)
 - `--category <CATEGORY>`: Category name (required)
@@ -123,6 +128,7 @@ kakei add --date <DATE> --amount <AMOUNT> --category <CATEGORY> --account <ACCOU
 - `--memo <MEMO>`: Optional memo/note
 
 **Examples:**
+
 ```bash
 # Simple expense
 kakei add --date 2025-01-01 --amount -1000 --category Food --account Cash
@@ -142,11 +148,13 @@ kakei add --date 2025-01-20 --amount -50 --category Food --account Cash --curren
 List recent transactions in a formatted table.
 
 **Usage:**
+
 ```bash
 kakei list
 ```
 
 **Description:**
+
 - Displays the 20 most recent transactions
 - Shows: Date, Amount, Category, Account, Memo
 - Formatted as a rounded table with proper currency symbols
@@ -156,41 +164,49 @@ kakei list
 Transform and analyze transactions using Lisp programs.
 
 **Usage:**
+
 ```bash
 kakei transform --program <LISP_PROGRAM>
 ```
 
 **Arguments:**
+
 - `--program <LISP_PROGRAM>`: Lisp expression to transform the transaction table (required)
 
 **Examples:**
 
 View all transactions:
+
 ```bash
 kakei transform --program "table"
 ```
 
 Group by category:
+
 ```bash
 kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))"
 ```
 
 Group by account:
+
 ```bash
 kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'account (cdr pair)))))"
 ```
 
 Get first transaction only:
+
 ```bash
 kakei transform --program "(cons (car table) ())"
 ```
 
 Skip first transaction:
+
 ```bash
 kakei transform --program "(cdr table)"
 ```
 
 Get first two transactions:
+
 ```bash
 kakei transform --program "(cons (car table) (cons (car (cdr table)) ()))"
 ```
@@ -210,6 +226,7 @@ Transactions are represented as association lists in Lisp format:
 ```
 
 **Fields:**
+
 - `date`: Transaction date (string, YYYY-MM-DD format)
 - `amount`: Transaction amount in minor units (integer, e.g., -1000 for ¥-1000)
 - `category`: Category name (string)
@@ -233,16 +250,19 @@ The `kakei_lisp` dialect provides the following built-in functions:
 ### Core Functions
 
 - **`lambda`**: Create anonymous functions
+
   ```lisp
   (lambda (x) (+ x 1))
   ```
 
 - **`define`**: Define variables or functions
+
   ```lisp
   (define x 42)
   ```
 
 - **`if`**: Conditional evaluation
+
   ```lisp
   (if (null? x) "empty" "not empty")
   ```
@@ -250,16 +270,19 @@ The `kakei_lisp` dialect provides the following built-in functions:
 ### List Operations
 
 - **`cons`**: Construct a pair (cons cell)
+
   ```lisp
   (cons 1 2)  ; => (1 . 2)
   ```
 
 - **`car`**: Get the first element of a pair
+
   ```lisp
   (car (cons 1 2))  ; => 1
   ```
 
 - **`cdr`**: Get the second element of a pair
+
   ```lisp
   (cdr (cons 1 2))  ; => 2
   ```
@@ -267,11 +290,13 @@ The `kakei_lisp` dialect provides the following built-in functions:
 ### Comparison Functions
 
 - **`equal?`**: Test equality
+
   ```lisp
   (equal? "Food" "Food")  ; => #t
   ```
 
 - **`null?`**: Test if value is nil
+
   ```lisp
   (null? ())  ; => #t
   ```
@@ -287,10 +312,11 @@ The `kakei_lisp` dialect provides the following built-in functions:
 ### Table Manipulation
 
 - **`group-by`**: Group a table by a key function
+
   ```lisp
   (group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))
   ```
-  
+
   Returns a list of groups: `(("GroupName" (row1) (row2) ...) ...)`
 
 ## Configuration
@@ -300,6 +326,7 @@ The `kakei_lisp` dialect provides the following built-in functions:
 Location: `~/.config/kakei/config.toml`
 
 **Example:**
+
 ```toml
 default_categories = ["Food", "Transport", "Daily Goods", "Hobby", "Salary"]
 default_accounts = ["Cash", "Bank"]
