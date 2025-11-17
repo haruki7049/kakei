@@ -67,7 +67,16 @@ pub enum Commands {
     List,
 
     /// Transform transactions using a Lisp program.
-    /// Example: kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))"
+    ///
+    /// Examples:
+    ///   # View all transactions
+    ///   kakei transform --program "table"
+    ///
+    ///   # Group by category
+    ///   kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))"
+    ///
+    ///   # Use a program from a file
+    ///   kakei transform --program "@my_program.lisp"
     Transform {
         /// Lisp program to transform the table.
         #[arg(long)]
