@@ -13,26 +13,11 @@ fn setup_test_cmd() -> (Command, TempDir) {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let mut cmd = cargo_bin_cmd!();
 
-    // Configure environment variables to isolate test from user's home directory
-    // Different platforms use different mechanisms:
-
-    // Set HOME for Unix systems (Linux, macOS)
+    // Set HOME to ensure macOS uses temp directory (directories crate on macOS uses ~/Library/Application Support)
     cmd.env("HOME", temp_dir.path());
-
-    // Set XDG variables for Linux (these override HOME on XDG-compliant systems)
+    // Set up environment to use temp directory for config and data (for XDG-based systems)
     cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
-
-    // Set Windows-specific environment variables
-    // directories crate uses FOLDERID_RoamingAppData on Windows
-    #[cfg(target_os = "windows")]
-    {
-        cmd.env("APPDATA", temp_dir.path().join("AppData").join("Roaming"));
-        cmd.env(
-            "LOCALAPPDATA",
-            temp_dir.path().join("AppData").join("Local"),
-        );
-    }
 
     (cmd, temp_dir)
 }
@@ -40,27 +25,11 @@ fn setup_test_cmd() -> (Command, TempDir) {
 /// Helper function to initialize a database for testing
 fn init_database(temp_dir: &TempDir) {
     let mut cmd = cargo_bin_cmd!();
-
-    // Configure environment variables to isolate test from user's home directory
-    // Different platforms use different mechanisms:
-
-    // Set HOME for Unix systems (Linux, macOS)
+    // Set HOME to ensure macOS uses temp directory (directories crate on macOS uses ~/Library/Application Support)
     cmd.env("HOME", temp_dir.path());
-
-    // Set XDG variables for Linux (these override HOME on XDG-compliant systems)
+    // Set up environment to use temp directory for config and data (for XDG-based systems)
     cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
-
-    // Set Windows-specific environment variables
-    #[cfg(target_os = "windows")]
-    {
-        cmd.env("APPDATA", temp_dir.path().join("AppData").join("Roaming"));
-        cmd.env(
-            "LOCALAPPDATA",
-            temp_dir.path().join("AppData").join("Local"),
-        );
-    }
-
     cmd.arg("init");
 
     cmd.assert().success();
@@ -101,29 +70,21 @@ fn test_init_command_success() {
         .stdout(predicate::str::contains("Initialization complete"));
 
     // Verify database file was created
-    // The database path depends on platform and environment variables:
+    // The database path depends on platform and XDG environment variables:
     // - macOS: ~/Library/Application Support/dev.haruki7049.kakei/kakei.db (ignores XDG)
     // - Linux with XDG_DATA_HOME: $XDG_DATA_HOME/kakei/kakei.db
-    // - Windows with APPDATA: %APPDATA%\dev.haruki7049\kakei\data\kakei.db
+    // - Windows: ~\AppData\Roaming\dev.haruki7049\kakei\data\kakei.db
     let db_path = if cfg!(target_os = "macos") {
         temp_dir
             .path()
-            .join("Library")
-            .join("Application Support")
-            .join("dev.haruki7049.kakei")
-            .join("kakei.db")
+            .join("Library/Application Support/dev.haruki7049.kakei/kakei.db")
     } else if cfg!(target_os = "windows") {
         temp_dir
             .path()
-            .join("AppData")
-            .join("Roaming")
-            .join("dev.haruki7049")
-            .join("kakei")
-            .join("data")
-            .join("kakei.db")
+            .join("AppData/Roaming/dev.haruki7049/kakei/data/kakei.db")
     } else {
         // Linux and other Unix-like systems use XDG_DATA_HOME when set
-        temp_dir.path().join("data").join("kakei").join("kakei.db")
+        temp_dir.path().join("data/kakei/kakei.db")
     };
     assert!(
         db_path.exists(),
