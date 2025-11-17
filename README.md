@@ -13,6 +13,7 @@ A kakeibo (household financial ledger) CLI application with powerful Lisp-based 
   - [Option A — Build from source](#option-a--build-from-source)
   - [Option B — Install via cargo (local)](#option-b--install-via-cargo-local)
   - [Option C — Releases](#option-c--releases)
+  - [Option D — Install via Nix flakes](#option-d--install-via-nix-flakes)
   - [Platform notes](#platform-notes)
 - [Quick Start](#quick-start)
   - [1. Initialize the database](#1-initialize-the-database)
@@ -87,6 +88,25 @@ This installs `kakei` to your cargo bin directory (usually `~/.cargo/bin`).
 ### Option C — Releases
 
 If release binaries are published on GitHub Releases, you can download the appropriate archive for your platform and unpack the `kakei` binary.
+
+### Option D — Install via Nix flakes
+
+If you have Nix with flakes enabled, you can install `kakei` directly from the repository:
+
+```bash
+# Install from the flake
+nix profile install github:haruki7049/kakei
+
+# Or run directly without installing
+nix run github:haruki7049/kakei -- --help
+
+# For local development
+nix develop
+```
+
+The flake provides:
+- `packages.default`: The kakei binary
+- `devShells.default`: Development environment with Rust toolchain and dependencies
 
 ### Platform notes
 
