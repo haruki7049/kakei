@@ -80,7 +80,7 @@ pub fn transactions_to_table(transactions: &[TransactionDetail]) -> Value {
 ///
 /// The Lisp program receives the table as a variable named `table`.
 /// The program should return the transformed table.
-/// 
+///
 /// The result is always normalized to a grouped format. If the Lisp program
 /// returns a flat list of transactions, it will be wrapped in a single group
 /// named "All".
@@ -371,7 +371,7 @@ mod tests {
 
         // The result should now be grouped (wrapped in a single "All" group)
         assert!(is_grouped_result(&result));
-        
+
         // Verify we can extract grouped tables
         let groups = value_to_grouped_tables(&result).unwrap();
         assert_eq!(groups.len(), 1);
