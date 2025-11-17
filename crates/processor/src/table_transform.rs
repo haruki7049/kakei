@@ -128,6 +128,187 @@ pub fn format_value(value: &Value) -> String {
     value.to_string()
 }
 
+/// Extract a field value from a row (association list).
+///
+/// Given a row like `(ID-001 . ((date . "2025-01-01") (amount . -1000) ...))`,
+/// this extracts the value for a specific field name.
+fn extract_field(row: &Value, field_name: &str) -> Option<String> {
+    // row is (row-id . row-data)
+    // We need the cdr (row-data) which is an association list
+    match row {
+        Value::Cons(_, row_data) => {
+            // row_data is an association list like ((date . "...") (amount . ...) ...)
+            let mut current = row_data.as_ref();
+            loop {
+                match current {
+                    Value::Nil => return None,
+                    Value::Cons(pair, rest) => {
+                        // pair is (field-name . field-value)
+                        match pair.as_ref() {
+                            Value::Cons(key, value) => {
+                                if let Value::Symbol(key_name) = key.as_ref() {
+                                    if key_name == field_name {
+                                        return Some(value_to_display_string(value.as_ref()));
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                        current = rest.as_ref();
+                    }
+                    _ => return None,
+                }
+            }
+        }
+        _ => None,
+    }
+}
+
+/// Convert a Value to a display string.
+fn value_to_display_string(value: &Value) -> String {
+    match value {
+        Value::String(s) => s.clone(),
+        Value::Number(n) => n.to_string(),
+        Value::Symbol(s) => s.clone(),
+        Value::Bool(b) => b.to_string(),
+        Value::Nil => "".to_string(),
+        _ => value.to_string(),
+    }
+}
+
+/// Represents a row in the transformed table for display.
+#[derive(Debug, Clone)]
+pub struct DisplayRow {
+    pub date: String,
+    pub amount: String,
+    pub category: String,
+    pub account: String,
+    pub memo: String,
+}
+
+/// Represents a grouped table with a group name and rows.
+#[derive(Debug, Clone)]
+pub struct GroupedTable {
+    pub group_name: String,
+    pub rows: Vec<DisplayRow>,
+}
+
+/// Convert a Lisp Value (transformed table) back to display-friendly structures.
+///
+/// This handles both flat tables and grouped tables (from group-by).
+pub fn value_to_display_rows(value: &Value) -> Result<Vec<DisplayRow>, TransformError> {
+    let mut rows = Vec::new();
+    let mut current = value;
+
+    loop {
+        match current {
+            Value::Nil => break,
+            Value::Cons(row, rest) => {
+                // Check if this is a grouped result or a flat table
+                // Grouped: (("GroupName" (row1) (row2) ...) ...)
+                // Flat: ((ID-001 . ((date . "...") ...)) ...)
+                
+                if let Value::Cons(first, second) = row.as_ref() {
+                    // Check if first is a string (group name) and second is a list of rows
+                    if let Value::String(_group_name) = first.as_ref() {
+                        // This is a grouped result - flatten it
+                        let group_rows = value_to_display_rows(second.as_ref())?;
+                        rows.extend(group_rows);
+                        current = rest.as_ref();
+                        continue;
+                    }
+                }
+                
+                // This is a regular row
+                let date = extract_field(row.as_ref(), "date").unwrap_or_default();
+                let amount = extract_field(row.as_ref(), "amount")
+                    .map(|a| format_amount(&a))
+                    .unwrap_or_default();
+                let category = extract_field(row.as_ref(), "category").unwrap_or_default();
+                let account = extract_field(row.as_ref(), "account").unwrap_or_default();
+                let memo = extract_field(row.as_ref(), "memo").unwrap_or_default();
+
+                rows.push(DisplayRow {
+                    date,
+                    amount,
+                    category,
+                    account,
+                    memo,
+                });
+
+                current = rest.as_ref();
+            }
+            _ => {
+                return Err(TransformError::TransformError(
+                    "Unexpected value structure".to_string(),
+                ))
+            }
+        }
+    }
+
+    Ok(rows)
+}
+
+/// Format amount for display (e.g., -1000 -> ¥-1000).
+fn format_amount(amount_str: &str) -> String {
+    if let Ok(amount) = amount_str.parse::<i64>() {
+        format!("¥{}", amount)
+    } else {
+        amount_str.to_string()
+    }
+}
+
+/// Convert a Lisp Value to grouped display structures.
+///
+/// This is specifically for group-by results.
+pub fn value_to_grouped_tables(value: &Value) -> Result<Vec<GroupedTable>, TransformError> {
+    let mut groups = Vec::new();
+    let mut current = value;
+
+    loop {
+        match current {
+            Value::Nil => break,
+            Value::Cons(group_pair, rest) => {
+                // group_pair should be ("GroupName" (row1) (row2) ...)
+                if let Value::Cons(group_name_val, rows_val) = group_pair.as_ref() {
+                    if let Value::String(group_name) = group_name_val.as_ref() {
+                        // Extract rows from this group
+                        let rows = value_to_display_rows(rows_val.as_ref())?;
+                        groups.push(GroupedTable {
+                            group_name: group_name.clone(),
+                            rows,
+                        });
+                    }
+                }
+                current = rest.as_ref();
+            }
+            _ => {
+                return Err(TransformError::TransformError(
+                    "Unexpected grouped value structure".to_string(),
+                ))
+            }
+        }
+    }
+
+    Ok(groups)
+}
+
+/// Check if a Value represents a grouped result (from group-by).
+pub fn is_grouped_result(value: &Value) -> bool {
+    match value {
+        Value::Cons(first_group, _) => {
+            // Check if the first element is a (GroupName . rows) pair
+            if let Value::Cons(group_name, _rows) = first_group.as_ref() {
+                matches!(group_name.as_ref(), Value::String(_))
+            } else {
+                false
+            }
+        }
+        Value::Nil => false,
+        _ => false,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

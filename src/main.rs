@@ -120,7 +120,57 @@ async fn handle_transform_command(
 ) -> Result<(), Box<dyn std::error::Error>> {
     match processor.transform_transactions(program).await {
         Ok(result) => {
-            println!("{}", kakei_processor::format_value(&result));
+            // Check if the result is a grouped table or a flat table
+            if kakei_processor::is_grouped_result(&result) {
+                // Handle grouped results
+                let grouped_tables = kakei_processor::value_to_grouped_tables(&result)?;
+                
+                for group in grouped_tables {
+                    println!("\n=== {} ===", group.group_name);
+                    
+                    if group.rows.is_empty() {
+                        println!("No transactions in this group.");
+                    } else {
+                        let display_data: Vec<TransactionDisplay> = group
+                            .rows
+                            .into_iter()
+                            .map(|row| TransactionDisplay {
+                                date: row.date,
+                                amount: row.amount,
+                                category: row.category,
+                                account: row.account,
+                                memo: row.memo,
+                            })
+                            .collect();
+
+                        let mut table = Table::new(display_data);
+                        table.with(Style::rounded());
+                        println!("{}", table);
+                    }
+                }
+            } else {
+                // Handle flat table results
+                let rows = kakei_processor::value_to_display_rows(&result)?;
+                
+                if rows.is_empty() {
+                    println!("No transactions found.");
+                } else {
+                    let display_data: Vec<TransactionDisplay> = rows
+                        .into_iter()
+                        .map(|row| TransactionDisplay {
+                            date: row.date,
+                            amount: row.amount,
+                            category: row.category,
+                            account: row.account,
+                            memo: row.memo,
+                        })
+                        .collect();
+
+                    let mut table = Table::new(display_data);
+                    table.with(Style::rounded());
+                    println!("{}", table);
+                }
+            }
             Ok(())
         }
         Err(e) => {

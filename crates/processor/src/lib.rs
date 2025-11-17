@@ -15,7 +15,10 @@ use std::str::FromStr;
 use thiserror::Error;
 use tracing::{debug, info, instrument, warn};
 
-pub use table_transform::{TransformError, format_value, transactions_to_table, transform_table};
+pub use table_transform::{
+    DisplayRow, GroupedTable, TransformError, format_value, is_grouped_result,
+    transactions_to_table, transform_table, value_to_display_rows, value_to_grouped_tables,
+};
 
 /// Errors specific to the Processor layer.
 #[derive(Debug, Error)]
