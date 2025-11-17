@@ -126,7 +126,9 @@ This creates the database at `~/.local/share/kakei/kakei.db` (on Linux when XDG 
 
 ### 2. Add transactions
 
-Example usages:
+You can add transactions in two ways:
+
+**Method 1: Using command-line arguments**
 
 ```bash
 # Add an expense
@@ -138,6 +140,32 @@ kakei add --date 2025-01-02 --amount -2000 --category Transport --account Cash -
 # Add income
 kakei add --date 2025-01-15 --amount 50000 --category Salary --account Bank --memo "Monthly salary"
 ```
+
+**Method 2: Using text editor (like git commit)**
+
+```bash
+# Opens your default text editor with a template
+kakei add --edit
+# or use the short form
+kakei add -e
+```
+
+This will open your preferred text editor (set via `VISUAL` or `EDITOR` environment variables) with a template that looks like:
+
+```
+# Enter transaction details below.
+# Lines starting with '#' are comments and will be ignored.
+# Format: key: value
+
+date: 
+amount: 
+currency: JPY
+category: 
+account: 
+memo: 
+```
+
+Simply fill in the values, save, and close the editor. The transaction will be added automatically.
 
 Note on amounts:
 
@@ -207,22 +235,31 @@ Description:
 
 Add a new transaction.
 
-Usage:
+**Usage (Command-line mode):**
 
 ```bash
 kakei add --date <DATE> --amount <AMOUNT> --category <CATEGORY> --account <ACCOUNT> [--currency <CURRENCY>] [--memo <MEMO>]
 ```
 
+**Usage (Editor mode):**
+
+```bash
+kakei add --edit
+# or
+kakei add -e
+```
+
 Arguments:
 
-- `--date <DATE>`: Transaction date in YYYY-MM-DD format (required)
-- `--amount <AMOUNT>`: Transaction amount in minor units (negative for expenses, positive for income) (required)
-- `--category <CATEGORY>`: Category name (required)
-- `--account <ACCOUNT>`: Account name (required)
+- `-e, --edit`: Open text editor to input transaction (like git commit)
+- `--date <DATE>`: Transaction date in YYYY-MM-DD format (required unless --edit is used)
+- `--amount <AMOUNT>`: Transaction amount in minor units (negative for expenses, positive for income) (required unless --edit is used)
+- `--category <CATEGORY>`: Category name (required unless --edit is used)
+- `--account <ACCOUNT>`: Account name (required unless --edit is used)
 - `--currency <CURRENCY>`: Currency code (default: JPY)
 - `--memo <MEMO>`: Optional memo/note
 
-Examples:
+**Command-line Examples:**
 
 ```bash
 # Simple expense
@@ -237,6 +274,15 @@ kakei add --date 2025-01-15 --amount 50000 --category Salary --account Bank
 # USD transaction
 kakei add --date 2025-01-20 --amount -50 --category Food --account Cash --currency USD
 ```
+
+**Editor Mode:**
+
+The editor mode provides a more user-friendly way to add transactions, especially useful when:
+- You want to add transactions with detailed memos
+- You prefer a form-like interface
+- You're already used to Git's commit message workflow
+
+When you run `kakei add --edit`, your default editor opens with a template. Fill in the fields and save to add the transaction. The editor respects the `VISUAL` and `EDITOR` environment variables, falling back to platform defaults if not set.
 
 ### `kakei list`
 
