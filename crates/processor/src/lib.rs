@@ -5,6 +5,9 @@
 
 pub mod table_transform;
 
+/// Default limit for the number of recent transactions to fetch
+const DEFAULT_TRANSACTION_LIMIT: i64 = 20;
+
 use chrono::NaiveDate;
 use kakei_database::{
     CategoryType, DbError, KakeiRepository, SqliteKakeiRepository, TransactionDetail, TransactionId,
@@ -196,8 +199,7 @@ impl Processor {
     #[instrument(skip(self))]
     pub async fn get_recent_transactions(&self) -> Result<Vec<TransactionDetail>, ProcessorError> {
         info!("Fetching recent transactions");
-        // Default limit to 20 for now
-        let transactions = self.repo.get_recent_transactions(20).await?;
+        let transactions = self.repo.get_recent_transactions(DEFAULT_TRANSACTION_LIMIT).await?;
         debug!("Retrieved {} transactions", transactions.len());
         Ok(transactions)
     }
