@@ -144,16 +144,13 @@ fn extract_field(row: &Value, field_name: &str) -> Option<String> {
                     Value::Nil => return None,
                     Value::Cons(pair, rest) => {
                         // pair is (field-name . field-value)
-                        match pair.as_ref() {
-                            Value::Cons(key, value) => {
-                                if let Value::Symbol(key_name) = key.as_ref() {
-                                    if key_name == field_name {
-                                        return Some(value_to_display_string(value.as_ref()));
-                                    }
-                                }
-                            }
-                            _ => {}
+                        if let Value::Cons(key, value) = pair.as_ref()
+                            && let Value::Symbol(key_name) = key.as_ref()
+                            && key_name == field_name
+                        {
+                            return Some(value_to_display_string(value.as_ref()));
                         }
+
                         current = rest.as_ref();
                     }
                     _ => return None,
@@ -270,15 +267,15 @@ pub fn value_to_grouped_tables(value: &Value) -> Result<Vec<GroupedTable>, Trans
             Value::Nil => break,
             Value::Cons(group_pair, rest) => {
                 // group_pair should be ("GroupName" (row1) (row2) ...)
-                if let Value::Cons(group_name_val, rows_val) = group_pair.as_ref() {
-                    if let Value::String(group_name) = group_name_val.as_ref() {
-                        // Extract rows from this group
-                        let rows = value_to_display_rows(rows_val.as_ref())?;
-                        groups.push(GroupedTable {
-                            group_name: group_name.clone(),
-                            rows,
-                        });
-                    }
+                if let Value::Cons(group_name_val, rows_val) = group_pair.as_ref()
+                    && let Value::String(group_name) = group_name_val.as_ref()
+                {
+                    // Extract rows from this group
+                    let rows = value_to_display_rows(rows_val.as_ref())?;
+                    groups.push(GroupedTable {
+                        group_name: group_name.clone(),
+                        rows,
+                    });
                 }
                 current = rest.as_ref();
             }
