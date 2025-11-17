@@ -6,6 +6,17 @@ use super::value::{Environment, EvalError, Value};
 use std::collections::HashMap;
 use std::rc::Rc;
 
+/// Helper function to check argument arity
+fn check_arity(args: &[Value], expected: usize) -> Result<(), EvalError> {
+    if args.len() != expected {
+        return Err(EvalError::ArityError {
+            expected: expected.to_string(),
+            got: args.len(),
+        });
+    }
+    Ok(())
+}
+
 /// Create a global environment with all built-in functions.
 pub fn create_global_env() -> Environment {
     let mut env = Environment::new();
@@ -30,12 +41,7 @@ pub fn create_global_env() -> Environment {
 
 /// Built-in cons function: (cons a b) creates a cons cell.
 fn builtin_cons(args: &[Value], _env: &mut Environment) -> Result<Value, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::ArityError {
-            expected: "2".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity(args, 2)?;
     Ok(Value::Cons(
         Rc::new(args[0].clone()),
         Rc::new(args[1].clone()),
@@ -44,12 +50,7 @@ fn builtin_cons(args: &[Value], _env: &mut Environment) -> Result<Value, EvalErr
 
 /// Built-in car function: (car pair) gets the first element.
 fn builtin_car(args: &[Value], _env: &mut Environment) -> Result<Value, EvalError> {
-    if args.len() != 1 {
-        return Err(EvalError::ArityError {
-            expected: "1".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity(args, 1)?;
     match &args[0] {
         Value::Cons(car, _) => Ok(car.as_ref().clone()),
         _ => Err(EvalError::TypeError("car requires a cons cell".to_string())),
@@ -58,12 +59,7 @@ fn builtin_car(args: &[Value], _env: &mut Environment) -> Result<Value, EvalErro
 
 /// Built-in cdr function: (cdr pair) gets the second element.
 fn builtin_cdr(args: &[Value], _env: &mut Environment) -> Result<Value, EvalError> {
-    if args.len() != 1 {
-        return Err(EvalError::ArityError {
-            expected: "1".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity(args, 1)?;
     match &args[0] {
         Value::Cons(_, cdr) => Ok(cdr.as_ref().clone()),
         _ => Err(EvalError::TypeError("cdr requires a cons cell".to_string())),
@@ -72,23 +68,13 @@ fn builtin_cdr(args: &[Value], _env: &mut Environment) -> Result<Value, EvalErro
 
 /// Built-in null? function: (null? val) checks if value is nil.
 fn builtin_null(args: &[Value], _env: &mut Environment) -> Result<Value, EvalError> {
-    if args.len() != 1 {
-        return Err(EvalError::ArityError {
-            expected: "1".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity(args, 1)?;
     Ok(Value::Bool(matches!(args[0], Value::Nil)))
 }
 
 /// Built-in equal? function: (equal? a b) checks if two values are equal.
 fn builtin_equal(args: &[Value], _env: &mut Environment) -> Result<Value, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::ArityError {
-            expected: "2".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity(args, 2)?;
     Ok(Value::Bool(values_equal(&args[0], &args[1])))
 }
 
@@ -110,12 +96,7 @@ fn values_equal(a: &Value, b: &Value) -> bool {
 /// Built-in assoc function: (assoc key alist) searches an association list.
 /// Returns the first pair whose car equals the key, or nil if not found.
 fn builtin_assoc(args: &[Value], _env: &mut Environment) -> Result<Value, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::ArityError {
-            expected: "2".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity(args, 2)?;
 
     let key = &args[0];
     let mut current = &args[1];
@@ -149,12 +130,7 @@ fn builtin_assoc(args: &[Value], _env: &mut Environment) -> Result<Value, EvalEr
 /// key-fn: a lambda that takes a row pair and returns a grouping key
 /// Returns: list of (group-key . grouped-rows) pairs
 fn builtin_group_by(args: &[Value], env: &mut Environment) -> Result<Value, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::ArityError {
-            expected: "2".to_string(),
-            got: args.len(),
-        });
-    }
+    check_arity(args, 2)?;
 
     let table = &args[0];
     let key_fn = &args[1];

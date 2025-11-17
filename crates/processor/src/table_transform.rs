@@ -22,58 +22,48 @@ pub enum TransformError {
     TransformError(String),
 }
 
+/// Helper function to create an association list pair (key . value)
+fn make_assoc_pair(key: &str, value: Value) -> Value {
+    Value::Cons(
+        Rc::new(Value::Symbol(key.to_string())),
+        Rc::new(value),
+    )
+}
+
+/// Helper function to cons a pair onto a list
+fn cons_pair(pair: Value, list: Value) -> Value {
+    Value::Cons(Rc::new(pair), Rc::new(list))
+}
+
 /// Convert a TransactionDetail into a Lisp Value (association list).
 ///
 /// The format is: `(row-id . ((date . "2025-01-01") (amount . -1000) (category . "Food") ...))`
 fn transaction_to_value(tx: &TransactionDetail, row_id: usize) -> Value {
     // Create the row data as an association list
-    let mut row_data = Value::Nil;
-
     // Build in reverse order since we're consing onto the front
-    // memo
-    let memo_val = match &tx.memo {
-        Some(m) => Value::String(m.clone()),
-        None => Value::String(String::new()),
-    };
-    let memo_pair = Value::Cons(
-        Rc::new(Value::Symbol("memo".to_string())),
-        Rc::new(memo_val),
+    let memo_val = tx.memo.as_ref()
+        .map(|m| Value::String(m.clone()))
+        .unwrap_or_else(|| Value::String(String::new()));
+    
+    let row_data = cons_pair(
+        make_assoc_pair("date", Value::String(tx.date.to_string())),
+        cons_pair(
+            make_assoc_pair("amount", Value::Number(tx.amount.to_minor().unwrap_or(0))),
+            cons_pair(
+                make_assoc_pair("category", Value::String(tx.category_name.clone())),
+                cons_pair(
+                    make_assoc_pair("account", Value::String(tx.account_name.clone())),
+                    cons_pair(
+                        make_assoc_pair("memo", memo_val),
+                        Value::Nil
+                    )
+                )
+            )
+        )
     );
-    row_data = Value::Cons(Rc::new(memo_pair), Rc::new(row_data));
 
-    // account
-    let account_pair = Value::Cons(
-        Rc::new(Value::Symbol("account".to_string())),
-        Rc::new(Value::String(tx.account_name.clone())),
-    );
-    row_data = Value::Cons(Rc::new(account_pair), Rc::new(row_data));
-
-    // category
-    let category_pair = Value::Cons(
-        Rc::new(Value::Symbol("category".to_string())),
-        Rc::new(Value::String(tx.category_name.clone())),
-    );
-    row_data = Value::Cons(Rc::new(category_pair), Rc::new(row_data));
-
-    // amount (convert to number, minor units)
-    let amount_val = Value::Number(tx.amount.to_minor().unwrap_or(0));
-    let amount_pair = Value::Cons(
-        Rc::new(Value::Symbol("amount".to_string())),
-        Rc::new(amount_val),
-    );
-    row_data = Value::Cons(Rc::new(amount_pair), Rc::new(row_data));
-
-    // date
-    let date_pair = Value::Cons(
-        Rc::new(Value::Symbol("date".to_string())),
-        Rc::new(Value::String(tx.date.to_string())),
-    );
-    row_data = Value::Cons(Rc::new(date_pair), Rc::new(row_data));
-
-    // Create the row ID
+    // Create the row ID and final pair (row-id . row-data)
     let row_id_sym = Value::Symbol(format!("ID-{:03}", row_id));
-
-    // Create the pair (row-id . row-data)
     Value::Cons(Rc::new(row_id_sym), Rc::new(row_data))
 }
 
