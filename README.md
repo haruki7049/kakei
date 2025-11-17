@@ -105,6 +105,7 @@ nix develop
 ```
 
 The flake provides:
+
 - `packages.default`: The kakei binary
 - `devShells.default`: Development environment with Rust toolchain and dependencies
 
