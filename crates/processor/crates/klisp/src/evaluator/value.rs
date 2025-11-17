@@ -46,7 +46,7 @@ impl PartialEq for Value {
             (Value::Cons(car_a, cdr_a), Value::Cons(car_b, cdr_b)) => {
                 car_a == car_b && cdr_a == cdr_b
             }
-            // Functions are compared by identity (never equal unless same instance)
+            // Functions are never considered equal (always returns false, even for the same instance)
             (Value::Primitive(_), Value::Primitive(_)) => false,
             (Value::Lambda { .. }, Value::Lambda { .. }) => false,
             _ => false,
