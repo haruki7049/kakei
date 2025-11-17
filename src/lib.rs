@@ -7,3 +7,5 @@
 pub mod cli;
 /// Configuration management for the application.
 pub mod configs;
+/// Editor support for transaction input.
+pub mod editor;

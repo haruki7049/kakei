@@ -33,28 +33,41 @@ impl CLIArgs {
 pub enum Commands {
     /// Add a new transaction.
     ///
-    /// Example: kakei add --date 2025-01-01 --amount -1000 --category Food --account Cash
+    /// Examples:
+    ///   # Using command-line arguments
+    ///   kakei add --date 2025-01-01 --amount -1000 --category Food --account Cash
+    ///
+    ///   # Using text editor (like git commit)
+    ///   kakei add --edit
     Add {
+        /// Open text editor to input transaction (like git commit).
+        #[arg(long, short = 'e')]
+        edit: bool,
+
         /// Date of the transaction (YYYY-MM-DD).
-        #[arg(long)]
-        date: String,
+        /// Required unless --edit is used.
+        #[arg(long, required_unless_present = "edit")]
+        date: Option<String>,
 
         /// Amount of the transaction.
         /// Use negative for expense (e.g. -1000), positive for income.
-        #[arg(long, allow_hyphen_values = true)]
-        amount: String,
+        /// Required unless --edit is used.
+        #[arg(long, allow_hyphen_values = true, required_unless_present = "edit")]
+        amount: Option<String>,
 
         /// Currency code (e.g., JPY, USD).
         #[arg(long, default_value = "JPY")]
         currency: String,
 
         /// Category name (e.g., Food, Salary).
-        #[arg(long)]
-        category: String,
+        /// Required unless --edit is used.
+        #[arg(long, required_unless_present = "edit")]
+        category: Option<String>,
 
         /// Account name (e.g., Cash, Bank).
-        #[arg(long)]
-        account: String,
+        /// Required unless --edit is used.
+        #[arg(long, required_unless_present = "edit")]
+        account: Option<String>,
 
         /// Optional memo.
         #[arg(long)]

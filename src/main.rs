@@ -9,6 +9,7 @@ use directories::ProjectDirs;
 use kakei::{
     cli::{CLIArgs, Commands},
     configs::Configuration,
+    editor,
 };
 use kakei_processor::Processor;
 use std::path::{Path, PathBuf};
@@ -202,6 +203,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 3. Dispatch commands
     match args.command() {
         Commands::Add {
+            edit: use_editor,
             date,
             amount,
             currency,
@@ -209,7 +211,42 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             account,
             memo,
         } => {
-            handle_add_command(&processor, date, amount, currency, category, account, memo).await?
+            if *use_editor {
+                // Editor mode
+                match editor::edit_transaction(currency) {
+                    Ok(tx) => {
+                        handle_add_command(
+                            &processor,
+                            &tx.date,
+                            &tx.amount,
+                            &tx.currency,
+                            &tx.category,
+                            &tx.account,
+                            &tx.memo,
+                        )
+                        .await?
+                    }
+                    Err(editor::EditorError::Cancelled) => {
+                        println!("Transaction cancelled.");
+                    }
+                    Err(e) => {
+                        eprintln!("❌ {}", e);
+                        return Err(e.into());
+                    }
+                }
+            } else {
+                // Traditional CLI mode
+                handle_add_command(
+                    &processor,
+                    date.as_ref().unwrap(),
+                    amount.as_ref().unwrap(),
+                    currency,
+                    category.as_ref().unwrap(),
+                    account.as_ref().unwrap(),
+                    memo,
+                )
+                .await?
+            }
         }
         Commands::Init => handle_init_command(&processor, &config, db_path_str).await?,
         Commands::List => handle_list_command(&processor).await?,

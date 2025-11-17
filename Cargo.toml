@@ -53,6 +53,7 @@ tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 tabled = "0.20.0"
 nom = "8.0.0"
+edit = "0.1.5"
 assert_cmd = "2.0"
 predicates = "3.0"
 tempfile = "3.8"
@@ -68,6 +69,7 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 tabled.workspace = true
 nom.workspace = true
+edit.workspace = true
 
 [dev-dependencies]
 assert_cmd.workspace = true
