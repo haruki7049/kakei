@@ -106,6 +106,7 @@ fn main() {
         ; Define lambda to extract department from a row
         ; The row format is (row-id . row-data)
         ; We use assoc to get the dept column from row-data
+        ; (cdr row) extracts the row-data part from the (row-id . row-data) structure
         (define get-dept (lambda (row)
             (cdr (assoc 'dept (cdr row)))))
         
