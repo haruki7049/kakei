@@ -113,6 +113,73 @@ async fn handle_list_command(processor: &Processor) -> Result<(), Box<dyn std::e
     }
 }
 
+/// Handle the Transform command
+async fn handle_transform_command(
+    processor: &Processor,
+    program: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match processor.transform_transactions(program).await {
+        Ok(result) => {
+            // Check if the result is a grouped table or a flat table
+            if kakei_processor::is_grouped_result(&result) {
+                // Handle grouped results
+                let grouped_tables = kakei_processor::value_to_grouped_tables(&result)?;
+
+                for group in grouped_tables {
+                    println!("\n=== {} ===", group.group_name);
+
+                    if group.rows.is_empty() {
+                        println!("No transactions in this group.");
+                    } else {
+                        let display_data: Vec<TransactionDisplay> = group
+                            .rows
+                            .into_iter()
+                            .map(|row| TransactionDisplay {
+                                date: row.date,
+                                amount: row.amount,
+                                category: row.category,
+                                account: row.account,
+                                memo: row.memo,
+                            })
+                            .collect();
+
+                        let mut table = Table::new(display_data);
+                        table.with(Style::rounded());
+                        println!("{}", table);
+                    }
+                }
+            } else {
+                // Handle flat table results
+                let rows = kakei_processor::value_to_display_rows(&result)?;
+
+                if rows.is_empty() {
+                    println!("No transactions found.");
+                } else {
+                    let display_data: Vec<TransactionDisplay> = rows
+                        .into_iter()
+                        .map(|row| TransactionDisplay {
+                            date: row.date,
+                            amount: row.amount,
+                            category: row.category,
+                            account: row.account,
+                            memo: row.memo,
+                        })
+                        .collect();
+
+                    let mut table = Table::new(display_data);
+                    table.with(Style::rounded());
+                    println!("{}", table);
+                }
+            }
+            Ok(())
+        }
+        Err(e) => {
+            eprintln!("❌ Failed to transform transactions: {}", e);
+            Err(e.into())
+        }
+    }
+}
+
 // Use tokio for async runtime
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -165,6 +232,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Commands::Init => handle_init_command(&processor, &config, db_path_str).await?,
         Commands::List => handle_list_command(&processor).await?,
+        Commands::Transform { program } => handle_transform_command(&processor, &program).await?,
     }
 
     Ok(())
