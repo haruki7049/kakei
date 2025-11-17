@@ -236,9 +236,10 @@ pub fn value_to_display_rows(value: &Value) -> Result<Vec<DisplayRow>, Transform
                 current = rest.as_ref();
             }
             _ => {
-                return Err(TransformError::TransformError(
-                    format!("Expected a cons cell or nil, but got: {:?}", current)
-                ));
+                return Err(TransformError::TransformError(format!(
+                    "Expected a cons cell or nil, but got: {:?}",
+                    current
+                )));
             }
         }
     }
