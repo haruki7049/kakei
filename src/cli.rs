@@ -32,6 +32,7 @@ impl CLIArgs {
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum Commands {
     /// Add a new transaction.
+    ///
     /// Example: kakei add --date 2025-01-01 --amount -1000 --category Food --account Cash
     Add {
         /// Date of the transaction (YYYY-MM-DD).
@@ -65,6 +66,20 @@ pub enum Commands {
 
     /// List recent transactions.
     List,
+
+    /// Transform transactions using a Lisp program.
+    ///
+    /// Examples:
+    ///   # View all transactions
+    ///   kakei transform --program "table"
+    ///
+    ///   # Group by category
+    ///   kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))"
+    Transform {
+        /// Lisp program to transform the table.
+        #[arg(long)]
+        program: String,
+    },
 }
 
 /// Default Configuration Path, using directories crate to calculate ProjectDirs (~/.config/kakei)
