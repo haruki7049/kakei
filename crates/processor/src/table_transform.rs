@@ -207,7 +207,7 @@ pub fn value_to_display_rows(value: &Value) -> Result<Vec<DisplayRow>, Transform
                 // Check if this is a grouped result or a flat table
                 // Grouped: (("GroupName" (row1) (row2) ...) ...)
                 // Flat: ((ID-001 . ((date . "...") ...)) ...)
-                
+
                 if let Value::Cons(first, second) = row.as_ref() {
                     // Check if first is a string (group name) and second is a list of rows
                     if let Value::String(_group_name) = first.as_ref() {
@@ -218,7 +218,7 @@ pub fn value_to_display_rows(value: &Value) -> Result<Vec<DisplayRow>, Transform
                         continue;
                     }
                 }
-                
+
                 // This is a regular row
                 let date = extract_field(row.as_ref(), "date").unwrap_or_default();
                 let amount = extract_field(row.as_ref(), "amount")
@@ -241,7 +241,7 @@ pub fn value_to_display_rows(value: &Value) -> Result<Vec<DisplayRow>, Transform
             _ => {
                 return Err(TransformError::TransformError(
                     "Unexpected value structure".to_string(),
-                ))
+                ));
             }
         }
     }
@@ -285,7 +285,7 @@ pub fn value_to_grouped_tables(value: &Value) -> Result<Vec<GroupedTable>, Trans
             _ => {
                 return Err(TransformError::TransformError(
                     "Unexpected grouped value structure".to_string(),
-                ))
+                ));
             }
         }
     }

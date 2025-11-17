@@ -124,10 +124,10 @@ async fn handle_transform_command(
             if kakei_processor::is_grouped_result(&result) {
                 // Handle grouped results
                 let grouped_tables = kakei_processor::value_to_grouped_tables(&result)?;
-                
+
                 for group in grouped_tables {
                     println!("\n=== {} ===", group.group_name);
-                    
+
                     if group.rows.is_empty() {
                         println!("No transactions in this group.");
                     } else {
@@ -151,7 +151,7 @@ async fn handle_transform_command(
             } else {
                 // Handle flat table results
                 let rows = kakei_processor::value_to_display_rows(&result)?;
-                
+
                 if rows.is_empty() {
                     println!("No transactions found.");
                 } else {
