@@ -212,13 +212,17 @@ impl Processor {
     /// This method retrieves recent transactions, converts them to a Lisp table,
     /// applies the transformation program, and returns the result as a Lisp Value.
     ///
+    /// The returned value is always in a grouped table format. If the Lisp program
+    /// returns a flat list of transactions, it will be automatically wrapped in a
+    /// single group named "All".
+    ///
     /// # Arguments
     ///
     /// * `lisp_program` - The Lisp program to transform the table
     ///
     /// # Returns
     ///
-    /// Returns the transformed table as a Lisp Value.
+    /// Returns the transformed table as a grouped Lisp Value.
     #[instrument(skip(self, lisp_program))]
     pub async fn transform_transactions(
         &self,
