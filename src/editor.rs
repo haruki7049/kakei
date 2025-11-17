@@ -7,6 +7,9 @@ use std::error::Error;
 use std::fmt;
 use tracing::warn;
 
+/// Default currency code used when none is specified
+const DEFAULT_CURRENCY: &str = "JPY";
+
 /// Represents a parsed transaction from the editor.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EditorTransaction {
@@ -45,7 +48,7 @@ impl Error for EditorError {}
 fn generate_template(currency: &str) -> String {
     // Use a default if currency is empty
     let currency = if currency.trim().is_empty() {
-        "JPY"
+        DEFAULT_CURRENCY
     } else {
         currency
     };
@@ -153,12 +156,17 @@ fn parse_template(content: &str) -> Result<EditorTransaction, EditorError> {
         return Err(EditorError::Cancelled);
     }
 
+    // Helper to validate required fields
+    fn require_field(field: Option<String>, name: &str) -> Result<String, EditorError> {
+        field.ok_or_else(|| EditorError::ParseError(format!("{} is required", name)))
+    }
+
     // Validate required fields
-    let date = date.ok_or_else(|| EditorError::ParseError("date is required".to_string()))?;
-    let amount = amount.ok_or_else(|| EditorError::ParseError("amount is required".to_string()))?;
-    let currency = currency.ok_or_else(|| EditorError::ParseError("currency is required".to_string()))?;
-    let category = category.ok_or_else(|| EditorError::ParseError("category is required".to_string()))?;
-    let account = account.ok_or_else(|| EditorError::ParseError("account is required".to_string()))?;
+    let date = require_field(date, "date")?;
+    let amount = require_field(amount, "amount")?;
+    let currency = require_field(currency, "currency")?;
+    let category = require_field(category, "category")?;
+    let account = require_field(account, "account")?;
 
     Ok(EditorTransaction {
         date,
