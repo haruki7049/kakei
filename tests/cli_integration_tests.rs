@@ -6,14 +6,24 @@
 //!
 //! ## Platform Support
 //!
-//! Most tests are skipped on Windows because the `directories` crate v6.0
-//! uses Windows APIs directly and doesn't respect environment variables
-//! for path isolation. This makes it impossible to properly isolate tests
-//! on Windows without interfering with the user's actual data.
+//! ### Unix Systems (Linux, macOS) - 19 tests
+//! - 2 cross-platform tests: version, help
+//! - 17 database tests with full isolation using environment variables
+//!   (HOME, XDG_CONFIG_HOME, XDG_DATA_HOME)
 //!
-//! On Windows, only basic CLI tests (version, help) run. On Unix systems
-//! (Linux, macOS), all tests run with proper isolation using environment
-//! variables (HOME, XDG_CONFIG_HOME, XDG_DATA_HOME).
+//! ### Windows - 12 tests
+//! - 2 cross-platform tests: version, help
+//! - 10 Windows-specific safe tests that validate CLI behavior without
+//!   touching the database:
+//!   - Subcommand help output tests
+//!   - Argument validation tests
+//!   - Error message tests
+//!
+//! Database tests are skipped on Windows because the `directories` crate v6.0
+//! uses Windows APIs directly and doesn't respect environment variables for
+//! path isolation, making it impossible to isolate tests without interfering
+//! with user data. Instead, Windows gets dedicated tests that verify CLI
+//! functionality without database operations.
 
 use assert_cmd::{Command, cargo::cargo_bin_cmd};
 use predicates::prelude::*;
@@ -652,4 +662,139 @@ fn test_transform_with_cdr_operation() {
         .success()
         .stdout(predicate::str::contains("Food"))
         .stdout(predicate::str::contains("2025-01-01"));
+}
+
+// ============================================================================
+// Windows-Specific Safe Tests
+// ============================================================================
+// These tests are designed to run on Windows without requiring database
+// isolation. They test CLI argument validation and help output without
+// modifying any user data.
+
+/// Test that help works for the 'add' subcommand on Windows
+#[test]
+#[cfg(target_os = "windows")]
+fn test_windows_add_help() {
+    let mut cmd = cargo_bin_cmd!();
+    cmd.arg("add").arg("--help");
+
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("Add a new transaction"))
+        .stdout(predicate::str::contains("--date"))
+        .stdout(predicate::str::contains("--amount"))
+        .stdout(predicate::str::contains("--category"))
+        .stdout(predicate::str::contains("--account"));
+}
+
+/// Test that help works for the 'init' subcommand on Windows
+#[test]
+#[cfg(target_os = "windows")]
+fn test_windows_init_help() {
+    let mut cmd = cargo_bin_cmd!();
+    cmd.arg("init").arg("--help");
+
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("Initialize configuration and database"));
+}
+
+/// Test that help works for the 'list' subcommand on Windows
+#[test]
+#[cfg(target_os = "windows")]
+fn test_windows_list_help() {
+    let mut cmd = cargo_bin_cmd!();
+    cmd.arg("list").arg("--help");
+
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("List recent transactions"));
+}
+
+/// Test that help works for the 'transform' subcommand on Windows
+#[test]
+#[cfg(target_os = "windows")]
+fn test_windows_transform_help() {
+    let mut cmd = cargo_bin_cmd!();
+    cmd.arg("transform").arg("--help");
+
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("Transform transactions using a Lisp program"))
+        .stdout(predicate::str::contains("--program"));
+}
+
+/// Test that invalid subcommand produces an error on Windows
+#[test]
+#[cfg(target_os = "windows")]
+fn test_windows_invalid_subcommand() {
+    let mut cmd = cargo_bin_cmd!();
+    cmd.arg("invalid_command");
+
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("error"));
+}
+
+/// Test that 'add' command without required arguments fails with helpful error on Windows
+#[test]
+#[cfg(target_os = "windows")]
+fn test_windows_add_missing_args() {
+    let mut cmd = cargo_bin_cmd!();
+    cmd.arg("add");
+
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("required"));
+}
+
+/// Test that 'transform' command without required program argument fails on Windows
+#[test]
+#[cfg(target_os = "windows")]
+fn test_windows_transform_missing_program() {
+    let mut cmd = cargo_bin_cmd!();
+    cmd.arg("transform");
+
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("required"));
+}
+
+/// Test version output format on Windows
+#[test]
+#[cfg(target_os = "windows")]
+fn test_windows_version_format() {
+    let mut cmd = cargo_bin_cmd!();
+    cmd.arg("--version");
+
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::is_match(r"kakei \d+\.\d+\.\d+").unwrap());
+}
+
+/// Test that config file path option is recognized on Windows
+#[test]
+#[cfg(target_os = "windows")]
+fn test_windows_config_file_option() {
+    let mut cmd = cargo_bin_cmd!();
+    cmd.arg("--config-file").arg("test.toml").arg("--help");
+
+    // Should succeed with --help even with non-existent config file path
+    cmd.assert().success();
+}
+
+/// Test help output contains all expected sections on Windows
+#[test]
+#[cfg(target_os = "windows")]
+fn test_windows_help_completeness() {
+    let mut cmd = cargo_bin_cmd!();
+    cmd.arg("--help");
+
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("Usage:"))
+        .stdout(predicate::str::contains("Commands:"))
+        .stdout(predicate::str::contains("Options:"))
+        .stdout(predicate::str::contains("--version"))
+        .stdout(predicate::str::contains("--help"));
 }
