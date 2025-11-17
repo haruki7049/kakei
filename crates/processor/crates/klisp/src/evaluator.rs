@@ -4,10 +4,10 @@
 //! AST expressions into runtime values.
 
 mod builtins;
-mod evaluator;
+mod eval;
 mod value;
 
 // Re-export public API
 pub use builtins::create_global_env;
-pub use evaluator::eval;
+pub use eval::eval;
 pub use value::{Environment, EvalError, Value};

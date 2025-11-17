@@ -4,9 +4,9 @@
 //! text input into AST types.
 
 mod ast;
-mod parser;
+mod parse;
 mod whitespace;
 
 // Re-export public API
 pub use ast::{Atom, Sexpr};
-pub use parser::parse;
+pub use parse::parse;
