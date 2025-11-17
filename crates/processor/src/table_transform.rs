@@ -237,7 +237,7 @@ pub fn value_to_display_rows(value: &Value) -> Result<Vec<DisplayRow>, Transform
             }
             _ => {
                 return Err(TransformError::TransformError(
-                    "Unexpected value structure".to_string(),
+                    format!("Expected a cons cell or nil, but got: {:?}", current)
                 ));
             }
         }
