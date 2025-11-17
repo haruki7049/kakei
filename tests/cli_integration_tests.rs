@@ -696,9 +696,9 @@ mod windows {
         let mut cmd = cargo_bin_cmd!();
         cmd.arg("init").arg("--help");
 
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("Initialize configuration and database"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "Initialize configuration and database",
+        ));
     }
 
     /// Test that help works for the 'list' subcommand on Windows
@@ -720,7 +720,9 @@ mod windows {
 
         cmd.assert()
             .success()
-            .stdout(predicate::str::contains("Transform transactions using a Lisp program"))
+            .stdout(predicate::str::contains(
+                "Transform transactions using a Lisp program",
+            ))
             .stdout(predicate::str::contains("--program"));
     }
 
