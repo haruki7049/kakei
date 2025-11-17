@@ -478,8 +478,8 @@ LANG=en_US.UTF-8 kakei list
 To add support for a new language:
 
 1. Create a new YAML file in the `locales/` directory named `[language_code].yml` (e.g., `fr.yml` for French)
-2. Copy the structure from `locales/en.yml` and translate the strings
-3. Rebuild the application with `cargo build`
+1. Copy the structure from `locales/en.yml` and translate the strings
+1. Rebuild the application with `cargo build`
 
 The translations are embedded at compile time, so there's no need to distribute separate locale files.
 
