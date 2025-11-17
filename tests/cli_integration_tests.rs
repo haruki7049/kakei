@@ -3,12 +3,19 @@
 //! These tests verify that the CLI commands work correctly end-to-end
 //! by executing the actual binary with various arguments and checking
 //! the output and exit codes.
+//!
+//! Note: Tests that require isolated database environments use XDG environment
+//! variables on Unix systems. On Windows, these tests are skipped as the
+//! directories crate does not respect XDG variables there.
 
 use assert_cmd::{Command, cargo::cargo_bin_cmd};
 use predicates::prelude::*;
 use tempfile::TempDir;
 
-/// Helper function to create a test command with a temporary database
+/// Helper function to create a test command with a temporary database.
+///
+/// This only works on Unix systems where XDG environment variables are respected.
+#[cfg(unix)]
 fn setup_test_cmd() -> (Command, TempDir) {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let mut cmd = cargo_bin_cmd!();
@@ -20,7 +27,10 @@ fn setup_test_cmd() -> (Command, TempDir) {
     (cmd, temp_dir)
 }
 
-/// Helper function to initialize a database for testing
+/// Helper function to initialize a database for testing.
+///
+/// This only works on Unix systems where XDG environment variables are respected.
+#[cfg(unix)]
 fn init_database(temp_dir: &TempDir) {
     let mut cmd = cargo_bin_cmd!();
     cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
@@ -56,6 +66,7 @@ fn test_cli_help() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_init_command_success() {
     let (mut cmd, temp_dir) = setup_test_cmd();
     cmd.arg("init");
@@ -70,6 +81,7 @@ fn test_init_command_success() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_add_command_success() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -93,6 +105,7 @@ fn test_add_command_success() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_add_command_with_memo() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -118,6 +131,7 @@ fn test_add_command_with_memo() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_add_command_with_positive_amount() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -143,6 +157,7 @@ fn test_add_command_with_positive_amount() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_add_command_with_custom_currency() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -169,6 +184,7 @@ fn test_add_command_with_custom_currency() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_list_command_empty() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -184,6 +200,7 @@ fn test_list_command_empty() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_list_command_with_transactions() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
@@ -239,6 +256,7 @@ fn test_list_command_with_transactions() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_transform_command_table() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
@@ -275,6 +293,7 @@ fn test_transform_command_table() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_transform_command_empty_table() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -290,6 +309,7 @@ fn test_transform_command_empty_table() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_transform_command_group_by() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
@@ -359,6 +379,7 @@ fn test_transform_command_group_by() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_transform_command_invalid_program() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -374,6 +395,7 @@ fn test_transform_command_invalid_program() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_add_command_missing_required_args() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -389,6 +411,7 @@ fn test_add_command_missing_required_args() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_add_command_invalid_date_format() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -410,6 +433,7 @@ fn test_add_command_invalid_date_format() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_init_command_idempotent() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -425,6 +449,7 @@ fn test_init_command_idempotent() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_list_command_shows_formatted_table() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
@@ -466,6 +491,7 @@ fn test_list_command_shows_formatted_table() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_transform_with_car_operation() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
@@ -521,6 +547,7 @@ fn test_transform_with_car_operation() {
 }
 
 #[test]
+#[cfg(unix)]
 fn test_transform_with_cdr_operation() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
