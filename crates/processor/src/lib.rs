@@ -217,18 +217,21 @@ impl Processor {
         lisp_program: &str,
     ) -> Result<kakei_lisp::Value, ProcessorError> {
         info!("Transforming transactions with Lisp program");
-        
+
         // Get recent transactions
         let transactions = self.get_recent_transactions().await?;
-        debug!("Converting {} transactions to Lisp table", transactions.len());
-        
+        debug!(
+            "Converting {} transactions to Lisp table",
+            transactions.len()
+        );
+
         // Convert to Lisp table
         let table = transactions_to_table(&transactions);
-        
+
         // Apply transformation
         debug!("Applying Lisp transformation");
         let result = transform_table(table, lisp_program)?;
-        
+
         info!("Transformation complete");
         Ok(result)
     }

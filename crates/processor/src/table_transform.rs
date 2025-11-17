@@ -4,7 +4,7 @@
 //! different table formats using Lisp programs.
 
 use kakei_database::TransactionDetail;
-use kakei_lisp::{create_global_env, eval, parse, EvalError, Value};
+use kakei_lisp::{EvalError, Value, create_global_env, eval, parse};
 use std::rc::Rc;
 use thiserror::Error;
 
@@ -94,13 +94,10 @@ pub fn transactions_to_table(transactions: &[TransactionDetail]) -> Value {
 ///
 /// The Lisp program receives the table as a variable named `table`.
 /// The program should return the transformed table.
-pub fn transform_table(
-    table: Value,
-    lisp_program: &str,
-) -> Result<Value, TransformError> {
+pub fn transform_table(table: Value, lisp_program: &str) -> Result<Value, TransformError> {
     // Parse the Lisp program
-    let (remaining, sexprs) = parse(lisp_program)
-        .map_err(|e| TransformError::ParseError(format!("{:?}", e)))?;
+    let (remaining, sexprs) =
+        parse(lisp_program).map_err(|e| TransformError::ParseError(format!("{:?}", e)))?;
 
     if !remaining.is_empty() {
         return Err(TransformError::ParseError(format!(
@@ -179,7 +176,13 @@ mod tests {
 
     #[test]
     fn test_transform_table_simple() {
-        let transactions = vec![create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash")];
+        let transactions = vec![create_test_transaction(
+            1,
+            "2025-01-01",
+            -1000,
+            "Food",
+            "Cash",
+        )];
         let table = transactions_to_table(&transactions);
 
         // Simple program that just returns the table
