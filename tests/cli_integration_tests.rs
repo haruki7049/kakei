@@ -3,12 +3,28 @@
 //! These tests verify that the CLI commands work correctly end-to-end
 //! by executing the actual binary with various arguments and checking
 //! the output and exit codes.
+//!
+//! ## Platform Support
+//!
+//! Most tests are skipped on Windows because the `directories` crate v6.0
+//! uses Windows APIs directly and doesn't respect environment variables
+//! for path isolation. This makes it impossible to properly isolate tests
+//! on Windows without interfering with the user's actual data.
+//!
+//! On Windows, only basic CLI tests (version, help) run. On Unix systems
+//! (Linux, macOS), all tests run with proper isolation using environment
+//! variables (HOME, XDG_CONFIG_HOME, XDG_DATA_HOME).
 
 use assert_cmd::{Command, cargo::cargo_bin_cmd};
 use predicates::prelude::*;
 use tempfile::TempDir;
 
-/// Helper function to create a test command with a temporary database
+/// Helper function to create a test command with a temporary database.
+///
+/// Note: On Windows, the directories crate v6.0 uses Windows APIs directly
+/// and doesn't respect environment variables, so tests requiring isolated
+/// database paths should be skipped on Windows.
+#[cfg(not(target_os = "windows"))]
 fn setup_test_cmd() -> (Command, TempDir) {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let mut cmd = cargo_bin_cmd!();
@@ -22,7 +38,12 @@ fn setup_test_cmd() -> (Command, TempDir) {
     (cmd, temp_dir)
 }
 
-/// Helper function to initialize a database for testing
+/// Helper function to initialize a database for testing.
+///
+/// Note: On Windows, the directories crate v6.0 uses Windows APIs directly
+/// and doesn't respect environment variables, so tests requiring isolated
+/// database paths should be skipped on Windows.
+#[cfg(not(target_os = "windows"))]
 fn init_database(temp_dir: &TempDir) {
     let mut cmd = cargo_bin_cmd!();
     // Set HOME to ensure macOS uses temp directory (directories crate on macOS uses ~/Library/Application Support)
@@ -61,6 +82,7 @@ fn test_cli_help() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_init_command_success() {
     let (mut cmd, temp_dir) = setup_test_cmd();
     cmd.arg("init");
@@ -94,6 +116,7 @@ fn test_init_command_success() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_add_command_success() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -117,6 +140,7 @@ fn test_add_command_success() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_add_command_with_memo() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -142,6 +166,7 @@ fn test_add_command_with_memo() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_add_command_with_positive_amount() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -167,6 +192,7 @@ fn test_add_command_with_positive_amount() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_add_command_with_custom_currency() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -193,6 +219,7 @@ fn test_add_command_with_custom_currency() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_list_command_empty() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -208,6 +235,7 @@ fn test_list_command_empty() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_list_command_with_transactions() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
@@ -266,6 +294,7 @@ fn test_list_command_with_transactions() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_transform_command_table() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
@@ -304,6 +333,7 @@ fn test_transform_command_table() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_transform_command_empty_table() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -319,6 +349,7 @@ fn test_transform_command_empty_table() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_transform_command_group_by() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
@@ -392,6 +423,7 @@ fn test_transform_command_group_by() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_transform_command_invalid_program() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -407,6 +439,7 @@ fn test_transform_command_invalid_program() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_add_command_missing_required_args() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -422,6 +455,7 @@ fn test_add_command_missing_required_args() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_add_command_invalid_date_format() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -443,6 +477,7 @@ fn test_add_command_invalid_date_format() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_init_command_idempotent() {
     let (mut cmd, temp_dir) = setup_test_cmd();
 
@@ -458,6 +493,7 @@ fn test_init_command_idempotent() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_list_command_shows_formatted_table() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
@@ -501,6 +537,7 @@ fn test_list_command_shows_formatted_table() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_transform_with_car_operation() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
@@ -559,6 +596,7 @@ fn test_transform_with_car_operation() {
 }
 
 #[test]
+#[cfg(not(target_os = "windows"))]
 fn test_transform_with_cdr_operation() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
