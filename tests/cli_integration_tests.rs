@@ -15,20 +15,23 @@ fn setup_test_cmd() -> (Command, TempDir) {
 
     // Configure environment variables to isolate test from user's home directory
     // Different platforms use different mechanisms:
-    
+
     // Set HOME for Unix systems (Linux, macOS)
     cmd.env("HOME", temp_dir.path());
-    
+
     // Set XDG variables for Linux (these override HOME on XDG-compliant systems)
     cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
-    
+
     // Set Windows-specific environment variables
     // directories crate uses FOLDERID_RoamingAppData on Windows
     #[cfg(target_os = "windows")]
     {
         cmd.env("APPDATA", temp_dir.path().join("AppData").join("Roaming"));
-        cmd.env("LOCALAPPDATA", temp_dir.path().join("AppData").join("Local"));
+        cmd.env(
+            "LOCALAPPDATA",
+            temp_dir.path().join("AppData").join("Local"),
+        );
     }
 
     (cmd, temp_dir)
@@ -37,24 +40,27 @@ fn setup_test_cmd() -> (Command, TempDir) {
 /// Helper function to initialize a database for testing
 fn init_database(temp_dir: &TempDir) {
     let mut cmd = cargo_bin_cmd!();
-    
+
     // Configure environment variables to isolate test from user's home directory
     // Different platforms use different mechanisms:
-    
+
     // Set HOME for Unix systems (Linux, macOS)
     cmd.env("HOME", temp_dir.path());
-    
+
     // Set XDG variables for Linux (these override HOME on XDG-compliant systems)
     cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
-    
+
     // Set Windows-specific environment variables
     #[cfg(target_os = "windows")]
     {
         cmd.env("APPDATA", temp_dir.path().join("AppData").join("Roaming"));
-        cmd.env("LOCALAPPDATA", temp_dir.path().join("AppData").join("Local"));
+        cmd.env(
+            "LOCALAPPDATA",
+            temp_dir.path().join("AppData").join("Local"),
+        );
     }
-    
+
     cmd.arg("init");
 
     cmd.assert().success();
