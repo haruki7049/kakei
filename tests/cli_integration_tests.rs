@@ -13,7 +13,9 @@ fn setup_test_cmd() -> (Command, TempDir) {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let mut cmd = cargo_bin_cmd!();
 
-    // Set up environment to use temp directory for config and data
+    // Set HOME to ensure macOS uses temp directory (directories crate on macOS uses ~/Library/Application Support)
+    cmd.env("HOME", temp_dir.path());
+    // Set up environment to use temp directory for config and data (for XDG-based systems)
     cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
 
@@ -23,6 +25,9 @@ fn setup_test_cmd() -> (Command, TempDir) {
 /// Helper function to initialize a database for testing
 fn init_database(temp_dir: &TempDir) {
     let mut cmd = cargo_bin_cmd!();
+    // Set HOME to ensure macOS uses temp directory (directories crate on macOS uses ~/Library/Application Support)
+    cmd.env("HOME", temp_dir.path());
+    // Set up environment to use temp directory for config and data (for XDG-based systems)
     cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     cmd.arg("init");
@@ -192,6 +197,7 @@ fn test_list_command_with_transactions() {
 
     // Add some transactions
     let mut add_cmd1 = cargo_bin_cmd!();
+    add_cmd1.env("HOME", temp_dir.path());
     add_cmd1.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd1.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd1
@@ -207,6 +213,7 @@ fn test_list_command_with_transactions() {
     add_cmd1.assert().success();
 
     let mut add_cmd2 = cargo_bin_cmd!();
+    add_cmd2.env("HOME", temp_dir.path());
     add_cmd2.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd2.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd2
@@ -223,6 +230,7 @@ fn test_list_command_with_transactions() {
 
     // List transactions
     let mut list_cmd = cargo_bin_cmd!();
+    list_cmd.env("HOME", temp_dir.path());
     list_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     list_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     list_cmd.arg("list");
@@ -247,6 +255,7 @@ fn test_transform_command_table() {
 
     // Add a transaction
     let mut add_cmd = cargo_bin_cmd!();
+    add_cmd.env("HOME", temp_dir.path());
     add_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd
@@ -263,6 +272,7 @@ fn test_transform_command_table() {
 
     // Transform with "table" program
     let mut transform_cmd = cargo_bin_cmd!();
+    transform_cmd.env("HOME", temp_dir.path());
     transform_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     transform_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     transform_cmd.arg("transform").arg("--program").arg("table");
@@ -298,6 +308,7 @@ fn test_transform_command_group_by() {
 
     // Add multiple transactions in different categories
     let mut add_cmd1 = cargo_bin_cmd!();
+    add_cmd1.env("HOME", temp_dir.path());
     add_cmd1.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd1.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd1
@@ -313,6 +324,7 @@ fn test_transform_command_group_by() {
     add_cmd1.assert().success();
 
     let mut add_cmd2 = cargo_bin_cmd!();
+    add_cmd2.env("HOME", temp_dir.path());
     add_cmd2.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd2.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd2
@@ -328,6 +340,7 @@ fn test_transform_command_group_by() {
     add_cmd2.assert().success();
 
     let mut add_cmd3 = cargo_bin_cmd!();
+    add_cmd3.env("HOME", temp_dir.path());
     add_cmd3.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd3.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd3
@@ -344,6 +357,7 @@ fn test_transform_command_group_by() {
 
     // Transform with group-by program
     let mut transform_cmd = cargo_bin_cmd!();
+    transform_cmd.env("HOME", temp_dir.path());
     transform_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     transform_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     transform_cmd
@@ -433,6 +447,7 @@ fn test_list_command_shows_formatted_table() {
 
     // Add a transaction
     let mut add_cmd = cargo_bin_cmd!();
+    add_cmd.env("HOME", temp_dir.path());
     add_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd
@@ -451,6 +466,7 @@ fn test_list_command_shows_formatted_table() {
 
     // List transactions
     let mut list_cmd = cargo_bin_cmd!();
+    list_cmd.env("HOME", temp_dir.path());
     list_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     list_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     list_cmd.arg("list");
@@ -474,6 +490,7 @@ fn test_transform_with_car_operation() {
 
     // Add multiple transactions
     let mut add_cmd1 = cargo_bin_cmd!();
+    add_cmd1.env("HOME", temp_dir.path());
     add_cmd1.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd1.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd1
@@ -489,6 +506,7 @@ fn test_transform_with_car_operation() {
     add_cmd1.assert().success();
 
     let mut add_cmd2 = cargo_bin_cmd!();
+    add_cmd2.env("HOME", temp_dir.path());
     add_cmd2.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd2.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd2
@@ -506,6 +524,7 @@ fn test_transform_with_car_operation() {
     // Get only first transaction using (cons (car table) ())
     // Note: transactions are returned newest first, so car gets the Transport transaction
     let mut transform_cmd = cargo_bin_cmd!();
+    transform_cmd.env("HOME", temp_dir.path());
     transform_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     transform_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     transform_cmd
@@ -529,6 +548,7 @@ fn test_transform_with_cdr_operation() {
 
     // Add multiple transactions
     let mut add_cmd1 = cargo_bin_cmd!();
+    add_cmd1.env("HOME", temp_dir.path());
     add_cmd1.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd1.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd1
@@ -544,6 +564,7 @@ fn test_transform_with_cdr_operation() {
     add_cmd1.assert().success();
 
     let mut add_cmd2 = cargo_bin_cmd!();
+    add_cmd2.env("HOME", temp_dir.path());
     add_cmd2.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     add_cmd2.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     add_cmd2
@@ -561,6 +582,7 @@ fn test_transform_with_cdr_operation() {
     // Skip first transaction using (cdr table)
     // Note: transactions are returned newest first, so cdr skips Transport and returns Food
     let mut transform_cmd = cargo_bin_cmd!();
+    transform_cmd.env("HOME", temp_dir.path());
     transform_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
     transform_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
     transform_cmd
