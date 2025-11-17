@@ -362,7 +362,8 @@ mod unix {
 
         cmd.assert()
             .success()
-            .stdout(predicate::str::contains("No transactions found"));
+            .stdout(predicate::str::contains("=== All ==="))
+            .stdout(predicate::str::contains("No transactions in this group"));
     }
 
     #[test]
