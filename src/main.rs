@@ -236,13 +236,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             } else {
                 // Traditional CLI mode
+                // These unwraps are safe because clap enforces required_unless_present = "edit"
+                let date = date.as_ref().expect("date is required in CLI mode");
+                let amount = amount.as_ref().expect("amount is required in CLI mode");
+                let category = category.as_ref().expect("category is required in CLI mode");
+                let account = account.as_ref().expect("account is required in CLI mode");
+                
                 handle_add_command(
                     &processor,
-                    date.as_ref().unwrap(),
-                    amount.as_ref().unwrap(),
+                    date,
+                    amount,
                     currency,
-                    category.as_ref().unwrap(),
-                    account.as_ref().unwrap(),
+                    category,
+                    account,
                     memo,
                 )
                 .await?

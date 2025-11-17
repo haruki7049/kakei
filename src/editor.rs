@@ -5,6 +5,7 @@
 
 use std::error::Error;
 use std::fmt;
+use tracing::warn;
 
 /// Represents a parsed transaction from the editor.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -42,6 +43,13 @@ impl Error for EditorError {}
 
 /// Generate a transaction template for the editor.
 fn generate_template(currency: &str) -> String {
+    // Use a default if currency is empty
+    let currency = if currency.trim().is_empty() {
+        "JPY"
+    } else {
+        currency
+    };
+    
     format!(
         r#"# Enter transaction details below.
 # Lines starting with '#' are comments and will be ignored.
@@ -135,7 +143,7 @@ fn parse_template(content: &str) -> Result<EditorTransaction, EditorError> {
                 }
                 _ => {
                     // Unknown key, skip or warn
-                    eprintln!("Warning: Unknown field '{}' will be ignored", key);
+                    warn!("Unknown field '{}' will be ignored", key);
                 }
             }
         }
@@ -298,5 +306,19 @@ unknown: value
         assert!(template.contains("currency: USD"));
         assert!(template.contains("date: "));
         assert!(template.contains("amount: "));
+    }
+
+    #[test]
+    fn test_generate_template_empty_currency() {
+        // Empty currency should default to JPY
+        let template = generate_template("");
+        assert!(template.contains("currency: JPY"));
+    }
+
+    #[test]
+    fn test_generate_template_whitespace_currency() {
+        // Whitespace-only currency should default to JPY
+        let template = generate_template("  ");
+        assert!(template.contains("currency: JPY"));
     }
 }
