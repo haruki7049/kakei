@@ -45,6 +45,13 @@ impl TransactionDisplay {
     }
 }
 
+/// Helper function to extract a required field from Option with a descriptive error
+fn require_cli_field<'a>(field: &'a Option<String>, name: &str) -> &'a str {
+    field.as_ref()
+        .map(|s| s.as_str())
+        .unwrap_or_else(|| panic!("{} is required when not using --edit mode", name))
+}
+
 /// Handle the Add command
 async fn handle_add_command(
     processor: &Processor,
@@ -236,19 +243,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             } else {
                 // Traditional CLI mode
-                // These expects are safe because clap enforces required_unless_present = "edit"
-                let date = date.as_ref().expect("date is required when not using --edit mode");
-                let amount = amount.as_ref().expect("amount is required when not using --edit mode");
-                let category = category.as_ref().expect("category is required when not using --edit mode");
-                let account = account.as_ref().expect("account is required when not using --edit mode");
-                
+                // These fields are guaranteed to be Some by clap's required_unless_present = "edit"
                 handle_add_command(
                     &processor,
-                    date,
-                    amount,
+                    require_cli_field(date, "date"),
+                    require_cli_field(amount, "amount"),
                     currency,
-                    category,
-                    account,
+                    require_cli_field(category, "category"),
+                    require_cli_field(account, "account"),
                     memo,
                 )
                 .await?

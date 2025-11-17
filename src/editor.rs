@@ -47,7 +47,7 @@ impl Error for EditorError {}
 /// Generate a transaction template for the editor.
 fn generate_template(currency: &str) -> String {
     // Use a default if currency is empty
-    let currency = if currency.trim().is_empty() {
+    let currency_code = if currency.trim().is_empty() {
         DEFAULT_CURRENCY
     } else {
         currency
@@ -83,7 +83,7 @@ category:
 account: 
 memo: 
 "#,
-        currency
+        currency_code
     )
 }
 
