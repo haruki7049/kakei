@@ -53,6 +53,9 @@ tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 tabled = "0.20.0"
 nom = "8.0.0"
+assert_cmd = "2.0"
+predicates = "3.0"
+tempfile = "3.8"
 
 [dependencies]
 kakei_processor.workspace = true
@@ -67,8 +70,8 @@ tabled.workspace = true
 nom.workspace = true
 
 [dev-dependencies]
-assert_cmd = "2.0"
-predicates = "3.0"
-tempfile = "3.8"
+assert_cmd.workspace = true
+predicates.workspace = true
+tempfile.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
