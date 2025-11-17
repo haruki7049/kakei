@@ -75,14 +75,22 @@ fn test_init_command_success() {
     // - Linux with XDG_DATA_HOME: $XDG_DATA_HOME/kakei/kakei.db
     // - Windows: ~\AppData\Roaming\dev.haruki7049\kakei\data\kakei.db
     let db_path = if cfg!(target_os = "macos") {
-        temp_dir.path().join("Library/Application Support/dev.haruki7049.kakei/kakei.db")
+        temp_dir
+            .path()
+            .join("Library/Application Support/dev.haruki7049.kakei/kakei.db")
     } else if cfg!(target_os = "windows") {
-        temp_dir.path().join("AppData/Roaming/dev.haruki7049/kakei/data/kakei.db")
+        temp_dir
+            .path()
+            .join("AppData/Roaming/dev.haruki7049/kakei/data/kakei.db")
     } else {
         // Linux and other Unix-like systems use XDG_DATA_HOME when set
         temp_dir.path().join("data/kakei/kakei.db")
     };
-    assert!(db_path.exists(), "Database file should exist after init at {:?}", db_path);
+    assert!(
+        db_path.exists(),
+        "Database file should exist after init at {:?}",
+        db_path
+    );
 }
 
 #[test]
