@@ -32,6 +32,10 @@ A kakeibo (household financial ledger) CLI application with powerful Lisp-based 
 - [Configuration](#configuration)
   - [Configuration File](#configuration-file)
   - [Database Location](#database-location)
+- [Internationalization (i18n)](#internationalization-i18n)
+  - [Supported Languages](#supported-languages)
+  - [Changing the Language](#changing-the-language)
+  - [Adding New Translations](#adding-new-translations)
 - [Architecture](#architecture)
 - [Development](#development)
   - [Running Tests](#running-tests)
@@ -57,6 +61,7 @@ A kakeibo (household financial ledger) CLI application with powerful Lisp-based 
 - 📋 Table Display: Beautiful table formatting using the `tabled` crate
 - 💾 SQLite Database: Persistent storage with automatic migrations
 - ⚙️ Configuration: Customizable categories and accounts
+- 🌍 Internationalization: Built-in support for multiple languages with compile-time embedded translations (English, Japanese)
 
 ## Installation
 
@@ -432,6 +437,60 @@ default_accounts = ["Cash", "Bank"]
 The SQLite database is stored at: `~/.local/share/kakei/kakei.db` (on Linux when XDG is used)
 
 This follows the XDG Base Directory specification on Linux. On macOS/Windows, the app will use platform-appropriate directories if XDG environment variables are not set.
+
+## Internationalization (i18n)
+
+`kakei` supports multiple languages through embedded locale files. The translations are compiled into the binary at build time, making the application self-contained and usable offline.
+
+### Supported Languages
+
+- **English (en)** - Default language
+- **Japanese (ja)** - 日本語サポート
+
+### Changing the Language
+
+You can change the language using one of these methods:
+
+#### Method 1: Using RUST_I18N_LOCALE environment variable
+
+```bash
+# English (default)
+kakei list
+
+# Japanese
+RUST_I18N_LOCALE=ja kakei list
+```
+
+#### Method 2: Using LANG environment variable
+
+The application will automatically detect your system locale from the `LANG` environment variable:
+
+```bash
+# Set system locale to Japanese
+LANG=ja_JP.UTF-8 kakei list
+
+# Set system locale to English
+LANG=en_US.UTF-8 kakei list
+```
+
+### Adding New Translations
+
+To add support for a new language:
+
+1. Create a new YAML file in the `locales/` directory named `[language_code].yml` (e.g., `fr.yml` for French)
+2. Copy the structure from `locales/en.yml` and translate the strings
+3. Rebuild the application with `cargo build`
+
+The translations are embedded at compile time, so there's no need to distribute separate locale files.
+
+Example locale file structure:
+
+```yaml
+# locales/fr.yml
+transaction_added: "✅ Transaction ajoutée avec succès ! (ID: %{id})"
+init_complete: "✅ Initialisation terminée. Base de données prête à : %{path}"
+# ... other translations
+```
 
 ## Architecture
 
