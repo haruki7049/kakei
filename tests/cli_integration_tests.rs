@@ -82,6 +82,8 @@ mod unix {
         // Set up environment to use temp directory for config and data (for XDG-based systems)
         cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        // Force English locale for consistent test output
+        cmd.env("RUST_I18N_LOCALE", "en");
 
         (cmd, temp_dir)
     }
@@ -94,6 +96,8 @@ mod unix {
         // Set up environment to use temp directory for config and data (for XDG-based systems)
         cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        // Force English locale for consistent test output
+        cmd.env("RUST_I18N_LOCALE", "en");
         cmd.arg("init");
 
         cmd.assert().success();
@@ -266,6 +270,7 @@ mod unix {
         add_cmd1.env("HOME", temp_dir.path());
         add_cmd1.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd1.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd1.env("RUST_I18N_LOCALE", "en");
         add_cmd1
             .arg("add")
             .arg("--date")
@@ -282,6 +287,7 @@ mod unix {
         add_cmd2.env("HOME", temp_dir.path());
         add_cmd2.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd2.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd2.env("RUST_I18N_LOCALE", "en");
         add_cmd2
             .arg("add")
             .arg("--date")
@@ -299,6 +305,7 @@ mod unix {
         list_cmd.env("HOME", temp_dir.path());
         list_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         list_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        list_cmd.env("RUST_I18N_LOCALE", "en");
         list_cmd.arg("list");
 
         list_cmd
@@ -324,6 +331,7 @@ mod unix {
         add_cmd.env("HOME", temp_dir.path());
         add_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd.env("RUST_I18N_LOCALE", "en");
         add_cmd
             .arg("add")
             .arg("--date")
@@ -341,6 +349,7 @@ mod unix {
         transform_cmd.env("HOME", temp_dir.path());
         transform_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         transform_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        transform_cmd.env("RUST_I18N_LOCALE", "en");
         transform_cmd.arg("transform").arg("--program").arg("table");
 
         transform_cmd
@@ -378,6 +387,7 @@ mod unix {
         add_cmd1.env("HOME", temp_dir.path());
         add_cmd1.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd1.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd1.env("RUST_I18N_LOCALE", "en");
         add_cmd1
             .arg("add")
             .arg("--date")
@@ -394,6 +404,7 @@ mod unix {
         add_cmd2.env("HOME", temp_dir.path());
         add_cmd2.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd2.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd2.env("RUST_I18N_LOCALE", "en");
         add_cmd2
             .arg("add")
             .arg("--date")
@@ -410,6 +421,7 @@ mod unix {
         add_cmd3.env("HOME", temp_dir.path());
         add_cmd3.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd3.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd3.env("RUST_I18N_LOCALE", "en");
         add_cmd3
             .arg("add")
             .arg("--date")
@@ -427,6 +439,7 @@ mod unix {
         transform_cmd.env("HOME", temp_dir.path());
         transform_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         transform_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        transform_cmd.env("RUST_I18N_LOCALE", "en");
         transform_cmd
             .arg("transform")
             .arg("--program")
@@ -517,6 +530,7 @@ mod unix {
         add_cmd.env("HOME", temp_dir.path());
         add_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd.env("RUST_I18N_LOCALE", "en");
         add_cmd
             .arg("add")
             .arg("--date")
@@ -536,6 +550,7 @@ mod unix {
         list_cmd.env("HOME", temp_dir.path());
         list_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         list_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        list_cmd.env("RUST_I18N_LOCALE", "en");
         list_cmd.arg("list");
 
         list_cmd
@@ -560,6 +575,7 @@ mod unix {
         add_cmd1.env("HOME", temp_dir.path());
         add_cmd1.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd1.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd1.env("RUST_I18N_LOCALE", "en");
         add_cmd1
             .arg("add")
             .arg("--date")
@@ -576,6 +592,7 @@ mod unix {
         add_cmd2.env("HOME", temp_dir.path());
         add_cmd2.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd2.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd2.env("RUST_I18N_LOCALE", "en");
         add_cmd2
             .arg("add")
             .arg("--date")
@@ -594,6 +611,7 @@ mod unix {
         transform_cmd.env("HOME", temp_dir.path());
         transform_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         transform_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        transform_cmd.env("RUST_I18N_LOCALE", "en");
         transform_cmd
             .arg("transform")
             .arg("--program")
@@ -618,6 +636,7 @@ mod unix {
         add_cmd1.env("HOME", temp_dir.path());
         add_cmd1.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd1.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd1.env("RUST_I18N_LOCALE", "en");
         add_cmd1
             .arg("add")
             .arg("--date")
@@ -634,6 +653,7 @@ mod unix {
         add_cmd2.env("HOME", temp_dir.path());
         add_cmd2.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         add_cmd2.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd2.env("RUST_I18N_LOCALE", "en");
         add_cmd2
             .arg("add")
             .arg("--date")
@@ -652,6 +672,7 @@ mod unix {
         transform_cmd.env("HOME", temp_dir.path());
         transform_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
         transform_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        transform_cmd.env("RUST_I18N_LOCALE", "en");
         transform_cmd
             .arg("transform")
             .arg("--program")
