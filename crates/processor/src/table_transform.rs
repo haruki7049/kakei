@@ -121,7 +121,7 @@ pub fn transform_table(table: Value, lisp_program: &str) -> Result<Value, Transf
         } else {
             result
         };
-        
+
         // Wrap the flat list in a single group: (("All" . normalized_result))
         let group_name = Value::String("All".to_string());
         let group_pair = Value::Cons(Rc::new(group_name), Rc::new(normalized_result));
@@ -553,10 +553,10 @@ mod tests {
     fn test_is_single_row() {
         let tx = create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash");
         let row = transaction_to_value(&tx, 1);
-        
+
         // A single row should be detected
         assert!(is_single_row(&row));
-        
+
         // A list of rows should not be detected as a single row
         let transactions = vec![
             create_test_transaction(1, "2025-01-01", -1000, "Food", "Cash"),
@@ -564,7 +564,7 @@ mod tests {
         ];
         let table = transactions_to_table(&transactions);
         assert!(!is_single_row(&table));
-        
+
         // Nil should not be detected as a single row
         assert!(!is_single_row(&Value::Nil));
     }
