@@ -2,6 +2,15 @@
 
 This guide covers all the ways you can install kakei on your system.
 
+Choose the installation method that works best for you:
+
+- [Prerequisites](./installation/prerequisites.md) - System requirements
+- [Build from Source](./installation/build-from-source.md) - Build the latest version yourself
+- [Install via Cargo](./installation/install-via-cargo.md) - Quick install if you have Rust
+- [Binary Releases](./installation/binary-releases.md) - Download pre-built binaries
+- [Install via Nix](./installation/install-via-nix.md) - Install with Nix package manager
+- [Platform Notes](./installation/platform-notes.md) - Platform-specific information
+
 ## Prerequisites
 
 Before installing kakei, ensure you have:
