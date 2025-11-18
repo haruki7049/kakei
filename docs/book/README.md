@@ -7,15 +7,18 @@ This directory contains the source files for the kakei documentation book, built
 This documentation is designed for:
 
 - **New Users**: People who want to start using kakei to manage their personal finances
+
   - Installation guides and quick start tutorials
   - Basic command usage and examples
-  
+
 - **Developers**: Contributors who want to understand and extend kakei
+
   - Architecture overview
   - Development setup and testing
   - Contribution guidelines
-  
+
 - **Power Users**: Advanced users who want to leverage kakei's full potential
+
   - Lisp-based data transformations
   - Configuration options
   - Real-world usage examples
@@ -61,7 +64,7 @@ The documentation is automatically built and deployed to GitHub Pages via GitHub
 To contribute to the documentation:
 
 1. Edit the relevant `.md` files in the `src/` directory
-2. Preview your changes locally with `mdbook serve`
-3. Submit a pull request
+1. Preview your changes locally with `mdbook serve`
+1. Submit a pull request
 
 For more details, see the [Contributing Guide](src/contributing.md).
