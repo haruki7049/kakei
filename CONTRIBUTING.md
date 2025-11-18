@@ -316,7 +316,7 @@ When requesting features, please include:
 ### Where to Ask Questions
 
 - **GitHub Issues**: For bug reports and feature requests
-- **GitHub Discussions**: For general questions and discussions (if enabled)
+- **GitHub Discussions**: For general questions and discussions
 - **Pull Request Comments**: For questions about specific code changes
 
 ### Community Guidelines
