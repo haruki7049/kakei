@@ -1,0 +1,82 @@
+name: "Feature request"
+description: "Suggest a new feature or improvement for kakei"
+title: "FEATURE: "
+labels: ["enhancement"]
+body:
+  - type: "markdown"
+    attributes:
+      value: |
+        # Feature Request for kakei
+
+        Thank you for suggesting a new feature. Please fill out the form below to help us understand your idea.
+
+        ---
+  - type: "textarea"
+    id: "description"
+    attributes:
+      label: "Feature description"
+      description: "Please provide a clear and concise description of the feature you'd like to see."
+    validations:
+      required: true
+  - type: "textarea"
+    id: "use-case"
+    attributes:
+      label: "Use case"
+      description: |
+        Explain why this feature would be useful. What problem does it solve?
+        Please provide concrete examples of how you would use this feature.
+    validations:
+      required: true
+  - type: "textarea"
+    id: "proposed-solution"
+    attributes:
+      label: "Proposed solution"
+      description: |
+        Describe how you envision this feature working.
+        If you have implementation ideas, please share them.
+    validations:
+      required: true
+  - type: "textarea"
+    id: "alternatives"
+    attributes:
+      label: "Alternatives considered"
+      description: |
+        Have you considered any alternative solutions or workarounds?
+        If so, please describe them and why they don't fully meet your needs.
+    validations:
+      required: false
+  - type: "textarea"
+    id: "screenshots"
+    attributes:
+      label: "Screenshots or mockups"
+      description: |
+        If applicable, add screenshots or mockups to help illustrate your feature idea.
+        You can drag and drop images here.
+    validations:
+      required: false
+  - type: "textarea"
+    id: "additional-context"
+    attributes:
+      label: "Additional context"
+      description: "Add any other context or examples about the feature request here."
+    validations:
+      required: false
+  - type: "checkboxes"
+    id: "checklist"
+    attributes:
+      label: "Checklist"
+      description: |
+        Please confirm the following before submitting this feature request.
+      options:
+        - label: "I have searched for existing issues and this feature has not been requested before."
+          required: true
+        - label: "I have read the [documentation](https://haruki7049.github.io/kakei/) and this feature does not exist."
+          required: false
+        - label: "This is a feature request, not a bug report or support question."
+          required: true
+  - type: "markdown"
+    attributes:
+      value: |
+        ---
+
+        # Thank you for helping improve kakei!
