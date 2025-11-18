@@ -1,7 +1,6 @@
 [book]
 authors = ["haruki7049 <tontonkirikiri@gmail.com>"]
 language = "en"
-multilingual = false
 src = "src"
 title = "kakei Documentation"
 description = "Documentation for kakei - A kakeibo (household financial ledger) CLI application"
