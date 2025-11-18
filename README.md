@@ -93,7 +93,7 @@ The documentation is built with [mdBook](https://rust-lang.github.io/mdBook/):
 cargo install mdbook
 
 # Build and serve locally
-cd book
+cd docs/book
 mdbook serve
 
 # Open http://localhost:3000 in your browser

@@ -11,7 +11,7 @@ build-dir = "book"
 
 [output.html]
 git-repository-url = "https://github.com/haruki7049/kakei"
-edit-url-template = "https://github.com/haruki7049/kakei/edit/main/book/{path}"
+edit-url-template = "https://github.com/haruki7049/kakei/edit/main/docs/book/src/{path}"
 site-url = "/kakei/"
 default-theme = "light"
 preferred-dark-theme = "navy"

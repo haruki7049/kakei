@@ -244,16 +244,16 @@ pub async fn add_transaction(
 
 ### mdBook Documentation
 
-The documentation is in `book/src/`:
+The documentation is in `docs/book/src/`:
 
 ```bash
 # Install mdbook
 cargo install mdbook
 
-# Make changes to .md files in book/src/
+# Make changes to .md files in docs/book/src/
 
 # Preview locally
-cd book
+cd docs/book
 mdbook serve
 
 # Open browser to http://localhost:3000

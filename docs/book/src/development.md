@@ -514,7 +514,7 @@ cargo test --doc
 cargo install mdbook
 
 # Build documentation
-cd book
+cd docs/book
 mdbook build
 
 # Serve locally

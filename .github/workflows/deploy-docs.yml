@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'book/**'
+      - 'docs/book/**'
       - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
@@ -34,13 +34,13 @@ jobs:
 
       - name: Build documentation
         run: |
-          cd book
+          cd docs/book
           mdbook build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./book/book
+          path: ./docs/book/book
 
   deploy:
     environment:
