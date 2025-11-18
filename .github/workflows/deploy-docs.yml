@@ -26,16 +26,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup mdBook
-        uses: peaceiris/actions-mdbook@v2
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31.6.0
         with:
-          mdbook-version: '0.4.43'
+          nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Build documentation
         run: |
           cd docs/book
-          mdbook build
+          nix develop -L --command sh -c 'mdbook build'
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
