@@ -28,7 +28,7 @@ kakei is a command-line application for managing personal finances using the Jap
 ### Prerequisites
 
 - **Rust**: Version 1.91.1 or later
-- **SQLite 3**: Required for database operations
+- **SQLite 3**: Optional, useful for debugging the database directly (not required for building)
 - **Git**: For version control
 
 ### Option A: Using Nix (Recommended)
@@ -80,8 +80,8 @@ cargo fetch
 
 **Windows Prerequisites**:
 - Install Rust from [rustup.rs](https://rustup.rs/)
-- Install SQLite 3 (you can use [vcpkg](https://github.com/microsoft/vcpkg) or download from [sqlite.org](https://www.sqlite.org/download.html))
 - Install Git from [git-scm.com](https://git-scm.com/download/win)
+- (Optional) Install SQLite 3 for database debugging - you can use [vcpkg](https://github.com/microsoft/vcpkg) or download from [sqlite.org](https://www.sqlite.org/download.html)
 
 **Limitations on Windows**:
 - `nix fmt` and `nix flake check` are not available (Nix doesn't support Windows)
