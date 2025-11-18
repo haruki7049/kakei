@@ -20,7 +20,7 @@ Then open <http://localhost:3000> in your browser.
 ## Making Changes
 
 1. Edit the markdown files in `docs/book/src/`
-2. The documentation will automatically reload when you save changes
-3. Review your changes in the browser
+1. The documentation will automatically reload when you save changes
+1. Review your changes in the browser
 
 For more information, see the [docs/book/README.md](../../README.md).
