@@ -7,6 +7,7 @@ Welcome to the **kakei** documentation!
 ## What is Kakeibo?
 
 Kakeibo (家計簿) is a Japanese household financial ledger system that emphasizes mindful spending and saving. The word combines:
+
 - 家計 (kakei): household finances
 - 簿 (bo): ledger/account book
 
@@ -24,18 +25,18 @@ Kakeibo (家計簿) is a Japanese household financial ledger system that emphasi
 Traditional financial tracking tools can be rigid and inflexible. `kakei` takes a different approach:
 
 1. **Flexible Data Analysis**: Use Lisp expressions to transform and analyze your financial data in any way you need
-2. **Command-Line First**: Designed for developers and power users who prefer the command line
-3. **Open and Portable**: Your data is stored in a standard SQLite database that you fully control
-4. **Extensible**: The Lisp-based transformation system allows for unlimited customization
+1. **Command-Line First**: Designed for developers and power users who prefer the command line
+1. **Open and Portable**: Your data is stored in a standard SQLite database that you fully control
+1. **Extensible**: The Lisp-based transformation system allows for unlimited customization
 
 ## Getting Started
 
 If you're new to kakei, we recommend:
 
 1. Start with the [Installation](./installation.md) guide to get kakei installed on your system
-2. Follow the [Quick Start](./quick-start.md) guide to initialize your database and add your first transactions
-3. Explore the [Commands](./commands.md) reference to learn all available commands
-4. Learn about [Lisp Functions](./lisp-functions.md) to unlock powerful data transformations
+1. Follow the [Quick Start](./quick-start.md) guide to initialize your database and add your first transactions
+1. Explore the [Commands](./commands.md) reference to learn all available commands
+1. Learn about [Lisp Functions](./lisp-functions.md) to unlock powerful data transformations
 
 ## Contributing
 

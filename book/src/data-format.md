@@ -32,6 +32,7 @@ Each transaction contains the following fields:
 ### Understanding the Structure
 
 The transaction is a **pair** (cons cell):
+
 - **Car** (first element): Transaction ID
 - **Cdr** (second element): Association list of fields
 
@@ -69,6 +70,7 @@ The `table` variable provided to `transform` commands contains a **list of trans
 ```
 
 Returns:
+
 ```lisp
 (ID-001 . ((date . "2025-01-01") (amount . -1000) ...))
 ```
@@ -112,10 +114,11 @@ To get the value of a specific field, use `assoc` followed by `cdr`:
 ```
 
 This expression:
+
 1. Gets the first transaction: `(car table)`
-2. Gets its fields: `(cdr (car table))`
-3. Finds the category pair: `(assoc 'category ...)`
-4. Extracts the value: `(cdr ...)`
+1. Gets its fields: `(cdr (car table))`
+1. Finds the category pair: `(assoc 'category ...)`
+1. Extracts the value: `(cdr ...)`
 
 ### Example: Get Category of First Transaction
 
@@ -164,12 +167,14 @@ The `table` variable would contain:
 ### Integers
 
 Used for amounts in minor units:
+
 - `-1000` = ¥-1,000 expense
 - `50000` = ¥50,000 income
 
 ### Strings
 
 Used for:
+
 - Transaction IDs
 - Dates (YYYY-MM-DD format)
 - Categories
@@ -181,6 +186,7 @@ Strings in Lisp are enclosed in double quotes: `"Food"`
 ### Symbols
 
 Used as keys in association lists:
+
 - `'date`
 - `'amount`
 - `'category`

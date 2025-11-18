@@ -17,20 +17,23 @@ kakei init
 The `init` command sets up kakei for first-time use:
 
 1. **Creates the database file** at the platform-appropriate location:
+
    - Linux (XDG): `~/.local/share/kakei/kakei.db`
    - macOS: `~/Library/Application Support/kakei/kakei.db`
    - Windows: `%APPDATA%\kakei\kakei.db`
 
-2. **Runs database migrations** to create the necessary tables and schema
+1. **Runs database migrations** to create the necessary tables and schema
 
-3. **Initializes default categories**:
+1. **Initializes default categories**:
+
    - Food
    - Transport
    - Daily Goods
    - Hobby
    - Salary
 
-4. **Initializes default accounts**:
+1. **Initializes default accounts**:
+
    - Cash
    - Bank
 
@@ -60,21 +63,25 @@ kakei add --date <DATE> --amount <AMOUNT> --category <CATEGORY> --account <ACCOU
 ### Required Arguments
 
 - `--date <DATE>`
+
   - Transaction date in **YYYY-MM-DD** format
   - Example: `2025-01-15`
 
 - `--amount <AMOUNT>`
+
   - Transaction amount in **minor units** (integer)
   - **Negative** for expenses (money out)
   - **Positive** for income (money in)
   - Example: `-1000` (¥-1,000 expense) or `50000` (¥50,000 income)
 
 - `--category <CATEGORY>`
+
   - Category name for the transaction
   - Must match one of your configured categories
   - Example: `Food`, `Transport`, `Salary`
 
 - `--account <ACCOUNT>`
+
   - Account name for the transaction
   - Must match one of your configured accounts
   - Example: `Cash`, `Bank`, `Card`
@@ -82,10 +89,12 @@ kakei add --date <DATE> --amount <AMOUNT> --category <CATEGORY> --account <ACCOU
 ### Optional Arguments
 
 - `--currency <CURRENCY>`
+
   - Currency code (default: `JPY`)
   - Example: `USD`, `EUR`, `GBP`
 
 - `--memo <MEMO>`
+
   - Optional note or description
   - Example: `"Monthly train pass"`
 
@@ -121,10 +130,10 @@ The `--amount` parameter uses **minor units** (the smallest subdivision of a cur
 
 | Currency | Minor Unit | Example Input | Actual Value |
 |----------|-----------|---------------|--------------|
-| JPY      | Yen (no subunit) | `-1000` | ¥-1,000 |
-| USD      | Cents | `-1050` | $-10.50 |
-| EUR      | Cents | `-2099` | €-20.99 |
-| GBP      | Pence | `-1500` | £-15.00 |
+| JPY | Yen (no subunit) | `-1000` | ¥-1,000 |
+| USD | Cents | `-1050` | $-10.50 |
+| EUR | Cents | `-2099` | €-20.99 |
+| GBP | Pence | `-1500` | £-15.00 |
 
 ## list
 
@@ -245,11 +254,13 @@ kakei transform --program "(cons (car table) (cons (car (cdr table)) ()))"
 Be careful with shell quoting when passing Lisp programs:
 
 **POSIX shells:**
+
 ```bash
 kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))"
 ```
 
 **PowerShell:**
+
 ```powershell
 kakei transform --program '(group-by table (lambda (pair) (cdr (assoc ''category'' (cdr pair)))))'
 ```

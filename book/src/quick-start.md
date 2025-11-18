@@ -11,6 +11,7 @@ kakei init
 ```
 
 This command:
+
 - Creates the database file at the appropriate location for your platform
   - Linux (XDG): `~/.local/share/kakei/kakei.db`
   - macOS: `~/Library/Application Support/kakei/kakei.db`
@@ -62,14 +63,16 @@ kakei add --date 2025-01-20 --amount -50 --category Food --account Cash --curren
 The `--amount` parameter expects values in the currency's **minor units** as an integer:
 
 - **For JPY** (no subunits): Use integer yen
+
   - `-1000` represents ¥-1,000 (expense)
   - `50000` represents ¥50,000 (income)
-  
+
 - **For USD, EUR, etc.**: Use cents
+
   - `-1050` represents $-10.50 (expense)
   - `50000` represents $500.00 (income)
 
-**Negative amounts** = expenses (money going out)  
+**Negative amounts** = expenses (money going out)\
 **Positive amounts** = income (money coming in)
 
 ## List Transactions
@@ -93,6 +96,7 @@ Example output:
 ```
 
 The `list` command displays the **20 most recent transactions** by default, showing:
+
 - Date
 - Amount (with currency symbol)
 - Category
@@ -150,11 +154,13 @@ kakei transform --program "(cons (car table) (cons (car (cdr table)) ()))"
 When passing Lisp programs on the command line, you may need to properly quote or escape the program string depending on your shell:
 
 **POSIX shells (bash, zsh, etc.):**
+
 ```bash
 kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))"
 ```
 
 **PowerShell:**
+
 ```powershell
 kakei transform --program '(group-by table (lambda (pair) (cdr (assoc ''category'' (cdr pair)))))'
 ```

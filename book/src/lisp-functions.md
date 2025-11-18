@@ -9,11 +9,13 @@ The `kakei_lisp` dialect provides a set of built-in functions for transforming a
 Create anonymous (unnamed) functions.
 
 **Syntax:**
+
 ```lisp
 (lambda (parameter ...) body)
 ```
 
 **Examples:**
+
 ```lisp
 ; Function that adds 1 to its argument
 (lambda (x) (+ x 1))
@@ -23,6 +25,7 @@ Create anonymous (unnamed) functions.
 ```
 
 **Usage in transform:**
+
 ```bash
 kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))"
 ```
@@ -32,11 +35,13 @@ kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category 
 Define variables or functions for reuse within a program.
 
 **Syntax:**
+
 ```lisp
 (define name value)
 ```
 
 **Examples:**
+
 ```lisp
 ; Define a constant
 (define pi 3.14159)
@@ -53,11 +58,13 @@ Define variables or functions for reuse within a program.
 Conditional evaluation - execute different code based on a condition.
 
 **Syntax:**
+
 ```lisp
 (if condition then-expr else-expr)
 ```
 
 **Examples:**
+
 ```lisp
 ; Check if a value is empty
 (if (null? x) "empty" "not empty")
@@ -73,11 +80,13 @@ Conditional evaluation - execute different code based on a condition.
 Construct a pair (cons cell) - the fundamental building block of Lisp lists.
 
 **Syntax:**
+
 ```lisp
 (cons first second)
 ```
 
 **Examples:**
+
 ```lisp
 (cons 1 2)           ; => (1 . 2)
 (cons 1 ())          ; => (1)
@@ -85,6 +94,7 @@ Construct a pair (cons cell) - the fundamental building block of Lisp lists.
 ```
 
 **Usage:**
+
 ```lisp
 ; Create a list with the first transaction only
 (cons (car table) ())
@@ -95,11 +105,13 @@ Construct a pair (cons cell) - the fundamental building block of Lisp lists.
 Get the **first element** of a pair.
 
 **Syntax:**
+
 ```lisp
 (car pair)
 ```
 
 **Examples:**
+
 ```lisp
 (car (cons 1 2))     ; => 1
 (car '(1 2 3))       ; => 1
@@ -107,6 +119,7 @@ Get the **first element** of a pair.
 ```
 
 **Usage:**
+
 ```bash
 # Get the first transaction
 kakei transform --program "(car table)"
@@ -117,11 +130,13 @@ kakei transform --program "(car table)"
 Get the **second element** of a pair (everything after the first element).
 
 **Syntax:**
+
 ```lisp
 (cdr pair)
 ```
 
 **Examples:**
+
 ```lisp
 (cdr (cons 1 2))     ; => 2
 (cdr '(1 2 3))       ; => (2 3)
@@ -129,6 +144,7 @@ Get the **second element** of a pair (everything after the first element).
 ```
 
 **Usage:**
+
 ```bash
 # Skip the first transaction
 kakei transform --program "(cdr table)"
@@ -141,11 +157,13 @@ kakei transform --program "(cdr table)"
 Test if two values are equal.
 
 **Syntax:**
+
 ```lisp
 (equal? value1 value2)
 ```
 
 **Examples:**
+
 ```lisp
 (equal? "Food" "Food")      ; => #t (true)
 (equal? "Food" "Transport") ; => #f (false)
@@ -154,6 +172,7 @@ Test if two values are equal.
 ```
 
 **Usage:**
+
 ```lisp
 ; Filter transactions where category is "Food"
 (if (equal? (cdr (assoc 'category (cdr pair))) "Food")
@@ -166,11 +185,13 @@ Test if two values are equal.
 Test if a value is nil (empty).
 
 **Syntax:**
+
 ```lisp
 (null? value)
 ```
 
 **Examples:**
+
 ```lisp
 (null? ())           ; => #t (true)
 (null? '(1 2 3))     ; => #f (false)
@@ -178,6 +199,7 @@ Test if a value is nil (empty).
 ```
 
 **Usage:**
+
 ```lisp
 ; Check if we've reached the end of a list
 (if (null? remaining-transactions)
@@ -192,11 +214,13 @@ Test if a value is nil (empty).
 Find a key in an association list and return the key-value pair.
 
 **Syntax:**
+
 ```lisp
 (assoc key alist)
 ```
 
 **Examples:**
+
 ```lisp
 (assoc 'category '((date . "2025-01-01") (category . "Food")))
 ; => (category . "Food")
@@ -206,6 +230,7 @@ Find a key in an association list and return the key-value pair.
 ```
 
 **Usage:**
+
 ```bash
 # Get the category field from first transaction
 kakei transform --program "(assoc 'category (cdr (car table)))"
@@ -244,16 +269,19 @@ kakei transform --program "(cdr (assoc 'category (cdr (car table))))"
 Group a table of transactions by a key function. This is one of the most powerful functions for analysis.
 
 **Syntax:**
+
 ```lisp
 (group-by table key-fn)
 ```
 
 **Parameters:**
+
 - `table`: The list of transactions
 - `key-fn`: A lambda function that extracts the grouping key from each transaction
 
 **Returns:**
 A list of groups, where each group is:
+
 ```lisp
 ("GroupName" (transaction1) (transaction2) ...)
 ```
@@ -267,6 +295,7 @@ kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category 
 ```
 
 Output structure:
+
 ```lisp
 (("Food" 
   (ID-001 . ((date . "2025-01-01") (amount . -1000) ...)))
@@ -291,9 +320,10 @@ kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'date (cdr
 **How it Works:**
 
 For each transaction in the table:
+
 1. The lambda function extracts a grouping key (e.g., category name)
-2. Transactions with the same key are grouped together
-3. The result is a list of groups labeled by their key
+1. Transactions with the same key are grouped together
+1. The result is a list of groups labeled by their key
 
 ## Complete Examples
 
@@ -312,10 +342,11 @@ kakei transform --program "(cons (car table) (cons (car (cdr table)) ()))"
 ```
 
 Step by step:
+
 1. `(car table)` - get first transaction
-2. `(cdr table)` - get remaining transactions
-3. `(car (cdr table))` - get second transaction
-4. `(cons ... ())` - build a list
+1. `(cdr table)` - get remaining transactions
+1. `(car (cdr table))` - get second transaction
+1. `(cons ... ())` - build a list
 
 ### Example 3: Custom Filter (Food Only)
 
@@ -349,34 +380,37 @@ You can combine functions to create powerful transformations:
 
 1. **Start Simple**: Begin with simple expressions like `table` or `(car table)` and build up complexity
 
-2. **Use assoc + cdr**: This pattern appears frequently for extracting field values:
+1. **Use assoc + cdr**: This pattern appears frequently for extracting field values:
+
    ```lisp
    (cdr (assoc 'field-name (cdr transaction)))
    ```
 
-3. **Test Incrementally**: Build your expression piece by piece, testing each part:
+1. **Test Incrementally**: Build your expression piece by piece, testing each part:
+
    ```bash
    # Step 1: View all transactions
    kakei transform --program "table"
-   
+
    # Step 2: Get first transaction
    kakei transform --program "(car table)"
-   
+
    # Step 3: Get fields of first transaction
    kakei transform --program "(cdr (car table))"
-   
+
    # Step 4: Get category field
    kakei transform --program "(assoc 'category (cdr (car table)))"
    ```
 
-4. **Group for Analysis**: Use `group-by` to understand spending patterns by category, account, or date
+1. **Group for Analysis**: Use `group-by` to understand spending patterns by category, account, or date
 
-5. **Save Complex Programs**: For complex transformations, save your Lisp program to a file and load it:
+1. **Save Complex Programs**: For complex transformations, save your Lisp program to a file and load it:
+
    ```bash
    cat > analysis.lisp << 'EOF'
    (group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))
    EOF
-   
+
    kakei transform --program "$(cat analysis.lisp)"
    ```
 

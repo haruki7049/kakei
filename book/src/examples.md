@@ -28,6 +28,7 @@ kakei list
 ```
 
 Output:
+
 ```
 ╭────────────┬────────┬───────────┬─────────┬──────────────╮
 │ Date       │ Amount │ Category  │ Account │ Memo         │
@@ -71,6 +72,7 @@ kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'account (
 ```
 
 This helps you understand:
+
 - How much you're spending from each account
 - Whether you're using cash vs. card appropriately
 - If your bank balance matches your expectations
@@ -222,6 +224,7 @@ Deep dive into specific categories.
 ### Food Spending Analysis
 
 1. **Record food transactions over time**:
+
    ```bash
    kakei add --date 2025-01-05 --amount -1200 --category Food --account Cash --memo "Lunch"
    kakei add --date 2025-01-10 --amount -800 --category Food --account Cash --memo "Dinner"
@@ -229,12 +232,13 @@ Deep dive into specific categories.
    kakei add --date 2025-01-20 --amount -1500 --category Food --account Cash --memo "Restaurant"
    ```
 
-2. **Group by category to see all food transactions**:
+1. **Group by category to see all food transactions**:
+
    ```bash
    kakei transform --program "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))"
    ```
 
-3. **Manually sum the amounts** to get total food spending
+1. **Manually sum the amounts** to get total food spending
 
 ### Transport Cost Analysis
 

@@ -20,12 +20,12 @@ All contributions are welcome and appreciated!
 ### 1. Fork and Clone
 
 1. **Fork the repository** on GitHub
-2. **Clone your fork:**
+1. **Clone your fork:**
    ```bash
    git clone https://github.com/YOUR_USERNAME/kakei.git
    cd kakei
    ```
-3. **Add upstream remote:**
+1. **Add upstream remote:**
    ```bash
    git remote add upstream https://github.com/haruki7049/kakei.git
    ```
@@ -35,6 +35,7 @@ All contributions are welcome and appreciated!
 See the [Development](./development.md) guide for detailed setup instructions.
 
 Quick start:
+
 ```bash
 # Option 1: Standard Rust
 cargo build
@@ -52,6 +53,7 @@ git checkout -b fix/my-bugfix
 ```
 
 Branch naming conventions:
+
 - `feature/` - New features
 - `fix/` - Bug fixes
 - `docs/` - Documentation changes
@@ -63,16 +65,16 @@ Branch naming conventions:
 ### Making Changes
 
 1. **Make your changes** in the appropriate files
-2. **Add tests** for new functionality
-3. **Run tests** to ensure nothing breaks:
+1. **Add tests** for new functionality
+1. **Run tests** to ensure nothing breaks:
    ```bash
    cargo test --workspace
    ```
-4. **Run linter:**
+1. **Run linter:**
    ```bash
    cargo clippy --workspace
    ```
-5. **Format code:**
+1. **Format code:**
    ```bash
    cargo fmt
    ```
@@ -94,6 +96,7 @@ git commit -m "changes"
 ```
 
 Commit message format:
+
 ```
 <type>: <short description>
 
@@ -103,6 +106,7 @@ Commit message format:
 ```
 
 Types:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -133,6 +137,7 @@ cargo fmt --check
 ```
 
 For CLI changes, test manually:
+
 ```bash
 # Build and test
 cargo run -- init
@@ -151,9 +156,9 @@ git push origin feature/my-feature
 ### 2. Create Pull Request
 
 1. Go to the [kakei repository](https://github.com/haruki7049/kakei)
-2. Click "New Pull Request"
-3. Select your branch
-4. Fill in the PR template (if provided)
+1. Click "New Pull Request"
+1. Select your branch
+1. Fill in the PR template (if provided)
 
 ### 3. PR Description
 
@@ -200,7 +205,8 @@ Follow standard Rust conventions:
 - Keep functions focused and small
 
 Example:
-```rust
+
+````rust
 /// Add a new transaction to the database.
 ///
 /// # Arguments
@@ -225,7 +231,7 @@ pub async fn add_transaction(
 ) -> Result<(), Error> {
     // Implementation
 }
-```
+````
 
 ### Documentation Style
 
@@ -270,16 +276,18 @@ mdbook serve
 ### Adding Examples
 
 When adding examples:
+
 1. Make sure they actually work
-2. Use realistic scenarios
-3. Explain what the example demonstrates
-4. Include expected output when relevant
+1. Use realistic scenarios
+1. Explain what the example demonstrates
+1. Include expected output when relevant
 
 ## Areas That Need Help
 
 Current areas where contributions are especially welcome:
 
 ### Code
+
 - [ ] Add more Lisp built-in functions (arithmetic, string operations)
 - [ ] Implement CSV import/export
 - [ ] Add filtering capabilities to `list` command
@@ -288,6 +296,7 @@ Current areas where contributions are especially welcome:
 - [ ] Performance optimizations
 
 ### Documentation
+
 - [ ] More examples in the book
 - [ ] Video tutorials
 - [ ] Translations to other languages
@@ -295,12 +304,14 @@ Current areas where contributions are especially welcome:
 - [ ] Troubleshooting guide
 
 ### Tests
+
 - [ ] Integration tests for CLI commands
 - [ ] More unit tests for Lisp interpreter
 - [ ] Property-based testing
 - [ ] Performance benchmarks
 
 ### Infrastructure
+
 - [ ] Automated releases
 - [ ] Pre-built binaries for more platforms
 - [ ] Docker image
@@ -311,15 +322,16 @@ Current areas where contributions are especially welcome:
 When reporting bugs, include:
 
 1. **Description** - What happened vs. what you expected
-2. **Steps to reproduce** - Exact commands to reproduce the bug
-3. **Environment:**
+1. **Steps to reproduce** - Exact commands to reproduce the bug
+1. **Environment:**
    - OS and version
    - Rust version (`rustc --version`)
    - kakei version
-4. **Error messages** - Full error output
-5. **Additional context** - Logs, screenshots, etc.
+1. **Error messages** - Full error output
+1. **Additional context** - Logs, screenshots, etc.
 
 Example:
+
 ```markdown
 ## Bug Description
 The `list` command crashes when there are more than 100 transactions.
@@ -336,7 +348,9 @@ The `list` command crashes when there are more than 100 transactions.
 
 ## Error Message
 ```
+
 thread 'main' panicked at 'index out of bounds'
+
 ```
 
 ## Suggesting Features
@@ -390,3 +404,4 @@ Your contributions make kakei better for everyone. Thank you for taking the time
 - [Development Guide](./development.md) - Development setup and workflow
 - [Architecture](./architecture.md) - Understanding the codebase
 - [Repository](https://github.com/haruki7049/kakei) - Source code
+```

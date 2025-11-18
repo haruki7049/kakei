@@ -29,17 +29,18 @@ kakei automatically creates a default configuration when you run `kakei init`. I
 
 1. **Locate the config file** (see locations above)
 
-2. **Edit with your favorite text editor**:
+1. **Edit with your favorite text editor**:
+
    ```bash
    # Linux/macOS
    nano ~/.config/kakei/config.toml
-   
+
    # Or use any editor you prefer
    vim ~/.config/kakei/config.toml
    code ~/.config/kakei/config.toml
    ```
 
-3. **Add your custom categories and accounts**
+1. **Add your custom categories and accounts**
 
 ### Example Configurations
 
@@ -101,26 +102,28 @@ default_accounts = ["Main"]
 
 ### default_categories
 
-**Type:** Array of strings  
-**Required:** Yes  
+**Type:** Array of strings\
+**Required:** Yes\
 **Description:** List of transaction categories available when adding transactions.
 
 Categories help organize your transactions by type (e.g., Food, Transport, Salary). Choose categories that match your tracking needs.
 
 **Tips:**
+
 - Include both expense categories (Food, Transport) and income categories (Salary, Freelance)
 - Be specific enough to be useful, but not so detailed that categorization becomes burdensome
 - You can always add transactions with categories not in this list, but these are the defaults
 
 ### default_accounts
 
-**Type:** Array of strings  
-**Required:** Yes  
+**Type:** Array of strings\
+**Required:** Yes\
 **Description:** List of accounts used to track where money comes from or goes to.
 
 Accounts represent the different financial accounts or payment methods you use (e.g., Cash, Bank, Credit Card).
 
 **Tips:**
+
 - Include all payment methods you regularly use
 - Consider separate accounts for different bank accounts or credit cards
 - Use descriptive names like "Main Bank" vs. "Savings" instead of actual bank names for privacy
@@ -140,11 +143,12 @@ The SQLite database file stores all your transaction data.
 Currently, kakei automatically determines the database location based on your operating system's conventions. To use a different location:
 
 1. **Set the XDG_DATA_HOME environment variable** (Linux):
+
    ```bash
    export XDG_DATA_HOME=/path/to/custom/location
    ```
 
-2. **Run kakei commands** - they will now use the custom location
+1. **Run kakei commands** - they will now use the custom location
 
 ### Backing Up Your Database
 
@@ -213,14 +217,17 @@ XDG_DATA_HOME=/custom/path kakei list
 ### Platform-Specific Behavior
 
 **Linux:**
+
 - Respects XDG environment variables
 - Falls back to standard XDG defaults if not set
 
 **macOS:**
+
 - Uses `~/Library/Application Support` by default
 - Can optionally respect XDG variables if set
 
 **Windows:**
+
 - Uses `%APPDATA%` directory
 - Does not use XDG variables
 
@@ -228,15 +235,15 @@ XDG_DATA_HOME=/custom/path kakei list
 
 1. **Start with defaults**: The default categories and accounts are a good starting point
 
-2. **Evolve over time**: Add categories as you identify new tracking needs
+1. **Evolve over time**: Add categories as you identify new tracking needs
 
-3. **Keep it simple**: Too many categories can make data entry tedious
+1. **Keep it simple**: Too many categories can make data entry tedious
 
-4. **Regular backups**: Back up your database regularly to prevent data loss
+1. **Regular backups**: Back up your database regularly to prevent data loss
 
-5. **Version control**: Consider keeping your config.toml in version control (without sensitive data)
+1. **Version control**: Consider keeping your config.toml in version control (without sensitive data)
 
-6. **Document your categories**: If using custom categories, document what each represents
+1. **Document your categories**: If using custom categories, document what each represents
 
 ## Troubleshooting
 
@@ -244,7 +251,8 @@ XDG_DATA_HOME=/custom/path kakei list
 
 **Problem:** Changes to `config.toml` don't seem to take effect.
 
-**Solution:** 
+**Solution:**
+
 - Verify the file is in the correct location for your OS
 - Check file permissions (should be readable by your user)
 - Verify TOML syntax is correct (no typos, proper quotes)
@@ -254,6 +262,7 @@ XDG_DATA_HOME=/custom/path kakei list
 **Problem:** kakei reports it can't find the database.
 
 **Solution:**
+
 - Run `kakei init` to create the database
 - Check XDG environment variables if on Linux
 - Verify permissions on the data directory
@@ -263,6 +272,7 @@ XDG_DATA_HOME=/custom/path kakei list
 **Problem:** Error creating config directory.
 
 **Solution:**
+
 - Check permissions on parent directories
 - Ensure disk space is available
 - On Linux, verify XDG_CONFIG_HOME is set correctly

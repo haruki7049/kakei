@@ -16,22 +16,26 @@ Before you start developing kakei, ensure you have:
 ### Option 1: Standard Rust Setup
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/haruki7049/kakei.git
    cd kakei
    ```
 
-2. **Install Rust** (if not already installed):
+1. **Install Rust** (if not already installed):
+
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    ```
 
-3. **Install the correct Rust version** (specified in `rust-toolchain.toml`):
+1. **Install the correct Rust version** (specified in `rust-toolchain.toml`):
+
    ```bash
    rustup install 1.91.1
    ```
 
-4. **Build the project:**
+1. **Build the project:**
+
    ```bash
    cargo build
    ```
@@ -53,6 +57,7 @@ cargo build
 ```
 
 The Nix development shell provides:
+
 - Correct Rust toolchain
 - All required dependencies
 - Consistent development environment across machines
@@ -106,6 +111,7 @@ cargo test --workspace
 ```
 
 This runs:
+
 - Unit tests in each crate
 - Integration tests in `tests/`
 - Doc tests in documentation comments
@@ -242,40 +248,46 @@ XDG_DATA_HOME=/tmp/kakei-test cargo run -- list
 ### Recommended Workflow
 
 1. **Create a feature branch:**
+
    ```bash
    git checkout -b feature/my-new-feature
    ```
 
-2. **Make changes** and test frequently:
+1. **Make changes** and test frequently:
+
    ```bash
    # Quick check for errors
    cargo check
-   
+
    # Run tests
    cargo test
-   
+
    # Run clippy
    cargo clippy
    ```
 
-3. **Format code before committing:**
+1. **Format code before committing:**
+
    ```bash
    cargo fmt
    ```
 
-4. **Run full test suite:**
+1. **Run full test suite:**
+
    ```bash
    cargo test --workspace
    cargo clippy --workspace
    ```
 
-5. **Commit changes:**
+1. **Commit changes:**
+
    ```bash
    git add .
    git commit -m "Add new feature"
    ```
 
-6. **Push and create PR:**
+1. **Push and create PR:**
+
    ```bash
    git push origin feature/my-new-feature
    ```
@@ -295,6 +307,7 @@ cargo test
 ```
 
 Install `cargo-watch`:
+
 ```bash
 cargo install cargo-watch
 ```
@@ -338,6 +351,7 @@ info!("Transaction added successfully");
 ```
 
 Enable trace logging:
+
 ```bash
 RUST_LOG=debug cargo run -- list
 ```
@@ -349,15 +363,17 @@ RUST_LOG=debug cargo run -- list
 When working on the Lisp interpreter:
 
 1. **Run Lisp tests:**
+
    ```bash
    cargo test --package kakei_lisp
    ```
 
-2. **Test parsing:**
+1. **Test parsing:**
+
    ```rust
    // In tests
    use kakei_lisp::parser::parse;
-   
+
    #[test]
    fn test_parse_expression() {
        let input = "(cons 1 2)";
@@ -366,10 +382,11 @@ When working on the Lisp interpreter:
    }
    ```
 
-3. **Test evaluation:**
+1. **Test evaluation:**
+
    ```rust
    use kakei_lisp::eval::eval;
-   
+
    #[test]
    fn test_eval() {
        let expr = /* parsed expression */;
@@ -383,9 +400,10 @@ When working on the Lisp interpreter:
 When working on database layer:
 
 1. **Use temporary database for tests:**
+
    ```rust
    use tempfile::tempdir;
-   
+
    #[tokio::test]
    async fn test_transaction_insert() {
        let temp = tempdir().unwrap();
@@ -394,7 +412,8 @@ When working on database layer:
    }
    ```
 
-2. **Check migrations:**
+1. **Check migrations:**
+
    ```bash
    # Ensure migrations work
    cargo run -- init
@@ -405,14 +424,16 @@ When working on database layer:
 When working on money types:
 
 1. **Run money tests:**
+
    ```bash
    cargo test --package kakei_money
    ```
 
-2. **Test currency formatting:**
+1. **Test currency formatting:**
+
    ```rust
    use kakei_money::Money;
-   
+
    #[test]
    fn test_jpy_formatting() {
        let money = Money::jpy(1000);
@@ -524,6 +545,7 @@ See [Contributing](./contributing.md) for more on documentation.
 **Problem:** Compilation errors about missing SQLite.
 
 **Solution:**
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get install libsqlite3-dev
@@ -538,6 +560,7 @@ nix develop
 **Problem:** Wrong Rust version.
 
 **Solution:**
+
 ```bash
 # Install correct version
 rustup install 1.91.1
@@ -551,6 +574,7 @@ cargo build
 **Problem:** Database tests fail with "database locked".
 
 **Solution:**
+
 - Run tests serially: `cargo test -- --test-threads=1`
 - Use different test databases
 - Clean up test databases in `drop` implementations
@@ -560,6 +584,7 @@ cargo build
 **Problem:** Debug builds are slow.
 
 **Solution:**
+
 - Use release builds for performance testing: `cargo build --release`
 - Profile with `cargo flamegraph`
 - Check database query performance

@@ -25,10 +25,11 @@ kakei/
 
 ### kakei (Main Crate)
 
-**Location:** `src/`  
+**Location:** `src/`\
 **Purpose:** Command-line interface and user interaction
 
 **Responsibilities:**
+
 - Parse command-line arguments using `clap`
 - Handle user input and output
 - Coordinate between other crates
@@ -36,41 +37,47 @@ kakei/
 - Manage configuration with `confy`
 
 **Key Files:**
+
 - `src/main.rs`: Application entry point
 - `src/commands/`: Command implementations (init, add, list, transform)
 
 ### kakei_processor
 
-**Location:** `crates/processor/`  
+**Location:** `crates/processor/`\
 **Purpose:** Business logic and table transformations
 
 **Responsibilities:**
+
 - Transaction management logic
 - Table transformation orchestration
 - Integration between database and Lisp interpreter
 - Data conversion between formats
 
 **Dependencies:**
+
 - `kakei_database`: For data persistence
 - `kakei_lisp`: For Lisp evaluation
 - `kakei_money`: For money types
 
 ### kakei_database
 
-**Location:** `crates/processor/crates/database/`  
+**Location:** `crates/processor/crates/database/`\
 **Purpose:** Database layer with SQLite
 
 **Responsibilities:**
+
 - SQLite database connection management
 - Transaction CRUD operations
 - Database migrations
 - Query execution
 
 **Key Technologies:**
+
 - `sqlx`: Async SQLite driver with compile-time query verification
 - `chrono`: Date/time handling
 
 **Schema:**
+
 ```sql
 CREATE TABLE transactions (
     id TEXT PRIMARY KEY,
@@ -85,16 +92,18 @@ CREATE TABLE transactions (
 
 ### kakei_money
 
-**Location:** `crates/processor/crates/money/`  
+**Location:** `crates/processor/crates/money/`\
 **Purpose:** Money type with currency support
 
 **Responsibilities:**
+
 - Type-safe money representation
 - Currency handling (JPY, USD, EUR, etc.)
 - Amount formatting with proper symbols
 - Minor unit conversion
 
 **Key Types:**
+
 ```rust
 pub struct Money {
     amount: i64,        // Amount in minor units
@@ -111,22 +120,25 @@ pub enum Currency {
 ```
 
 **Features:**
+
 - Amounts stored in minor units (cents, yen, etc.)
 - Currency-specific formatting
 - Decimal conversion utilities
 
 ### kakei_lisp
 
-**Location:** `crates/processor/crates/klisp/`  
+**Location:** `crates/processor/crates/klisp/`\
 **Purpose:** Embedded Lisp dialect for data transformation
 
 **Responsibilities:**
+
 - Lisp parsing (using `nom` parser combinator)
 - Expression evaluation
 - Built-in function implementations
 - Runtime environment
 
 **Language Features:**
+
 - S-expressions: `(func arg1 arg2)`
 - Lambda functions: `(lambda (x) (+ x 1))`
 - Core functions: `cons`, `car`, `cdr`, `if`, `define`
@@ -134,6 +146,7 @@ pub enum Currency {
 - Table manipulation: `group-by`
 
 **Architecture:**
+
 ```
 Input String
     ↓
@@ -254,6 +267,7 @@ kakei includes Nix flakes support for reproducible builds:
 ### Workspace Organization
 
 The workspace structure allows:
+
 - **Independent testing** of each component
 - **Clear separation of concerns**
 - **Reusable components** (e.g., `kakei_money` could be used elsewhere)
@@ -290,6 +304,7 @@ async fn main() -> Result<()> {
 ### Type Safety
 
 Strong typing throughout:
+
 - `Money` type ensures currency safety
 - `Transaction` structs validate data
 - Compile-time SQL query verification
@@ -329,9 +344,9 @@ Use in Application
 Migrations are handled at application startup:
 
 1. Check if database exists
-2. Create if missing
-3. Run pending migrations
-4. Initialize default data (categories, accounts)
+1. Create if missing
+1. Run pending migrations
+1. Initialize default data (categories, accounts)
 
 ### Connection Pooling
 
@@ -385,21 +400,21 @@ let pool = SqlitePool::connect(&database_url).await?;
 Potential areas for expansion:
 
 1. **Plugin System**: Allow custom Lisp functions via plugins
-2. **Multiple Databases**: Support for multiple financial ledgers
-3. **Import/Export**: CSV/JSON import/export capabilities
-4. **Web Interface**: Optional web UI using the same core crates
-5. **Sync**: Cloud sync or multi-device support
-6. **More Lisp Functions**: Additional built-ins for calculations
+1. **Multiple Databases**: Support for multiple financial ledgers
+1. **Import/Export**: CSV/JSON import/export capabilities
+1. **Web Interface**: Optional web UI using the same core crates
+1. **Sync**: Cloud sync or multi-device support
+1. **More Lisp Functions**: Additional built-ins for calculations
 
 ## Contributing to Architecture
 
 When contributing, consider:
 
 1. **Maintain separation of concerns** - keep crates focused
-2. **Add tests** - especially for new Lisp functions
-3. **Document public APIs** - use Rust doc comments
-4. **Follow existing patterns** - match the codebase style
-5. **Consider performance** - especially for database operations
+1. **Add tests** - especially for new Lisp functions
+1. **Document public APIs** - use Rust doc comments
+1. **Follow existing patterns** - match the codebase style
+1. **Consider performance** - especially for database operations
 
 ## See Also
 
