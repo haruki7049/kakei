@@ -107,9 +107,15 @@
 
           devShells.default = pkgs.mkShell {
             nativeBuildInputs = [
+              # Compiler
               rust
+
+              # Development Tools
               pkgs.sqlite # For debugging
               pkgs.sqlx-cli # For Database migration
+
+              # Book Tools
+              pkgs.mdbook
             ];
           };
         };
