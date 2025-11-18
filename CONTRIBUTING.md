@@ -111,20 +111,31 @@ cargo clippy --workspace --fix
 
 ### Formatting
 
-```bash
-# Check code formatting
-cargo fmt --all -- --check
+The project uses `nix fmt` as the primary formatting command, which internally uses `treefmt-nix`. This Nix library allows you to run multiple formatters (rustfmt, nixfmt-rfc-style, and others) with a single command.
 
-# Format code automatically
+```bash
+# Format all code (Rust, Nix, SQL, TOML, Markdown, Shell scripts)
+nix fmt
+
+# If you're not using Nix, you can format Rust code individually
 cargo fmt --all
 ```
+
+The `nix fmt` command formats:
+- Rust code with rustfmt
+- Nix code with nixfmt-rfc-style
+- SQL with sql-formatter
+- TOML with taplo
+- Markdown with mdformat
+- Shell scripts with shfmt
 
 ## Code Style and Quality
 
 ### Code Style
 
 - Follow the Rust style guide and community conventions
-- Use `cargo fmt` to format your code before committing
+- Use `nix fmt` to format your code before committing (formats Rust, Nix, SQL, TOML, Markdown, and Shell scripts)
+- If not using Nix, use `cargo fmt --all` for Rust code
 - Ensure your code passes `cargo clippy` without warnings
 - Write clear, self-documenting code with appropriate comments where necessary
 
@@ -183,7 +194,7 @@ Fixes #123
    ```bash
    cargo test --workspace
    cargo clippy --workspace
-   cargo fmt --all
+   nix fmt  # or 'cargo fmt --all' if not using Nix
    ```
 
 5. Commit your changes with clear commit messages
@@ -236,7 +247,7 @@ When requesting features, please include:
 
 1. **Ensure all tests pass**: Run `cargo test --workspace`
 2. **Ensure linting passes**: Run `cargo clippy --workspace`
-3. **Format your code**: Run `cargo fmt --all`
+3. **Format your code**: Run `nix fmt` (or `cargo fmt --all` if not using Nix)
 4. **Update documentation**: Update README.md or other docs if needed
 5. **Write a clear PR description**:
    - Describe what your changes do
@@ -253,7 +264,7 @@ When requesting features, please include:
 - [ ] Code builds without errors
 - [ ] All tests pass
 - [ ] No clippy warnings
-- [ ] Code is formatted with `cargo fmt`
+- [ ] Code is formatted with `nix fmt` (or `cargo fmt --all` if not using Nix)
 - [ ] Documentation is updated (if applicable)
 - [ ] Tests are added for new functionality
 - [ ] Commit messages are clear and descriptive
