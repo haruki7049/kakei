@@ -79,11 +79,13 @@ cargo fetch
 ```
 
 **Windows Prerequisites**:
+
 - Install Rust from [rustup.rs](https://rustup.rs/)
 - Install Git from [git-scm.com](https://git-scm.com/download/win)
 - (Optional) Install SQLite 3 for database debugging - you can use [vcpkg](https://github.com/microsoft/vcpkg) or download from [sqlite.org](https://www.sqlite.org/download.html)
 
 **Limitations on Windows**:
+
 - `nix fmt` and `nix flake check` are not available (Nix doesn't support Windows)
 - Use `cargo fmt --all` for formatting
 - Use `cargo clippy --workspace` for linting
@@ -106,6 +108,7 @@ cargo build --workspace
 ```
 
 The binary will be available at:
+
 - Debug: `target/debug/kakei`
 - Release: `target/release/kakei`
 
@@ -158,6 +161,7 @@ cargo fmt --all
 ```
 
 The `nix fmt` command formats:
+
 - Rust code with rustfmt
 - Nix code with nixfmt-rfc-style
 - SQL with sql-formatter
@@ -197,6 +201,7 @@ The `nix fmt` command formats:
 - Reference issue numbers when applicable (e.g., "Fix #123")
 
 Example:
+
 ```
 Add support for EUR currency
 
@@ -212,34 +217,37 @@ Fixes #123
 ### Before You Start
 
 1. Check existing issues and pull requests to avoid duplicate work
-2. For large changes, consider opening an issue first to discuss the approach
-3. Fork the repository and create a new branch for your changes
+1. For large changes, consider opening an issue first to discuss the approach
+1. Fork the repository and create a new branch for your changes
 
 ### Making Changes
 
 1. Create a feature branch from `main`:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
-2. Make your changes, following the code style guidelines
+1. Make your changes, following the code style guidelines
 
-3. Add tests for your changes
+1. Add tests for your changes
 
-4. Run tests, linting, and formatting:
+1. Run tests, linting, and formatting:
+
    ```bash
    # Using Nix on Linux/macOS (recommended - runs all checks at once)
    nix flake check --all-systems --print-build-logs
-   
+
    # On Windows or without Nix, run commands individually
    cargo test --workspace
    cargo clippy --workspace
    cargo fmt --all
    ```
 
-5. Commit your changes with clear commit messages
+1. Commit your changes with clear commit messages
 
-6. Push your branch to your fork:
+1. Push your branch to your fork:
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -258,6 +266,7 @@ When reporting bugs, please include:
 - **Logs/Output**: Relevant error messages or logs
 
 Example:
+
 ```markdown
 **Description**: kakei crashes when adding a transaction with an invalid date
 
@@ -285,19 +294,23 @@ When requesting features, please include:
 
 ## Pull Request Process
 
-1. **Run all checks**: 
+1. **Run all checks**:
+
    - Linux/macOS with Nix: `nix flake check --all-systems --print-build-logs`
    - Windows or without Nix: Run `cargo test --workspace`, `cargo clippy --workspace`, and `cargo fmt --all` individually
-2. **Update documentation**: Update README.md or other docs if needed
-5. **Write a clear PR description**:
+
+1. **Update documentation**: Update README.md or other docs if needed
+
+1. **Write a clear PR description**:
+
    - Describe what your changes do
    - Reference related issues
    - Explain any design decisions
    - List any breaking changes
 
-6. **Respond to review feedback**: Be open to suggestions and make requested changes
+1. **Respond to review feedback**: Be open to suggestions and make requested changes
 
-7. **Wait for CI**: The GitHub Actions CI will run tests on multiple platforms (Ubuntu, macOS, Windows)
+1. **Wait for CI**: The GitHub Actions CI will run tests on multiple platforms (Ubuntu, macOS, Windows)
 
 ### PR Checklist
 
