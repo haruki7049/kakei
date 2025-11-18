@@ -5,6 +5,7 @@
 ## Related Issue
 
 <!-- Link to the related issue(s) if applicable -->
+
 <!-- Example: Fixes #123, Relates to #456 -->
 
 ## Type of Change
@@ -23,9 +24,9 @@
 
 <!-- List the specific changes you made -->
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Testing
 
@@ -37,8 +38,9 @@
 - [ ] Comprehensive checks (Nix users): `nix flake check --all-systems --print-build-logs`
 
 **Test environment:**
-- OS: 
-- Rust version: 
+
+- OS:
+- Rust version:
 - Test commands run:
 
 ## Checklist
