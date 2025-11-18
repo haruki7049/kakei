@@ -1,12 +1,10 @@
-______________________________________________________________________
-
+---
 name: Bug Report
 about: Create a report to help us improve kakei
 title: '[BUG] '
 labels: bug
 assignees: ''
-
-______________________________________________________________________
+---
 
 ## Description
 
