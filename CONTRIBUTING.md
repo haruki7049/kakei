@@ -101,8 +101,16 @@ cargo test --workspace --verbose
 
 ### Linting
 
+The project uses `nix flake check` to run linters and formatter checks. This command runs all checks defined in the flake, including builds, Clippy, and formatting validation.
+
 ```bash
-# Run Clippy (Rust linter)
+# Run all checks (linters, formatters, builds, tests)
+nix flake check --all-systems --print-build-logs
+
+# For a quick check on current system only
+nix flake check --print-build-logs
+
+# If you're not using Nix, you can run Clippy individually
 cargo clippy --workspace
 
 # Fix clippy warnings automatically (where possible)
@@ -190,8 +198,12 @@ Fixes #123
 
 3. Add tests for your changes
 
-4. Run tests and linting:
+4. Run tests, linting, and formatting:
    ```bash
+   # Using Nix (recommended - runs all checks at once)
+   nix flake check --all-systems --print-build-logs
+   
+   # Or run commands individually
    cargo test --workspace
    cargo clippy --workspace
    nix fmt  # or 'cargo fmt --all' if not using Nix
@@ -245,10 +257,8 @@ When requesting features, please include:
 
 ## Pull Request Process
 
-1. **Ensure all tests pass**: Run `cargo test --workspace`
-2. **Ensure linting passes**: Run `cargo clippy --workspace`
-3. **Format your code**: Run `nix fmt` (or `cargo fmt --all` if not using Nix)
-4. **Update documentation**: Update README.md or other docs if needed
+1. **Run all checks**: Run `nix flake check --all-systems --print-build-logs` (or run tests, linting, and formatting individually if not using Nix)
+2. **Update documentation**: Update README.md or other docs if needed
 5. **Write a clear PR description**:
    - Describe what your changes do
    - Reference related issues
@@ -261,6 +271,7 @@ When requesting features, please include:
 
 ### PR Checklist
 
+- [ ] All checks pass: `nix flake check --all-systems --print-build-logs` (or individual commands if not using Nix)
 - [ ] Code builds without errors
 - [ ] All tests pass
 - [ ] No clippy warnings
