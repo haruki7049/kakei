@@ -46,9 +46,9 @@ nix develop
 # All development tools will be available
 ```
 
-### Option B: Using Cargo
+### Option B: Using Cargo (Linux/macOS)
 
-If you prefer not to use Nix:
+If you prefer not to use Nix on Linux or macOS:
 
 ```bash
 # Clone the repository
@@ -61,6 +61,34 @@ rustc --version
 # Install the project dependencies
 cargo fetch
 ```
+
+### Option C: Windows Setup
+
+**Note**: Nix does not support Windows, so Windows developers must use Cargo-based workflows.
+
+```powershell
+# Clone the repository
+git clone https://github.com/haruki7049/kakei.git
+cd kakei
+
+# Ensure you have Rust 1.90.0 or later
+rustc --version
+
+# Install the project dependencies
+cargo fetch
+```
+
+**Windows Prerequisites**:
+- Install Rust from [rustup.rs](https://rustup.rs/)
+- Install SQLite 3 (you can use [vcpkg](https://github.com/microsoft/vcpkg) or download from [sqlite.org](https://www.sqlite.org/download.html))
+- Install Git from [git-scm.com](https://git-scm.com/download/win)
+
+**Limitations on Windows**:
+- `nix fmt` and `nix flake check` are not available (Nix doesn't support Windows)
+- Use `cargo fmt --all` for formatting
+- Use `cargo clippy --workspace` for linting
+- Use `cargo test --workspace` for testing
+- Some formatters used by `nix fmt` (nixfmt-rfc-style, sql-formatter, taplo, mdformat, shfmt) must be run separately if needed
 
 ## Building and Testing
 
@@ -101,16 +129,16 @@ cargo test --workspace --verbose
 
 ### Linting
 
-The project uses `nix flake check` to run linters and formatter checks. This command runs all checks defined in the flake, including builds, Clippy, and formatting validation.
+The project uses `nix flake check` to run linters and formatter checks (not available on Windows). This command runs all checks defined in the flake, including builds, Clippy, and formatting validation.
 
 ```bash
-# Run all checks (linters, formatters, builds, tests)
+# Run all checks (linters, formatters, builds, tests) - Linux/macOS only
 nix flake check --all-systems --print-build-logs
 
-# For a quick check on current system only
+# For a quick check on current system only - Linux/macOS only
 nix flake check --print-build-logs
 
-# If you're not using Nix, you can run Clippy individually
+# Windows / Non-Nix: Run Clippy individually
 cargo clippy --workspace
 
 # Fix clippy warnings automatically (where possible)
@@ -119,13 +147,13 @@ cargo clippy --workspace --fix
 
 ### Formatting
 
-The project uses `nix fmt` as the primary formatting command, which internally uses `treefmt-nix`. This Nix library allows you to run multiple formatters (rustfmt, nixfmt-rfc-style, and others) with a single command.
+The project uses `nix fmt` as the primary formatting command (not available on Windows), which internally uses `treefmt-nix`. This Nix library allows you to run multiple formatters (rustfmt, nixfmt-rfc-style, and others) with a single command.
 
 ```bash
-# Format all code (Rust, Nix, SQL, TOML, Markdown, Shell scripts)
+# Format all code (Rust, Nix, SQL, TOML, Markdown, Shell scripts) - Linux/macOS only
 nix fmt
 
-# If you're not using Nix, you can format Rust code individually
+# Windows / Non-Nix: Format Rust code individually
 cargo fmt --all
 ```
 
@@ -142,8 +170,8 @@ The `nix fmt` command formats:
 ### Code Style
 
 - Follow the Rust style guide and community conventions
-- Use `nix fmt` to format your code before committing (formats Rust, Nix, SQL, TOML, Markdown, and Shell scripts)
-- If not using Nix, use `cargo fmt --all` for Rust code
+- Use `nix fmt` to format your code before committing on Linux/macOS (formats Rust, Nix, SQL, TOML, Markdown, and Shell scripts)
+- On Windows or if not using Nix, use `cargo fmt --all` for Rust code
 - Ensure your code passes `cargo clippy` without warnings
 - Write clear, self-documenting code with appropriate comments where necessary
 
@@ -200,13 +228,13 @@ Fixes #123
 
 4. Run tests, linting, and formatting:
    ```bash
-   # Using Nix (recommended - runs all checks at once)
+   # Using Nix on Linux/macOS (recommended - runs all checks at once)
    nix flake check --all-systems --print-build-logs
    
-   # Or run commands individually
+   # On Windows or without Nix, run commands individually
    cargo test --workspace
    cargo clippy --workspace
-   nix fmt  # or 'cargo fmt --all' if not using Nix
+   cargo fmt --all
    ```
 
 5. Commit your changes with clear commit messages
@@ -257,7 +285,9 @@ When requesting features, please include:
 
 ## Pull Request Process
 
-1. **Run all checks**: Run `nix flake check --all-systems --print-build-logs` (or run tests, linting, and formatting individually if not using Nix)
+1. **Run all checks**: 
+   - Linux/macOS with Nix: `nix flake check --all-systems --print-build-logs`
+   - Windows or without Nix: Run `cargo test --workspace`, `cargo clippy --workspace`, and `cargo fmt --all` individually
 2. **Update documentation**: Update README.md or other docs if needed
 5. **Write a clear PR description**:
    - Describe what your changes do
@@ -271,11 +301,11 @@ When requesting features, please include:
 
 ### PR Checklist
 
-- [ ] All checks pass: `nix flake check --all-systems --print-build-logs` (or individual commands if not using Nix)
+- [ ] All checks pass: `nix flake check --all-systems --print-build-logs` on Linux/macOS (or individual commands on Windows/without Nix)
 - [ ] Code builds without errors
 - [ ] All tests pass
 - [ ] No clippy warnings
-- [ ] Code is formatted with `nix fmt` (or `cargo fmt --all` if not using Nix)
+- [ ] Code is formatted with `nix fmt` on Linux/macOS (or `cargo fmt --all` on Windows/without Nix)
 - [ ] Documentation is updated (if applicable)
 - [ ] Tests are added for new functionality
 - [ ] Commit messages are clear and descriptive
