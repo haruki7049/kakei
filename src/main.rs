@@ -94,31 +94,75 @@ async fn handle_init_command(
 }
 
 /// Handle the List command
-async fn handle_list_command(processor: &Processor) -> Result<(), Box<dyn std::error::Error>> {
-    match processor.get_recent_transactions().await {
-        Ok(transactions) => {
-            if transactions.is_empty() {
-                println!("No transactions found.");
-            } else {
-                // Convert transactions to display format
-                let display_data: Vec<TransactionDisplay> = transactions
-                    .into_iter()
-                    .map(|tx| TransactionDisplay {
-                        date: tx.date.to_string(),
-                        amount: tx.amount.to_string(),
-                        category: tx.category_name,
-                        account: tx.account_name,
-                        memo: tx.memo.unwrap_or_default(),
-                    })
-                    .collect();
+async fn handle_list_command(
+    processor: &Processor,
+    list_transform_path: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // Check if a custom list transformation file exists
+    let use_custom_transform = list_transform_path.exists();
+    
+    if use_custom_transform {
+        // Read the Lisp program from the file
+        let lisp_program = std::fs::read_to_string(list_transform_path)
+            .map_err(|e| format!("Failed to read list transformation file: {}", e))?
+            .trim()
+            .to_string();
+        
+        // Use the transform functionality
+        match processor.transform_transactions(&lisp_program).await {
+            Ok(result) => {
+                // The result is always in grouped format
+                let grouped_tables = kakei_processor::value_to_grouped_tables(&result)?;
 
-                display_table(display_data);
+                for group in grouped_tables {
+                    println!("\n=== {} ===", group.group_name);
+
+                    if group.rows.is_empty() {
+                        println!("No transactions in this group.");
+                    } else {
+                        let display_data: Vec<TransactionDisplay> = group
+                            .rows
+                            .into_iter()
+                            .map(TransactionDisplay::from_display_row)
+                            .collect();
+
+                        display_table(display_data);
+                    }
+                }
+                Ok(())
             }
-            Ok(())
+            Err(e) => {
+                eprintln!("❌ Failed to apply custom list transformation: {}", e);
+                Err(e.into())
+            }
         }
-        Err(e) => {
-            eprintln!("❌ Failed to retrieve transactions: {}", e);
-            Err(e.into())
+    } else {
+        // Use the default list behavior
+        match processor.get_recent_transactions().await {
+            Ok(transactions) => {
+                if transactions.is_empty() {
+                    println!("No transactions found.");
+                } else {
+                    // Convert transactions to display format
+                    let display_data: Vec<TransactionDisplay> = transactions
+                        .into_iter()
+                        .map(|tx| TransactionDisplay {
+                            date: tx.date.to_string(),
+                            amount: tx.amount.to_string(),
+                            category: tx.category_name,
+                            account: tx.account_name,
+                            memo: tx.memo.unwrap_or_default(),
+                        })
+                        .collect();
+
+                    display_table(display_data);
+                }
+                Ok(())
+            }
+            Err(e) => {
+                eprintln!("❌ Failed to retrieve transactions: {}", e);
+                Err(e.into())
+            }
         }
     }
 }
@@ -199,7 +243,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // This establishes the DB connection and runs migrations if needed.
     let processor: Processor = Processor::new(db_path_str).await?;
 
-    // 3. Dispatch commands
+    // 3. Determine the list transformation file path
+    let config_dir = project_dirs.config_dir();
+    let list_transform_path = config_dir.join("list.kakei");
+    debug!("List transformation file path: {:?}", list_transform_path);
+
+    // 4. Dispatch commands
     match args.command() {
         Commands::Add {
             date,
@@ -212,7 +261,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             handle_add_command(&processor, date, amount, currency, category, account, memo).await?
         }
         Commands::Init => handle_init_command(&processor, &config, db_path_str).await?,
-        Commands::List => handle_list_command(&processor).await?,
+        Commands::List => handle_list_command(&processor, &list_transform_path).await?,
         Commands::Transform { program } => handle_transform_command(&processor, program).await?,
     }
 
