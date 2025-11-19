@@ -1,0 +1,1 @@
+(group-by table (lambda (pair) (cdr (assoc 'account (cdr pair)))))
