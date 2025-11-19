@@ -37,6 +37,40 @@ The evaluator provides a functional Lisp interpreter with the following features
 - `assoc` - Search association lists by key
 - `group-by` - Group table rows by a key function (for data transformation)
 
+## REPL (Interactive Shell)
+
+`kakei_lisp` includes an interactive REPL (Read-Eval-Print Loop) for experimenting with Lisp expressions:
+
+```bash
+# Run the REPL from the klisp directory
+cd crates/processor/crates/klisp
+cargo run --bin repl
+
+# Or run from the workspace root
+cargo run --manifest-path crates/processor/crates/klisp/Cargo.toml --bin repl
+```
+
+Example REPL session:
+
+```
+kakei_lisp REPL v0.1.0
+Type expressions to evaluate. Press Ctrl+C or Ctrl+D to exit.
+
+klisp> (define x 42)
+42
+klisp> x
+42
+klisp> (car (cons 1 2))
+1
+klisp> '(a b c)
+(a b c)
+```
+
+The REPL features:
+- Line editing and history (arrow keys work!)
+- Persistent environment across evaluations
+- Error reporting for parse and evaluation errors
+
 ## API & Usage
 
 The primary public API consists of:
