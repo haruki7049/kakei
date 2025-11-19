@@ -663,6 +663,114 @@ mod unix {
             .stdout(predicate::str::contains("Food"))
             .stdout(predicate::str::contains("2025-01-01"));
     }
+
+    #[test]
+    fn test_list_with_custom_transformation_file() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+
+        // Initialize database
+        init_database(&temp_dir);
+
+        // Add multiple transactions in different categories
+        let mut add_cmd1 = cargo_bin_cmd!();
+        add_cmd1.env("HOME", temp_dir.path());
+        add_cmd1.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
+        add_cmd1.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd1
+            .arg("add")
+            .arg("--date")
+            .arg("2025-01-01")
+            .arg("--amount")
+            .arg("-1000")
+            .arg("--category")
+            .arg("Food")
+            .arg("--account")
+            .arg("Cash");
+        add_cmd1.assert().success();
+
+        let mut add_cmd2 = cargo_bin_cmd!();
+        add_cmd2.env("HOME", temp_dir.path());
+        add_cmd2.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
+        add_cmd2.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd2
+            .arg("add")
+            .arg("--date")
+            .arg("2025-01-02")
+            .arg("--amount")
+            .arg("-2000")
+            .arg("--category")
+            .arg("Transport")
+            .arg("--account")
+            .arg("Bank");
+        add_cmd2.assert().success();
+
+        // Create the list.kakei file with a group-by transformation
+        let config_dir = temp_dir.path().join("config").join("kakei");
+        std::fs::create_dir_all(&config_dir).expect("Failed to create config directory");
+        let list_kakei_path = config_dir.join("list.kakei");
+        std::fs::write(
+            &list_kakei_path,
+            "(group-by table (lambda (pair) (cdr (assoc 'category (cdr pair)))))",
+        )
+        .expect("Failed to write list.kakei file");
+
+        // List transactions with custom transformation
+        let mut list_cmd = cargo_bin_cmd!();
+        list_cmd.env("HOME", temp_dir.path());
+        list_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
+        list_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        list_cmd.arg("list");
+
+        list_cmd
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("=== Food ==="))
+            .stdout(predicate::str::contains("=== Transport ==="))
+            .stdout(predicate::str::contains("2025-01-01"))
+            .stdout(predicate::str::contains("2025-01-02"));
+    }
+
+    #[test]
+    fn test_list_without_custom_transformation_file() {
+        let temp_dir = TempDir::new().expect("Failed to create temp directory");
+
+        // Initialize database
+        init_database(&temp_dir);
+
+        // Add a transaction
+        let mut add_cmd = cargo_bin_cmd!();
+        add_cmd.env("HOME", temp_dir.path());
+        add_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
+        add_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        add_cmd
+            .arg("add")
+            .arg("--date")
+            .arg("2025-01-01")
+            .arg("--amount")
+            .arg("-1000")
+            .arg("--category")
+            .arg("Food")
+            .arg("--account")
+            .arg("Cash");
+        add_cmd.assert().success();
+
+        // List transactions without custom transformation
+        // (no list.kakei file exists)
+        let mut list_cmd = cargo_bin_cmd!();
+        list_cmd.env("HOME", temp_dir.path());
+        list_cmd.env("XDG_CONFIG_HOME", temp_dir.path().join("config"));
+        list_cmd.env("XDG_DATA_HOME", temp_dir.path().join("data"));
+        list_cmd.arg("list");
+
+        list_cmd
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("Food"))
+            .stdout(predicate::str::contains("2025-01-01"))
+            .stdout(predicate::str::contains("¥-1000"))
+            // Should NOT contain group headers since no transformation is applied
+            .stdout(predicate::str::contains("===").not());
+    }
 }
 
 // ============================================================================
