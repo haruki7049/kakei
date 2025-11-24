@@ -67,6 +67,7 @@ klisp> '(a b c)
 ```
 
 The REPL features:
+
 - Line editing and history (arrow keys work!)
 - Persistent environment across evaluations
 - Error reporting for parse and evaluation errors

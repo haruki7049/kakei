@@ -4,7 +4,7 @@
 //! Users can type expressions, see the results immediately, and experiment
 //! with the language.
 
-use kakei_lisp::{create_global_env, eval, parse, Value};
+use kakei_lisp::{Value, create_global_env, eval, parse};
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
 
@@ -15,7 +15,7 @@ fn main() -> Result<()> {
 
     // Create readline editor for line editing and history
     let mut rl = DefaultEditor::new()?;
-    
+
     // Create the global environment with built-in functions
     let mut env = create_global_env();
 
