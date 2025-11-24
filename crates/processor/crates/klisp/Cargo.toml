@@ -10,4 +10,4 @@ readme.workspace = true
 
 [dependencies]
 nom.workspace = true
-rustyline = "14.0.0"
+rustyline.workspace = true
