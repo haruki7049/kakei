@@ -7,8 +7,11 @@
 use kakei_lisp::{Value, create_global_env, eval, parse};
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
+use clap::Parser;
 
 fn main() -> Result<()> {
+    let _args: CLIArgs = CLIArgs::parse();
+
     println!("kakei_lisp REPL v{}", env!("CARGO_PKG_VERSION"));
     println!("Type expressions to evaluate. Press Ctrl+C or Ctrl+D to exit.");
     println!();
@@ -73,3 +76,7 @@ fn main() -> Result<()> {
 
     Ok(())
 }
+
+#[derive(Parser)]
+#[command(version, about, author)]
+struct CLIArgs;
