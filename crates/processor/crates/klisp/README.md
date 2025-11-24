@@ -44,10 +44,10 @@ The evaluator provides a functional Lisp interpreter with the following features
 ```bash
 # Run the REPL from the klisp directory
 cd crates/processor/crates/klisp
-cargo run --bin repl
+cargo run --bin klisp
 
 # Or run from the workspace root
-cargo run --manifest-path crates/processor/crates/klisp/Cargo.toml --bin repl
+cargo run --manifest-path crates/processor/crates/klisp/Cargo.toml --bin klisp
 ```
 
 Example REPL session:
