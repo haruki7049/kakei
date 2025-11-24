@@ -4,10 +4,10 @@
 //! Users can type expressions, see the results immediately, and experiment
 //! with the language.
 
+use clap::Parser;
 use kakei_lisp::{Value, create_global_env, eval, parse};
 use rustyline::error::ReadlineError;
 use rustyline::{DefaultEditor, Result};
-use clap::Parser;
 
 fn main() -> Result<()> {
     let _args: CLIArgs = CLIArgs::parse();
