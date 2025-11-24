@@ -41,21 +41,21 @@
 
           src = lib.cleanSource ./.;
 
+          cargoExtraArgs = "--locked --workspace";
           cargoArtifacts = craneLib.buildDepsOnly {
             inherit src;
           };
           kakei = craneLib.buildPackage {
-            inherit src cargoArtifacts;
+            inherit src cargoArtifacts cargoExtraArgs;
             strictDeps = true;
-
             doCheck = true;
           };
           cargo-clippy = craneLib.cargoClippy {
-            inherit src cargoArtifacts;
+            inherit src cargoArtifacts cargoExtraArgs;
             cargoClippyExtraArgs = "--verbose -- --deny warnings";
           };
           cargo-doc = craneLib.cargoDoc {
-            inherit src cargoArtifacts;
+            inherit src cargoArtifacts cargoExtraArgs;
           };
         in
         {
