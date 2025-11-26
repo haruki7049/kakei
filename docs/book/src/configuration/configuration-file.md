@@ -99,6 +99,7 @@ default_accounts = ["Main"]
 In addition to the TOML configuration file, you can customize how the `list` command displays transactions by creating a `list.kakei` file in the same configuration directory.
 
 **Location**: Same directory as `config.toml`, but named `list.kakei`
+
 - **Linux (XDG)**: `~/.config/kakei/list.kakei`
 - **macOS**: `~/Library/Application Support/kakei/list.kakei`
 - **Windows**: `%APPDATA%\kakei\list.kakei`

@@ -52,6 +52,7 @@ You can customize how transactions are displayed by creating a Lisp transformati
 #### Location
 
 The transformation file should be placed at:
+
 - **Linux (XDG)**: `~/.config/kakei/list.kakei` (or `$XDG_CONFIG_HOME/kakei/list.kakei`)
 - **macOS**: `~/Library/Application Support/kakei/list.kakei`
 - **Windows**: `%APPDATA%\kakei\list.kakei`
@@ -59,8 +60,9 @@ The transformation file should be placed at:
 #### How It Works
 
 When you run `kakei list`:
+
 1. If `list.kakei` exists, the Lisp program in the file is used to transform the transaction table
-2. If the file doesn't exist, the default table format is used (as shown above)
+1. If the file doesn't exist, the default table format is used (as shown above)
 
 The Lisp program receives a `table` variable containing all recent transactions, just like the `transform` command.
 

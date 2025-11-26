@@ -100,14 +100,14 @@ async fn handle_list_command(
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Check if a custom list transformation file exists
     let use_custom_transform = list_transform_path.exists();
-    
+
     if use_custom_transform {
         // Read the Lisp program from the file
         let lisp_program = std::fs::read_to_string(list_transform_path)
             .map_err(|e| format!("Failed to read list transformation file: {}", e))?
             .trim()
             .to_string();
-        
+
         // Use the transform functionality
         match processor.transform_transactions(&lisp_program).await {
             Ok(result) => {
