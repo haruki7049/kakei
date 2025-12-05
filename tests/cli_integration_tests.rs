@@ -705,7 +705,16 @@ mod unix {
         add_cmd2.assert().success();
 
         // Create the list.kakei file with a group-by transformation
-        let config_dir = temp_dir.path().join("config").join("kakei");
+        let config_dir = if cfg!(target_os = "macos") {
+            temp_dir
+                .path()
+                .join("Library")
+                .join("Application Support")
+                .join("dev.haruki7049.kakei")
+        } else {
+            temp_dir.path().join("config").join("kakei")
+        };
+
         std::fs::create_dir_all(&config_dir).expect("Failed to create config directory");
         let list_kakei_path = config_dir.join("list.kakei");
         std::fs::write(
