@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Configuration for the Kakei application.
-/// Saved in ~/.config/kakei/config.toml (typically).
+/// Saved in ~/.config/kakei/default.kakei (typically).
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Configuration {
     /// List of default categories to create during initialization.

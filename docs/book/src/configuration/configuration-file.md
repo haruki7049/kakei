@@ -6,9 +6,9 @@ kakei uses a TOML configuration file to customize default categories and account
 
 The configuration file location depends on your operating system:
 
-- **Linux (XDG)**: `~/.config/kakei/config.toml` (or `$XDG_CONFIG_HOME/kakei/config.toml`)
-- **macOS**: `~/Library/Application Support/kakei/config.toml`
-- **Windows**: `%APPDATA%\kakei\config.toml`
+- **Linux (XDG)**: `~/.config/kakei/default.kakei` (or `$XDG_CONFIG_HOME/kakei/default.kakei`)
+- **macOS**: `~/Library/Application Support/kakei/default.kakei`
+- **Windows**: `%APPDATA%\kakei\default.kakei`
 
 ### Format
 
@@ -29,11 +29,11 @@ kakei automatically creates a default configuration when you run `kakei init`. I
 
    ```bash
    # Linux/macOS
-   nano ~/.config/kakei/config.toml
+   nano ~/.config/kakei/default.kakei
 
    # Or use any editor you prefer
-   vim ~/.config/kakei/config.toml
-   code ~/.config/kakei/config.toml
+   vim ~/.config/kakei/default.kakei
+   code ~/.config/kakei/default.kakei
    ```
 
 1. **Add your custom categories and accounts**

@@ -328,7 +328,7 @@ Load/Create Config File
 ```
 confy crate
     ↓
-Load config.toml
+Load default.kakei
     ↓
 Parse with TOML parser
     ↓
