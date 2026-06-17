@@ -11,6 +11,7 @@ readme.workspace = true
 
 [dependencies]
 tabled.workspace = true
+thiserror.workspace = true
 
 [dev-dependencies]
 anyhow.workspace = true

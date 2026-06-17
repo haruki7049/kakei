@@ -1,10 +1,7 @@
 //! Kakeibo Raw Note Types
 
+use super::Note;
 use tabled::{Table, Tabled};
-
-pub trait Note {
-    fn table(&self) -> tabled::Table;
-}
 
 #[derive(Debug)]
 pub struct RawKakeiboNote<C>
