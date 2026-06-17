@@ -1,24 +1,6 @@
-[package]
-name = "kakei"
-description = "A kakeibo cli application"
-keywords = ["editor", "kakeibo"]
-categories = ["command-line-utilities"]
-authors.workspace = true
-version.workspace = true
-edition.workspace = true
-license.workspace = true
-repository.workspace = true
-publish.workspace = true
-readme.workspace = true
-
 [workspace]
 resolver = "3"
-members = [
-  "crates/processor/crates/money",
-  "crates/processor/crates/database",
-  "crates/processor/crates/klisp",
-  "crates/processor",
-]
+members = ["crates/cli", "crates/processor"]
 
 [workspace.package]
 authors = ["haruki7049 <tontonkirikiri@gmail.com>"]
@@ -30,49 +12,9 @@ publish = false
 readme = "README.md"
 
 [workspace.dependencies]
-kakei_processor = { path = "crates/processor" }
-kakei_database = { path = "crates/processor/crates/database" }
-kakei_money = { path = "crates/processor/crates/money" }
-kakei_lisp = { path = "crates/processor/crates/klisp" }
-sqlx = { version = "0.8.6", features = [
-  "sqlite",
-  "runtime-tokio",
-  "chrono",
-  "macros",
-] }
-tokio = { version = "1.48.0", features = ["full"] }
-chrono = { version = "0.4.42", features = ["serde"] }
-thiserror = "2.0.17"
-rust_decimal = { version = "1.39.0", features = ["macros", "serde"] }
-serde = { version = "1.0.219", features = ["derive"] }
+anyhow = "1.0.102"
 clap = { version = "4.4.11", features = ["derive", "string"] }
 confy = "0.6.1"
 directories = "6.0.0"
-xdg = "3.0.0"
-tracing = "0.1.41"
-tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
-tabled = "0.20.0"
-nom = "8.0.0"
-assert_cmd = "2.0"
-predicates = "3.0"
-tempfile = "3.8"
-rustyline = "17.0.2"
-
-[dependencies]
-kakei_processor.workspace = true
-clap.workspace = true
-directories.workspace = true
-tokio.workspace = true
-confy.workspace = true
-serde.workspace = true
-tracing.workspace = true
-tracing-subscriber.workspace = true
-tabled.workspace = true
-nom.workspace = true
-
-[dev-dependencies]
-assert_cmd.workspace = true
-predicates.workspace = true
-tempfile.workspace = true
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+tabled = "0.21.0"
+thiserror = "2.0.17"

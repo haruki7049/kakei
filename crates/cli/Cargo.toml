@@ -1,6 +1,8 @@
 [package]
-name = "kakei_processor"
-description = "Processor crate for kakei CLI"
+name = "kakei"
+description = "Kakeibo CLI application"
+keywords = ["editor", "kakeibo"]
+categories = ["command-line-utilities"]
 authors.workspace = true
 version.workspace = true
 edition.workspace = true
@@ -10,8 +12,9 @@ publish.workspace = true
 readme.workspace = true
 
 [dependencies]
+anyhow.workspace = true
+clap.workspace = true
+confy.workspace = true
+directories.workspace = true
 tabled.workspace = true
 thiserror.workspace = true
-
-[dev-dependencies]
-anyhow.workspace = true
