@@ -1,9 +1,10 @@
 //! Kakeibo Raw Note Types
+//! This type is needed to express the received sheet's type.
 
-use super::Note;
-use tabled::{Table, Tabled};
-
-#[derive(Debug)]
+/// Raw Kakeibo Note.
+///
+/// This type contains a `Vec<RawkakeiboQuery>`.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RawKakeiboNote<C>
 where
     C: std::fmt::Display + Clone,
@@ -15,21 +16,16 @@ impl<C> RawKakeiboNote<C>
 where
     C: std::fmt::Display + Clone,
 {
+    /// Generates a `RawkakeiboNote`.
     pub fn new(queries: Vec<RawKakeiboQuery<C>>) -> Self {
         Self { queries }
     }
 }
 
-impl<C> Note for RawKakeiboNote<C>
-where
-    C: std::fmt::Display + Clone,
-{
-    fn table(&self) -> tabled::Table {
-        Table::new(&self.queries)
-    }
-}
-
-#[derive(Debug, Tabled, Clone)]
+/// Raw Kakeibo Query.
+///
+/// This type contains only query name, debit, and credit fields. This hasn't the total field.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RawKakeiboQuery<C>
 where
     C: std::fmt::Display + Clone,
@@ -43,6 +39,7 @@ impl<C> RawKakeiboQuery<C>
 where
     C: std::fmt::Display + Clone,
 {
+    /// Generates a `RawKakeiboQuery<C>`.
     pub fn new(name: String, debit: C, credit: C) -> Self {
         Self {
             name,
@@ -56,7 +53,6 @@ where
 mod tests {
     use super::*;
     use crate::prelude::*;
-    use tabled::assert::assert_table;
 
     #[test]
     fn table() -> anyhow::Result<()> {
@@ -70,25 +66,20 @@ mod tests {
             debit: Currency::sats(1000), // 1000 JPY
             credit: Currency::sats(0),   // 0 JPY
         };
-        let queries = vec![jpy_query.clone(), jpy_query, sats_query.clone(), sats_query];
+        let queries = vec![
+            jpy_query.clone(),
+            jpy_query.clone(),
+            sats_query.clone(),
+            sats_query.clone(),
+        ];
         let kakeibo = RawKakeiboNote::new(queries);
 
-        let table: Table = kakeibo.table();
-        assert_table!(
-            table,
-            "+-----------------+-----------+--------+"
-            "| name            | debit     | credit |"
-            "+-----------------+-----------+--------+"
-            "| Test JPY query  | 1 JPY     | 0 JPY  |"
-            "+-----------------+-----------+--------+"
-            "| Test JPY query  | 1 JPY     | 0 JPY  |"
-            "+-----------------+-----------+--------+"
-            "| Test SATS query | 1000 SATS | 0 SATS |"
-            "+-----------------+-----------+--------+"
-            "| Test SATS query | 1000 SATS | 0 SATS |"
-            "+-----------------+-----------+--------+"
+        assert_eq!(
+            kakeibo,
+            RawKakeiboNote {
+                queries: vec![jpy_query.clone(), jpy_query, sats_query.clone(), sats_query]
+            }
         );
-
         Ok(())
     }
 }

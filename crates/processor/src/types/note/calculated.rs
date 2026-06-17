@@ -1,8 +1,12 @@
 //! Kakeibo Raw Note Types
+//! This type is needed to express the calculated sheet's type.
 
 use super::Note;
 use tabled::{Table, Tabled};
 
+/// Calculated Kakeibo Note.
+///
+/// This type contains a `Vec<CalculatedKakeiboNote>`.
 #[derive(Debug)]
 pub struct CalculatedKakeiboNote<C>
 where
@@ -15,6 +19,7 @@ impl<C> CalculatedKakeiboNote<C>
 where
     C: std::fmt::Display + Clone,
 {
+    /// Generates a `CalculatedKakeiboNote`.
     pub fn new(queries: Vec<CalculatedKakeiboQuery<C>>) -> Self {
         Self { queries }
     }
@@ -24,11 +29,15 @@ impl<C> Note for CalculatedKakeiboNote<C>
 where
     C: std::fmt::Display + Clone,
 {
+    /// Generates a `tabled::Table` to render a ASCII table.
     fn table(&self) -> tabled::Table {
         Table::new(&self.queries)
     }
 }
 
+/// Calculated Kakeibo Query.
+///
+/// This type contains only query name, debit, credit, and total field.
 #[derive(Debug, Tabled, Clone)]
 pub struct CalculatedKakeiboQuery<C>
 where
@@ -44,6 +53,7 @@ impl<C> CalculatedKakeiboQuery<C>
 where
     C: std::fmt::Display + Clone,
 {
+    /// Generates a `CalculatedKakeiboQuery<C>`.
     pub fn new(name: String, debit: C, credit: C, total: C) -> Self {
         Self {
             name,
