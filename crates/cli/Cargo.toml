@@ -1,6 +1,6 @@
 [package]
 name = "kakei"
-description = "A kakeibo cli application"
+description = "Kakeibo CLI application"
 keywords = ["editor", "kakeibo"]
 categories = ["command-line-utilities"]
 authors.workspace = true
