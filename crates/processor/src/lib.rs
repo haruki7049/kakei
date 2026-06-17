@@ -42,17 +42,37 @@ where
     pub credit: C,
 }
 
-// ----- Currency -----
+// ----- Currency & Unit -----
 
 pub trait Unit {
     fn is_f64(&self) -> bool;
     fn is_i64(&self) -> bool;
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Currency {
-    JPY(i64),
-    SATS(i64),
+    JPY(JPY),
+    SATS(SATS),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct JPY {
+    inner: i64,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct SATS {
+    inner: i64,
+}
+
+impl Currency {
+    pub fn jpy(inner: i64) -> Self {
+        Self::JPY(JPY { inner })
+    }
+
+    pub fn sats(inner: i64) -> Self {
+        Self::SATS(SATS { inner })
+    }
 }
 
 impl std::fmt::Display for Currency {
@@ -84,3 +104,15 @@ impl Unit for Currency {
 
 #[derive(Debug, Tabled)]
 pub struct Configuration {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn currency() -> anyhow::Result<()> {
+        let _ = Currency::jpy(1); // 1 JPY
+        let _ = Currency::sats(1000); // 1000 SATS
+        Ok(())
+    }
+}
