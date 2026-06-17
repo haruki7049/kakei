@@ -1,3 +1,7 @@
+//! Processor crate
+
+use tabled::Tabled;
+
 // ----- Processor -----
 
 /// Processor trait to express the processor methods
@@ -12,12 +16,12 @@ impl Processor for KakeiProcessor {}
 
 pub trait Kakeibo {}
 
-#[derive(Debug)]
+#[derive(Debug, Tabled)]
 pub struct KakeiboNote {}
 
 impl Kakeibo for KakeiboNote {}
 
 // ----- Configuration -----
 
-#[derive(Debug)]
+#[derive(Debug, Tabled)]
 pub struct Configuration {}

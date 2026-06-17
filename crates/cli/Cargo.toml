@@ -16,4 +16,5 @@ anyhow.workspace = true
 clap.workspace = true
 confy.workspace = true
 directories.workspace = true
+tabled.workspace = true
 thiserror.workspace = true
