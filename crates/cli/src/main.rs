@@ -16,11 +16,11 @@ fn main() -> anyhow::Result<()> {
 #[clap(author, about, version)]
 pub struct CLIArgs {
     /// The file path to kakeibo note.
-    kakeibo: PathBuf,
+    pub kakeibo: PathBuf,
 
     /// kakei's config file path
     #[arg(short, long, default_value = DEFAULT_CONFIG_PATH.lock().unwrap().display().to_string())]
-    config: PathBuf,
+    pub config: PathBuf,
 }
 
 /// Default Configuration Path, using directories crate to calculate ProjectDirs (~/.config/kakei)
