@@ -1,5 +1,5 @@
 use clap::Parser;
-use kakei::cli::CLIArgs;
+use kakei::prelude::*;
 
 fn main() -> anyhow::Result<()> {
     let _ = CLIArgs::parse();
