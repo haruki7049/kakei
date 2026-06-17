@@ -1,5 +1,8 @@
 [package]
-name = "kakei_lisp"
+name = "kakei"
+description = "A kakeibo cli application"
+keywords = ["editor", "kakeibo"]
+categories = ["command-line-utilities"]
 authors.workspace = true
 version.workspace = true
 edition.workspace = true
@@ -10,5 +13,5 @@ readme.workspace = true
 
 [dependencies]
 clap.workspace = true
-nom.workspace = true
-rustyline.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
