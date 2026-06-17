@@ -38,7 +38,23 @@ impl std::fmt::Display for JPY {
     }
 }
 
-// TODO: Add std::ops::Add, std::ops::Sub and etc for JPY
+impl std::ops::Add for JPY {
+    type Output = JPY;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        let inner = self.inner + rhs.inner;
+        Self { inner }
+    }
+}
+
+impl std::ops::Sub for JPY {
+    type Output = JPY;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        let inner = self.inner - rhs.inner;
+        Self { inner }
+    }
+}
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct SATS {
@@ -51,7 +67,23 @@ impl std::fmt::Display for SATS {
     }
 }
 
-// TODO: Add std::ops::Add, std::ops::Sub and etc for SATS
+impl std::ops::Add for SATS {
+    type Output = SATS;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        let inner = self.inner + rhs.inner;
+        Self { inner }
+    }
+}
+
+impl std::ops::Sub for SATS {
+    type Output = SATS;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        let inner = self.inner - rhs.inner;
+        Self { inner }
+    }
+}
 
 #[cfg(test)]
 mod tests {
