@@ -12,6 +12,8 @@ publish.workspace = true
 readme.workspace = true
 
 [dependencies]
-clap.workspace = true
 anyhow.workspace = true
+clap.workspace = true
+confy.workspace = true
+directories.workspace = true
 thiserror.workspace = true
