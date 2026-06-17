@@ -38,6 +38,8 @@ impl std::fmt::Display for JPY {
     }
 }
 
+// TODO: Add std::ops::Add, std::ops::Sub and etc for JPY
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct SATS {
     inner: i64,
@@ -48,6 +50,8 @@ impl std::fmt::Display for SATS {
         write!(f, "{} SATS", self.inner)
     }
 }
+
+// TODO: Add std::ops::Add, std::ops::Sub and etc for SATS
 
 #[cfg(test)]
 mod tests {
