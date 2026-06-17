@@ -81,7 +81,19 @@ mod tests {
         let kakeibo = CalculatedKakeiboNote::new(queries);
 
         let table: Table = kakeibo.table();
-        assert_table!(table, "");
+        assert_table!(table,
+            "+-----------------+-----------+-----------+--------+"
+            "| name            | debit     | credit    | total  |"
+            "+-----------------+-----------+-----------+--------+"
+            "| Test JPY query  | 1 JPY     | 1 JPY     | 0 JPY  |"
+            "+-----------------+-----------+-----------+--------+"
+            "| Test JPY query  | 1 JPY     | 1 JPY     | 0 JPY  |"
+            "+-----------------+-----------+-----------+--------+"
+            "| Test SATS query | 1000 SATS | 1000 SATS | 0 SATS |"
+            "+-----------------+-----------+-----------+--------+"
+            "| Test SATS query | 1000 SATS | 1000 SATS | 0 SATS |"
+            "+-----------------+-----------+-----------+--------+"
+        );
 
         Ok(())
     }
