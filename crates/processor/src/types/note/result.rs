@@ -1,6 +1,9 @@
 //! Kakeibo Result Note Types
 
-use crate::types::currency::{Currency, JPY, SATS};
+use crate::types::{
+    currency::{Currency, JPY, SATS},
+    note::raw::RawQuery,
+};
 use tabled::Tabled;
 
 pub struct Note {
@@ -17,6 +20,15 @@ impl crate::types::note::Note for self::Note {
 pub enum AnyQuery {
     JPY(Query<JPY>),
     SATS(Query<SATS>),
+}
+
+impl<C> From<RawQuery<C>> for AnyQuery
+where
+    C: Currency,
+{
+    fn from(value: RawQuery<C>) -> Self {
+        todo!()
+    }
 }
 
 impl AnyQuery {
@@ -62,5 +74,14 @@ where
             credit,
             total,
         }
+    }
+}
+
+impl<C> From<RawQuery<C>> for Query<C>
+where
+    C: Currency,
+{
+    fn from(value: RawQuery<C>) -> Self {
+        todo!()
     }
 }
