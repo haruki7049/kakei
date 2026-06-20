@@ -3,7 +3,5 @@ use kakei::prelude::*;
 
 fn main() -> anyhow::Result<()> {
     let _ = CLIArgs::parse();
-    println!("Hello, world!");
-
-    Ok(())
+    todo!();
 }
