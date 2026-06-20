@@ -1,29 +1,6 @@
 //! Currency module
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum Currency {
-    JPY(JPY),
-    SATS(SATS),
-}
-
-impl Currency {
-    pub fn jpy(inner: i64) -> Self {
-        Self::JPY(JPY { inner })
-    }
-
-    pub fn sats(inner: i64) -> Self {
-        Self::SATS(SATS { inner })
-    }
-}
-
-impl std::fmt::Display for Currency {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::JPY(i) => write!(f, "{}", i),
-            Self::SATS(i) => write!(f, "{}", i),
-        }
-    }
-}
+pub trait Currency: std::fmt::Display + std::fmt::Debug {}
 
 // ----- Each Currency Unit -----
 
@@ -31,6 +8,14 @@ impl std::fmt::Display for Currency {
 pub struct JPY {
     inner: i64,
 }
+
+impl JPY {
+    pub fn new(inner: i64) -> Self {
+        Self { inner }
+    }
+}
+
+impl Currency for JPY {}
 
 impl std::fmt::Display for JPY {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -60,6 +45,14 @@ impl std::ops::Sub for JPY {
 pub struct SATS {
     inner: i64,
 }
+
+impl SATS {
+    pub fn new(inner: i64) -> Self {
+        Self { inner }
+    }
+}
+
+impl Currency for SATS {}
 
 impl std::fmt::Display for SATS {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -91,8 +84,8 @@ mod tests {
 
     #[test]
     fn currency() -> anyhow::Result<()> {
-        let _ = Currency::jpy(1); // 1 JPY
-        let _ = Currency::sats(1000); // 1000 SATS
+        let _ = JPY::new(1); // 1 JPY
+        let _ = SATS::new(1000); // 1000 SATS
         Ok(())
     }
 }

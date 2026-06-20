@@ -228,6 +228,7 @@ dependencies = [
  "clap",
  "confy",
  "directories 6.0.0",
+ "kakei_processor",
  "tabled",
  "thiserror 2.0.17",
 ]

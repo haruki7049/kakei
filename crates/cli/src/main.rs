@@ -1,7 +1,8 @@
 use clap::Parser;
 use kakei::prelude::*;
+use kakei_processor::prelude::*;
 
 fn main() -> anyhow::Result<()> {
-    let _ = CLIArgs::parse();
-    todo!();
+    let args = CLIArgs::parse();
+    todo!()
 }
