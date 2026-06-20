@@ -32,7 +32,7 @@ impl AnyQuery {
 #[derive(Debug, Tabled)]
 pub struct Query<C>
 where
-    C: Currency + ?Sized,
+    C: Currency,
 {
     pub name: String,
     pub debit: C,
