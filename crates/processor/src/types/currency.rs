@@ -2,7 +2,10 @@
 
 use std::ops::{Add, Sub};
 
-pub trait Currency: Add<Output = Self> + Sub<Output = Self> + Sized + Copy {}
+pub trait Currency:
+    Add<Output = Self> + Sub<Output = Self> + Sized + Copy + std::fmt::Display
+{
+}
 
 // ----- Each Currency Unit -----
 
