@@ -1,8 +1,7 @@
 //! Kakeibo Raw Note Types
 //! This type is needed to express the calculated sheet's type.
 
-use crate::prelude::*;
-use std::boxed::Box;
+use crate::types::{currency::Unit, note::Note};
 use tabled::{Table, Tabled};
 
 /// Calculated Kakeibo Note.
@@ -11,14 +10,14 @@ use tabled::{Table, Tabled};
 #[derive(Debug)]
 pub struct CalculatedKakeiboNote<C>
 where
-    C: Currency + ?Sized,
+    C: Currency + Clone,
 {
     queries: Vec<CalculatedKakeiboQuery<C>>,
 }
 
 impl<C> CalculatedKakeiboNote<C>
 where
-    C: Currency,
+    C: Currency + Clone,
 {
     /// Generates a `CalculatedKakeiboNote`.
     pub fn new(queries: Vec<CalculatedKakeiboQuery<C>>) -> Self {
@@ -26,9 +25,9 @@ where
     }
 }
 
-impl<C: ?Sized> Note for CalculatedKakeiboNote<C>
+impl<C> Note for CalculatedKakeiboNote<C>
 where
-    C: Currency,
+    C: Currency + Clone,
 {
     /// Generates a `tabled::Table` to render a ASCII table.
     fn table(&self) -> tabled::Table {
@@ -40,52 +39,50 @@ where
 ///
 /// This type contains only query name, debit, credit, and total field.
 #[derive(Debug, Tabled, Clone)]
-pub struct CalculatedKakeiboQuery<C>
-where
-    C: Currency + ?Sized,
-{
+pub struct CalculatedKakeiboQuery {
     pub name: String,
-    pub debit: Box<C>,
-    pub credit: Box<C>,
-    pub total: Box<C>,
+    pub debit: Unit,
+    pub credit: Unit,
+    pub total: Unit,
 }
 
-impl<C> CalculatedKakeiboQuery<C>
-where
-    C: Currency,
-{
-    /// Generates a `CalculatedKakeiboQuery<C>`.
-    pub fn new(name: String, debit: C, credit: C, total: C) -> Self {
+impl CalculatedKakeiboQuery {
+    /// Generates a `CalculatedKakeiboQuery`.
+    pub fn new(name: String, debit: Unit, credit: Unit, total: Unit) -> Self {
         Self {
             name,
-            debit: Box::new(debit),
-            credit: Box::new(credit),
-            total: Box::new(total),
+            debit,
+            credit,
+            total,
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::prelude::*;
+    use crate::types::currency::Currency;
+    use crate::types::currency::JPY;
+    use crate::types::currency::SATS;
+    use crate::types::note::calculated::CalculatedKakeiboNote;
+    use crate::types::note::calculated::CalculatedKakeiboQuery;
     use tabled::assert::assert_table;
+    use tabled::{Table, Tabled};
 
     #[test]
     fn table() -> anyhow::Result<()> {
         let jpy_query = CalculatedKakeiboQuery {
             name: "Test JPY query".to_string(),
-            debit: Box::new(JPY::new(1)),  // 1 JPY
-            credit: Box::new(JPY::new(1)), // 1 JPY
-            total: Box::new(JPY::new(0)),  // total: 0 JPY
+            debit: JPY::new(1),  // 1 JPY
+            credit: JPY::new(1), // 1 JPY
+            total: JPY::new(0),  // total: 0 JPY
         };
         let sats_query = CalculatedKakeiboQuery {
             name: "Test SATS query".to_string(),
-            debit: Box::new(SATS::new(1000)),  // 1000 SATS
-            credit: Box::new(SATS::new(1000)), // 0 JPY
-            total: Box::new(SATS::new(0)),     // 1000 SATS
+            debit: SATS::new(1000),  // 1000 SATS
+            credit: SATS::new(1000), // 0 JPY
+            total: SATS::new(0),     // 1000 SATS
         };
-        let queries: Vec<CalculatedKakeiboQuery<dyn Currency>> =
+        let queries: Vec<CalculatedKakeiboQuery> =
             vec![jpy_query.clone(), jpy_query, sats_query.clone(), sats_query];
         let kakeibo: CalculatedKakeiboNote<dyn Currency> = CalculatedKakeiboNote::new(queries);
 

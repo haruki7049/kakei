@@ -1,7 +1,7 @@
 //! Kakeibo Raw Note Types
 //! This type is needed to express the received sheet's type.
 
-use crate::prelude::*;
+use crate::types::currency::Currency;
 
 /// Raw Kakeibo Note.
 ///
@@ -9,14 +9,14 @@ use crate::prelude::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RawKakeiboNote<C>
 where
-    C: Currency + ?Sized,
+    C: Currency + Clone,
 {
     queries: Vec<RawKakeiboQuery<C>>,
 }
 
 impl<C> RawKakeiboNote<C>
 where
-    C: Currency,
+    C: Currency + Clone,
 {
     /// Generates a `RawkakeiboNote`.
     pub fn new(queries: Vec<RawKakeiboQuery<C>>) -> Self {
@@ -30,7 +30,7 @@ where
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RawKakeiboQuery<C>
 where
-    C: Currency + ?Sized,
+    C: Currency + Clone,
 {
     pub name: String,
     pub debit: Box<C>,
@@ -39,7 +39,7 @@ where
 
 impl<C> RawKakeiboQuery<C>
 where
-    C: Currency,
+    C: Currency + Clone,
 {
     /// Generates a `RawKakeiboQuery<C>`.
     pub fn new(name: String, debit: C, credit: C) -> Self {
@@ -54,6 +54,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::types::currency::JPY;
+    use crate::types::currency::SATS;
 
     #[test]
     fn table() -> anyhow::Result<()> {

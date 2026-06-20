@@ -1,6 +1,9 @@
 //! Currency module
 
-pub trait Currency: std::fmt::Display + std::fmt::Debug {}
+pub enum Unit {
+    JPY(JPY),
+    SATS(SATS),
+}
 
 // ----- Each Currency Unit -----
 
@@ -14,8 +17,6 @@ impl JPY {
         Self { inner }
     }
 }
-
-impl Currency for JPY {}
 
 impl std::fmt::Display for JPY {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -51,8 +52,6 @@ impl SATS {
         Self { inner }
     }
 }
-
-impl Currency for SATS {}
 
 impl std::fmt::Display for SATS {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

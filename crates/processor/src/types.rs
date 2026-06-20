@@ -1,9 +1,9 @@
 //! Processor types
 
 pub mod configuration;
-pub mod currency;
-pub mod note;
+mod currency;
+mod note;
 
 pub use configuration::*;
-pub use currency::*;
-pub use note::*;
+// pub use currency::*;
+// pub use note::*;
