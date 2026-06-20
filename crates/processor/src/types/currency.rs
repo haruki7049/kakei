@@ -1,16 +1,17 @@
 //! Currency module
 
-pub enum Unit {
-    JPY(JPY),
-    SATS(SATS),
-}
+use std::ops::{Add, Sub};
+
+pub trait Currency: Add<Output = Self> + Sub<Output = Self> + Sized + Copy {}
 
 // ----- Each Currency Unit -----
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct JPY {
     inner: i64,
 }
+
+impl Currency for JPY {}
 
 impl JPY {
     pub fn new(inner: i64) -> Self {
@@ -42,10 +43,12 @@ impl std::ops::Sub for JPY {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct SATS {
     inner: i64,
 }
+
+impl Currency for SATS {}
 
 impl SATS {
     pub fn new(inner: i64) -> Self {
