@@ -22,12 +22,15 @@ pub enum AnyQuery {
     SATS(Query<SATS>),
 }
 
-impl<C> From<RawQuery<C>> for AnyQuery
-where
-    C: Currency,
-{
-    fn from(value: RawQuery<C>) -> Self {
-        todo!()
+impl From<RawQuery<JPY>> for AnyQuery {
+    fn from(value: RawQuery<JPY>) -> Self {
+        Self::JPY(value.into())
+    }
+}
+
+impl From<RawQuery<SATS>> for AnyQuery {
+    fn from(value: RawQuery<SATS>) -> Self {
+        Self::SATS(value.into())
     }
 }
 
@@ -82,6 +85,16 @@ where
     C: Currency,
 {
     fn from(value: RawQuery<C>) -> Self {
-        todo!()
+        let name = value.name;
+        let debit = *value.debit;
+        let credit = *value.credit;
+        let total = *value.debit - *value.credit;
+
+        Self {
+            name,
+            debit,
+            credit,
+            total,
+        }
     }
 }
