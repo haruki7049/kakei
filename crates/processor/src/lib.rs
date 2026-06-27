@@ -39,7 +39,11 @@ impl Processor {
 
 #[cfg(test)]
 mod tests {
-    use crate::Processor;
+    use crate::{
+        Processor,
+        currency::{JPY, SATS},
+        note::Query,
+    };
     use tabled::{Table, assert::assert_table};
 
     #[test]
@@ -62,6 +66,64 @@ mod tests {
             "+------+-------+--------+-------+"
             "| name | debit | credit | total |"
             "+------+-------+--------+-------+"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn some_tables() -> anyhow::Result<()> {
+        let processor = Processor {
+            jpy_queries: vec![
+                Query::<JPY> {
+                    name: "Test JPY query".to_string(),
+                    debit: JPY(0),
+                    credit: JPY(0),
+                    total: JPY(0),
+                },
+                Query::<JPY> {
+                    name: "Test JPY query".to_string(),
+                    debit: JPY(0),
+                    credit: JPY(0),
+                    total: JPY(0),
+                },
+            ],
+            sats_queries: vec![
+                Query::<SATS> {
+                    name: "Test SATS query".to_string(),
+                    debit: SATS(0),
+                    credit: SATS(0),
+                    total: SATS(0),
+                },
+                Query::<SATS> {
+                    name: "Test SATS query".to_string(),
+                    debit: SATS(0),
+                    credit: SATS(0),
+                    total: SATS(0),
+                },
+            ],
+        };
+        let tables: Vec<Table> = processor.tables();
+
+        assert_eq!(tables.len(), 2);
+        assert_table!(
+            tables[0],
+            "+----------------+-------+--------+-------+"
+            "| name           | debit | credit | total |"
+            "+----------------+-------+--------+-------+"
+            "| Test JPY query | 0 JPY | 0 JPY  | 0 JPY |"
+            "+----------------+-------+--------+-------+"
+            "| Test JPY query | 0 JPY | 0 JPY  | 0 JPY |"
+            "+----------------+-------+--------+-------+"
+        );
+        assert_table!(
+            tables[1],
+            "+-----------------+--------+--------+--------+"
+            "| name            | debit  | credit | total  |"
+            "+-----------------+--------+--------+--------+"
+            "| Test SATS query | 0 SATS | 0 SATS | 0 SATS |"
+            "+-----------------+--------+--------+--------+"
+            "| Test SATS query | 0 SATS | 0 SATS | 0 SATS |"
+            "+-----------------+--------+--------+--------+"
         );
         Ok(())
     }
