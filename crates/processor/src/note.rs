@@ -1,4 +1,4 @@
-use crate::types::currency::Currency;
+use crate::currency::Currency;
 use tabled::Tabled;
 
 #[derive(Debug, Tabled, Clone)]
