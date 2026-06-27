@@ -1,27 +1,7 @@
 //! Kakeibo Result Note Types
 
-use crate::types::{
-    currency::{Currency, JPY, SATS},
-    note::raw::RawQuery,
-};
+use crate::types::currency::Currency;
 use tabled::Tabled;
-
-#[derive(Debug)]
-pub struct Note<C>
-where
-    C: Currency,
-{
-    queries: Vec<Query<C>>,
-}
-
-impl<C> crate::types::note::Note for self::Note<C>
-where
-    C: Currency,
-{
-    fn table(&self) -> tabled::Table {
-        todo!()
-    }
-}
 
 #[derive(Debug, Tabled)]
 pub struct Query<C>
@@ -50,25 +30,6 @@ where
     }
 
     pub fn new(name: String, debit: C, credit: C, total: C) -> Self {
-        Self {
-            name,
-            debit,
-            credit,
-            total,
-        }
-    }
-}
-
-impl<C> From<RawQuery<C>> for Query<C>
-where
-    C: Currency,
-{
-    fn from(value: RawQuery<C>) -> Self {
-        let name = value.name;
-        let debit = *value.debit;
-        let credit = *value.credit;
-        let total = *value.debit - *value.credit;
-
         Self {
             name,
             debit,
