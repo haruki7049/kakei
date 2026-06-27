@@ -6,6 +6,7 @@ use crate::types::{
 };
 use tabled::Tabled;
 
+#[derive(Debug)]
 pub struct Note<C>
 where
     C: Currency,
