@@ -6,42 +6,19 @@ use crate::types::{
 };
 use tabled::Tabled;
 
-pub struct Note {
-    queries: Vec<AnyQuery>,
+pub struct Note<C>
+where
+    C: Currency,
+{
+    queries: Vec<Query<C>>,
 }
 
-impl crate::types::note::Note for self::Note {
+impl<C> crate::types::note::Note for self::Note<C>
+where
+    C: Currency,
+{
     fn table(&self) -> tabled::Table {
         todo!()
-    }
-}
-
-#[allow(clippy::upper_case_acronyms)]
-#[derive(Debug, Tabled)]
-pub enum AnyQuery {
-    JPY(Query<JPY>),
-    SATS(Query<SATS>),
-}
-
-impl From<RawQuery<JPY>> for AnyQuery {
-    fn from(value: RawQuery<JPY>) -> Self {
-        Self::JPY(value.into())
-    }
-}
-
-impl From<RawQuery<SATS>> for AnyQuery {
-    fn from(value: RawQuery<SATS>) -> Self {
-        Self::SATS(value.into())
-    }
-}
-
-impl AnyQuery {
-    pub fn jpy(jpy: Query<JPY>) -> Self {
-        Self::JPY(jpy)
-    }
-
-    pub fn sats(sats: Query<SATS>) -> Self {
-        Self::SATS(sats)
     }
 }
 
