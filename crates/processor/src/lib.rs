@@ -36,3 +36,33 @@ impl Processor {
         result
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::Processor;
+    use tabled::{Table, assert::assert_table};
+
+    #[test]
+    fn empty_tables() -> anyhow::Result<()> {
+        let processor = Processor {
+            jpy_queries: vec![],
+            sats_queries: vec![],
+        };
+        let tables: Vec<Table> = processor.tables();
+
+        assert_eq!(tables.len(), 2);
+        assert_table!(
+            tables[0],
+            "+------+-------+--------+-------+"
+            "| name | debit | credit | total |"
+            "+------+-------+--------+-------+"
+        );
+        assert_table!(
+            tables[1],
+            "+------+-------+--------+-------+"
+            "| name | debit | credit | total |"
+            "+------+-------+--------+-------+"
+        );
+        Ok(())
+    }
+}
