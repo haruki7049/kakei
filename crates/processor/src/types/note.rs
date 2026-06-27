@@ -1,7 +1,13 @@
-pub mod raw;
-pub mod result;
+use crate::types::currency::Currency;
+use tabled::Tabled;
 
-/// Note trait to convert to `tabled::Table`.
-pub trait Note {
-    fn table(&self) -> tabled::Table;
+#[derive(Debug, Tabled, Clone)]
+pub struct Query<C>
+where
+    C: Currency,
+{
+    pub name: String,
+    pub debit: C,
+    pub credit: C,
+    pub total: C,
 }

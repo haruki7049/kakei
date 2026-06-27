@@ -6,14 +6,15 @@ mod note;
 
 use crate::types::{
     currency::{JPY, SATS},
-    note::{Note as _, result::Note},
+    note::Query,
 };
 pub use configuration::*;
 use std::path::PathBuf;
+use tabled::Table;
 
 pub struct Processor {
-    jpy_notes: Vec<Note<JPY>>,
-    sats_notes: Vec<Note<SATS>>,
+    jpy_queries: Vec<Query<JPY>>,
+    sats_queries: Vec<Query<SATS>>,
 }
 
 impl Processor {
@@ -25,16 +26,12 @@ impl Processor {
         let mut result: Vec<tabled::Table> = Vec::new();
 
         // JPY
-        for jpy_note in self.jpy_notes.iter() {
-            let table: tabled::Table = jpy_note.table();
-            result.push(table);
-        }
+        let jpy_table = Table::new(self.jpy_queries.clone());
+        result.push(jpy_table);
 
         // SATS
-        for sats_note in self.sats_notes.iter() {
-            let table: tabled::Table = sats_note.table();
-            result.push(table);
-        }
+        let sats_table = Table::new(self.sats_queries.clone());
+        result.push(sats_table);
 
         result
     }
