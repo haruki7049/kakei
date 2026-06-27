@@ -17,12 +17,6 @@ pub struct JPY {
 
 impl Currency for JPY {}
 
-impl JPY {
-    pub fn new(inner: i64) -> Self {
-        Self { inner }
-    }
-}
-
 impl std::fmt::Display for JPY {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} JPY", self.inner)
@@ -55,12 +49,6 @@ pub struct SATS {
 
 impl Currency for SATS {}
 
-impl SATS {
-    pub fn new(inner: i64) -> Self {
-        Self { inner }
-    }
-}
-
 impl std::fmt::Display for SATS {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} SATS", self.inner)
@@ -82,17 +70,5 @@ impl std::ops::Sub for SATS {
     fn sub(self, rhs: Self) -> Self::Output {
         let inner = self.inner - rhs.inner;
         Self { inner }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn currency() -> anyhow::Result<()> {
-        let _ = JPY::new(1); // 1 JPY
-        let _ = SATS::new(1000); // 1000 SATS
-        Ok(())
     }
 }
