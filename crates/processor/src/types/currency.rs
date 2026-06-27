@@ -9,6 +9,7 @@ pub trait Currency:
 
 // ----- Each Currency Unit -----
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct JPY {
     inner: i64,
@@ -46,6 +47,7 @@ impl std::ops::Sub for JPY {
     }
 }
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct SATS {
     inner: i64,

@@ -50,3 +50,26 @@ where
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::RawNote;
+    use crate::types::currency::{JPY, SATS};
+
+    #[test]
+    fn raw_note() -> anyhow::Result<()> {
+        // JPY
+        {
+            let empty_note = RawNote::<JPY>::new(vec![]);
+            assert_eq!(RawNote { queries: vec![] }, empty_note);
+        }
+
+        // SATS
+        {
+            let empty_note = RawNote::<SATS>::new(vec![]);
+            assert_eq!(RawNote { queries: vec![] }, empty_note);
+        }
+
+        Ok(())
+    }
+}

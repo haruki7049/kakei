@@ -16,6 +16,7 @@ impl crate::types::note::Note for self::Note {
     }
 }
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, Tabled)]
 pub enum AnyQuery {
     JPY(Query<JPY>),
