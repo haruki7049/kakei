@@ -3,6 +3,7 @@ resolver = "3"
 default-members = ["crates/cli"]
 members = [
   "crates/cli",
+  "crates/parser",
   "crates/processor",
   "crates/types",
 
@@ -20,11 +21,13 @@ publish = false
 readme = "README.md"
 
 [workspace.dependencies]
+kakei_parser.path = "crates/parser"
 kakei_processor.path = "crates/processor"
 kakei_types.path = "crates/types"
 anyhow = "1.0.102"
 clap = { version = "4.4.11", features = ["derive", "string"] }
 confy = "0.6.1"
+chumsky = "0.13.0"
 directories = "6.0.0"
 tabled = "0.21.0"
 thiserror = "2.0.17"
