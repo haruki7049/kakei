@@ -2,11 +2,11 @@
 
 pub mod configuration;
 mod currency;
-mod note;
+mod query;
 
 use crate::{
     currency::{JPY, SATS},
-    note::Query,
+    query::Query,
 };
 pub use configuration::*;
 use std::path::PathBuf;
@@ -42,7 +42,7 @@ mod tests {
     use crate::{
         Processor,
         currency::{JPY, SATS},
-        note::Query,
+        query::Query,
     };
     use tabled::{Table, assert::assert_table};
 
