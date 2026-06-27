@@ -238,6 +238,16 @@ name = "kakei_processor"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "kakei_types",
+ "tabled",
+ "thiserror 2.0.17",
+]
+
+[[package]]
+name = "kakei_types"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
  "tabled",
  "thiserror 2.0.17",
 ]

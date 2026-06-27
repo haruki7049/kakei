@@ -1,14 +1,11 @@
 //! Processor crate
 
 pub mod configuration;
-mod currency;
-mod query;
 
-use crate::{
+use kakei_types::{
     currency::{JPY, SATS},
     query::Query,
 };
-pub use configuration::*;
 use std::path::PathBuf;
 use tabled::Table;
 
@@ -39,8 +36,8 @@ impl Processor {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        Processor,
+    use crate::Processor;
+    use kakei_types::{
         currency::{JPY, SATS},
         query::Query,
     };

@@ -4,6 +4,7 @@ default-members = ["crates/cli"]
 members = [
   "crates/cli",
   "crates/processor",
+  "crates/types",
 
   # cargo-xtask
   "crates/xtask",
@@ -20,6 +21,7 @@ readme = "README.md"
 
 [workspace.dependencies]
 kakei_processor.path = "crates/processor"
+kakei_types.path = "crates/types"
 anyhow = "1.0.102"
 clap = { version = "4.4.11", features = ["derive", "string"] }
 confy = "0.6.1"
