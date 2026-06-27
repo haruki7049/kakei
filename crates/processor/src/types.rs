@@ -12,13 +12,12 @@ pub use configuration::*;
 use std::path::PathBuf;
 
 pub struct Processor {
-    path: PathBuf,
     jpy_notes: Vec<Note<JPY>>,
     sats_notes: Vec<Note<SATS>>,
 }
 
 impl Processor {
-    pub fn read(path: PathBuf) {
+    pub fn read(paths: Vec<PathBuf>) {
         todo!()
     }
 
